@@ -9,7 +9,6 @@
 
 pub mod login;
 
-use std::fmt::{Display, Formatter};
 use super::*;
 use luban_lib::*;
 
@@ -3586,3 +3585,5 @@ impl std::ops::Index<i32> for TbAutoImport2 {
         &self.data_map.get(&index).unwrap()
     }
 }
+
+
