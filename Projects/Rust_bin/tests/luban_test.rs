@@ -1,9 +1,30 @@
-use Rust_bin::TABLES;
 use cfg::prelude::*;
+use Rust_bin::TABLES;
 
 #[test]
 pub fn test_tables() {
-    println!("{:?}", TABLES.TbItem.data_list[0].name)
+    let row = TABLES.TbFullTypes.data_list[0].clone();
+    println!("{:?}", row.x1);
+    println!("{:?}", row.x2);
+    println!("{:?}", row.x3);
+    println!("{:?}", row.x4);
+    println!("{:?}", row.x5);
+    println!("{:?}", row.x6);
+    println!("{:?}", row.x7);
+    println!("{:?}", row.x8);
+    println!("{:?}", row.x9);
+    println!("{:?}", row.x10);
+    println!("{:?}", row.x12);
+    println!("{:?}", row.x13);
+    println!("{:?}", row.x14);
+    println!("{:?}", row.s1);
+    println!("{:?}", row.t1);
+    println!("{:?}", row.k1);
+    println!("{:?}", row.k2);
+    println!("{:?}", row.k5);
+    println!("{:?}", row.k8);
+    println!("{:?}", row.k9);
+    println!("{:?}", row.k15);
 }
 
 #[test]
@@ -24,7 +45,10 @@ pub fn test_list_table() {
 pub fn test_union_key_table() {
     println!("{:?}", TABLES.TbMultiUnionIndexList);
     assert_eq!(TABLES.TbMultiUnionIndexList.data_list.len(), 11);
-    let item = TABLES.TbMultiUnionIndexList.get(&(1, 1, "ab1".to_string())).unwrap();
+    let item = TABLES
+        .TbMultiUnionIndexList
+        .get(&(1, 1, "ab1".to_string()))
+        .unwrap();
     assert_eq!(item.num, 1);
     assert_eq!(item.desc, "desc1".to_string());
 }
@@ -49,15 +73,25 @@ pub fn test_flags() {
 
 #[test]
 pub fn test_polymorphic() {
-    let row = TABLES.TbFullTypes.get(&30).unwrap().clone();
-    println!("{:?}", row);
-    assert!(row.x14.is::<DemoD2>());
-    let item: &dyn TDemoDynamic = row.x14.get_base().unwrap();
-    assert_eq!(*item.get_x1(), 1);
+    println!("{:?}", TABLES.TbFullTypes.data_list[0].k15);
 }
 
 #[test]
-pub fn test_array(){
+pub fn test_array() {
     let row = TABLES.TbFullTypes.data_list[0].clone();
     println!("{:?}", row.k1)
+}
+
+#[test]
+pub fn test_float() {
+    let row = TABLES.TbFullTypes.data_list[0].clone();
+    println!("{:?}", row.x6);
+    assert_eq!(1.28_f32, row.x6);
+}
+
+#[test]
+pub fn test_double() {
+    let row = TABLES.TbFullTypes.data_list[0].clone();
+    println!("{:?}", row.x7);
+    assert_eq!(1.23457891_f64, row.x7);
 }

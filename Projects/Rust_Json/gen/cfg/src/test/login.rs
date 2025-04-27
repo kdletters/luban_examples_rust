@@ -12,7 +12,6 @@ use super::*;
 use serde::Deserialize;
 
 #[derive(Debug)]
-#[derive(macros::TryIntoBase)]
 pub struct RoleInfo {
     pub x1: i32,
     pub x3: i32,
@@ -20,12 +19,15 @@ pub struct RoleInfo {
 }
 
 impl RoleInfo{
-    pub fn new(json: &serde_json::Value) -> Result<RoleInfo, LubanError> {
+    pub(crate) fn new(json: &serde_json::Value) -> Result<RoleInfo, LubanError> {
         let x1 = (json["x1"].as_i64().unwrap() as i32);
         let x3 = (json["x3"].as_i64().unwrap() as i32);
         let role_id = json["role_id"].as_i64().unwrap();
         
         Ok(RoleInfo { x1, x3, role_id, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
     }
 }
 

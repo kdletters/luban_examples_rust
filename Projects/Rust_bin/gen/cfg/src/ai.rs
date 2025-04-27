@@ -19,10 +19,46 @@ pub enum EExecutor {
 
 impl From<i32> for EExecutor {
     fn from(value: i32) -> Self {
-        match value { 
+        match value {
             0 => EExecutor::CLIENT,
             1 => EExecutor::SERVER,
             _ => panic!("Invalid value for EExecutor:{}", value),
+        }
+    }
+}
+
+#[derive(Debug, Hash, Eq, PartialEq, macros::EnumFromNum)]
+pub enum EFinishMode {
+    IMMEDIATE = 0,
+    DELAYED = 1,
+}
+
+impl From<i32> for EFinishMode {
+    fn from(value: i32) -> Self {
+        match value {
+            0 => EFinishMode::IMMEDIATE,
+            1 => EFinishMode::DELAYED,
+            _ => panic!("Invalid value for EFinishMode:{}", value),
+        }
+    }
+}
+
+#[derive(Debug, Hash, Eq, PartialEq, macros::EnumFromNum)]
+pub enum EFlowAbortMode {
+    NONE = 0,
+    LOWER_PRIORITY = 1,
+    SELF = 2,
+    BOTH = 3,
+}
+
+impl From<i32> for EFlowAbortMode {
+    fn from(value: i32) -> Self {
+        match value {
+            0 => EFlowAbortMode::NONE,
+            1 => EFlowAbortMode::LOWER_PRIORITY,
+            2 => EFlowAbortMode::SELF,
+            3 => EFlowAbortMode::BOTH,
+            _ => panic!("Invalid value for EFlowAbortMode:{}", value),
         }
     }
 }
@@ -43,7 +79,7 @@ pub enum EKeyType {
 
 impl From<i32> for EKeyType {
     fn from(value: i32) -> Self {
-        match value { 
+        match value {
             1 => EKeyType::BOOL,
             2 => EKeyType::INT,
             3 => EKeyType::FLOAT,
@@ -60,42 +96,6 @@ impl From<i32> for EKeyType {
 }
 
 #[derive(Debug, Hash, Eq, PartialEq, macros::EnumFromNum)]
-pub enum EFlowAbortMode {
-    NONE = 0,
-    LOWER_PRIORITY = 1,
-    SELF = 2,
-    BOTH = 3,
-}
-
-impl From<i32> for EFlowAbortMode {
-    fn from(value: i32) -> Self {
-        match value { 
-            0 => EFlowAbortMode::NONE,
-            1 => EFlowAbortMode::LOWER_PRIORITY,
-            2 => EFlowAbortMode::SELF,
-            3 => EFlowAbortMode::BOTH,
-            _ => panic!("Invalid value for EFlowAbortMode:{}", value),
-        }
-    }
-}
-
-#[derive(Debug, Hash, Eq, PartialEq, macros::EnumFromNum)]
-pub enum EFinishMode {
-    IMMEDIATE = 0,
-    DELAYED = 1,
-}
-
-impl From<i32> for EFinishMode {
-    fn from(value: i32) -> Self {
-        match value { 
-            0 => EFinishMode::IMMEDIATE,
-            1 => EFinishMode::DELAYED,
-            _ => panic!("Invalid value for EFinishMode:{}", value),
-        }
-    }
-}
-
-#[derive(Debug, Hash, Eq, PartialEq, macros::EnumFromNum)]
 pub enum ENotifyObserverMode {
     ON_VALUE_CHANGE = 0,
     ON_RESULT_CHANGE = 1,
@@ -103,7 +103,7 @@ pub enum ENotifyObserverMode {
 
 impl From<i32> for ENotifyObserverMode {
     fn from(value: i32) -> Self {
-        match value { 
+        match value {
             0 => ENotifyObserverMode::ON_VALUE_CHANGE,
             1 => ENotifyObserverMode::ON_RESULT_CHANGE,
             _ => panic!("Invalid value for ENotifyObserverMode:{}", value),
@@ -125,7 +125,7 @@ pub enum EOperator {
 
 impl From<i32> for EOperator {
     fn from(value: i32) -> Self {
-        match value { 
+        match value {
             0 => EOperator::IS_EQUAL_TO,
             1 => EOperator::IS_NOT_EQUAL_TO,
             2 => EOperator::IS_LESS_THAN,
@@ -140,6 +140,64 @@ impl From<i32> for EOperator {
 }
 
 #[derive(Debug)]
+pub struct BehaviorTree {
+    pub id: i32,
+    pub name: String,
+    pub desc: String,
+    pub blackboard_id: String,
+    pub blackboard_id_ref: Option<std::sync::Arc<crate::ai::Blackboard>>,
+    pub root: crate::ai::ComposeNode,
+}
+
+impl BehaviorTree{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<BehaviorTree, LubanError> {
+        let id = buf.read_int();
+        let name = buf.read_string();
+        let desc = buf.read_string();
+        let blackboard_id = buf.read_string();
+        let blackboard_id_ref = None;
+        let root = crate::ai::ComposeNode::new(&mut buf)?;
+        
+        Ok(BehaviorTree { id, name, desc, blackboard_id, blackboard_id_ref, root, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.blackboard_id_ref = tables.TbBlackboard.get(&self.blackboard_id);
+        self.root.resolve_ref(tables);
+    }
+
+    pub const __ID__: i32 = 159552822;
+}
+
+#[derive(Debug)]
+pub struct Blackboard {
+    pub name: String,
+    pub desc: String,
+    pub parent_name: String,
+    pub parent_name_ref: Option<std::sync::Arc<crate::ai::Blackboard>>,
+    pub keys: Vec<crate::ai::BlackboardKey>,
+}
+
+impl Blackboard{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<Blackboard, LubanError> {
+        let name = buf.read_string();
+        let desc = buf.read_string();
+        let parent_name = buf.read_string();
+        let parent_name_ref = None;
+        let keys = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::BlackboardKey::new(&mut buf)?); } _e0 };
+        
+        Ok(Blackboard { name, desc, parent_name, parent_name_ref, keys, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.parent_name_ref = tables.TbBlackboard.get(&self.parent_name);
+        self.keys.iter_mut().for_each(|mut x| { x.resolve_ref(tables); });
+    }
+
+    pub const __ID__: i32 = 1576193005;
+}
+
+#[derive(Debug)]
 pub struct BlackboardKey {
     pub name: String,
     pub desc: String,
@@ -149,7 +207,7 @@ pub struct BlackboardKey {
 }
 
 impl BlackboardKey{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<BlackboardKey, LubanError> {
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<BlackboardKey, LubanError> {
         let name = buf.read_string();
         let desc = buf.read_string();
         let is_static = buf.read_bool();
@@ -157,745 +215,1242 @@ impl BlackboardKey{
         let type_class_name = buf.read_string();
         
         Ok(BlackboardKey { name, desc, is_static, key_type, type_class_name, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
     }
 
     pub const __ID__: i32 = -511559886;
 }
 
 #[derive(Debug)]
-pub struct Blackboard {
-    pub name: String,
-    pub desc: String,
-    pub parent_name: String,
-    pub keys: Vec<crate::ai::BlackboardKey>,
-}
-
-impl Blackboard{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<Blackboard, LubanError> {
-        let name = buf.read_string();
-        let desc = buf.read_string();
-        let parent_name = buf.read_string();
-        let keys = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::BlackboardKey::new(&mut buf)?); } _e0 };
-        
-        Ok(Blackboard { name, desc, parent_name, keys, })
-    }
-
-    pub const __ID__: i32 = 1576193005;
-}
-
-#[derive(Debug)]
-pub struct KeyData {
+pub enum KeyData {
+    FloatKeyData(std::sync::Arc<crate::ai::FloatKeyData>),
+    IntKeyData(std::sync::Arc<crate::ai::IntKeyData>),
+    StringKeyData(std::sync::Arc<crate::ai::StringKeyData>),
+    BlackboardKeyData(std::sync::Arc<crate::ai::BlackboardKeyData>),
 }
 
 impl KeyData {
-    pub fn new(mut buf: &mut ByteBuf) -> Result<std::sync::Arc<AbstractBase>, LubanError> {
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<Self, LubanError> {
         let type_id = buf.read_int();
         match type_id {
-            crate::ai::FloatKeyData::__ID__ => Ok(std::sync::Arc::new(crate::ai::FloatKeyData::new(buf)?)),
-            crate::ai::IntKeyData::__ID__ => Ok(std::sync::Arc::new(crate::ai::IntKeyData::new(buf)?)),
-            crate::ai::StringKeyData::__ID__ => Ok(std::sync::Arc::new(crate::ai::StringKeyData::new(buf)?)),
-            crate::ai::BlackboardKeyData::__ID__ => Ok(std::sync::Arc::new(crate::ai::BlackboardKeyData::new(buf)?)),
+            crate::ai::FloatKeyData::__ID__ => Ok(Self::FloatKeyData(std::sync::Arc::new(crate::ai::FloatKeyData::new(buf)?))),
+            crate::ai::IntKeyData::__ID__ => Ok(Self::IntKeyData(std::sync::Arc::new(crate::ai::IntKeyData::new(buf)?))),
+            crate::ai::StringKeyData::__ID__ => Ok(Self::StringKeyData(std::sync::Arc::new(crate::ai::StringKeyData::new(buf)?))),
+            crate::ai::BlackboardKeyData::__ID__ => Ok(Self::BlackboardKeyData(std::sync::Arc::new(crate::ai::BlackboardKeyData::new(buf)?))),
             _ => Err(LubanError::Bean(format!("Invalid type for KeyData:{}", type_id)))
         }
     }
-}
 
-pub trait TKeyData {
-}
-
-impl crate::ai::TKeyData for crate::ai::FloatKeyData {
-}
-
-impl crate::ai::TKeyData for crate::ai::IntKeyData {
-}
-
-impl crate::ai::TKeyData for crate::ai::StringKeyData {
-}
-
-impl crate::ai::TKeyData for crate::ai::BlackboardKeyData {
-}
-
-impl<'a> GetBase<'a, &'a dyn crate::ai::TKeyData> for AbstractBase {
-    fn get_base(&'a self) -> Result<&'a dyn crate::ai::TKeyData, LubanError> {
-        let base: Result<&crate::ai::FloatKeyData, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        match self {
+            Self::FloatKeyData(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::FloatKeyData as *mut crate::ai::FloatKeyData); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::IntKeyData(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::IntKeyData as *mut crate::ai::IntKeyData); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::StringKeyData(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::StringKeyData as *mut crate::ai::StringKeyData); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::BlackboardKeyData(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::BlackboardKeyData as *mut crate::ai::BlackboardKeyData); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
         }
-        let base: Result<&crate::ai::IntKeyData, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::StringKeyData, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::BlackboardKeyData, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-
-        Err(LubanError::Polymorphic(format!("Invalid type for KeyData")))
     }
 }
 
-#[derive(Debug)]
-#[derive(macros::TryIntoBase)]
-pub struct FloatKeyData {
-    pub value: f32,
-}
-
-impl FloatKeyData{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<FloatKeyData, LubanError> {
-        let value = buf.read_float();
-        
-        Ok(FloatKeyData { value, })
-    }
-
-    pub const __ID__: i32 = -719747885;
-}
 
 #[derive(Debug)]
-#[derive(macros::TryIntoBase)]
-pub struct IntKeyData {
-    pub value: i32,
-}
-
-impl IntKeyData{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<IntKeyData, LubanError> {
-        let value = buf.read_int();
-        
-        Ok(IntKeyData { value, })
-    }
-
-    pub const __ID__: i32 = -342751904;
-}
-
-#[derive(Debug)]
-#[derive(macros::TryIntoBase)]
-pub struct StringKeyData {
-    pub value: String,
-}
-
-impl StringKeyData{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<StringKeyData, LubanError> {
-        let value = buf.read_string();
-        
-        Ok(StringKeyData { value, })
-    }
-
-    pub const __ID__: i32 = -307888654;
-}
-
-#[derive(Debug)]
-#[derive(macros::TryIntoBase)]
 pub struct BlackboardKeyData {
     pub value: String,
 }
 
 impl BlackboardKeyData{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<BlackboardKeyData, LubanError> {
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<BlackboardKeyData, LubanError> {
         let value = buf.read_string();
         
         Ok(BlackboardKeyData { value, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
     }
 
     pub const __ID__: i32 = 1517269500;
 }
 
 #[derive(Debug)]
-pub struct KeyQueryOperator {
+pub struct FloatKeyData {
+    pub value: f32,
+}
+
+impl FloatKeyData{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<FloatKeyData, LubanError> {
+        let value = buf.read_float();
+        
+        Ok(FloatKeyData { value, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = -719747885;
+}
+
+#[derive(Debug)]
+pub struct IntKeyData {
+    pub value: i32,
+}
+
+impl IntKeyData{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<IntKeyData, LubanError> {
+        let value = buf.read_int();
+        
+        Ok(IntKeyData { value, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = -342751904;
+}
+
+#[derive(Debug)]
+pub struct StringKeyData {
+    pub value: String,
+}
+
+impl StringKeyData{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<StringKeyData, LubanError> {
+        let value = buf.read_string();
+        
+        Ok(StringKeyData { value, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = -307888654;
+}
+
+#[derive(Debug)]
+pub enum KeyQueryOperator {
+    IsSet2(std::sync::Arc<crate::ai::IsSet2>),
+    IsNotSet(std::sync::Arc<crate::ai::IsNotSet>),
+    BinaryOperator(std::sync::Arc<crate::ai::BinaryOperator>),
 }
 
 impl KeyQueryOperator {
-    pub fn new(mut buf: &mut ByteBuf) -> Result<std::sync::Arc<AbstractBase>, LubanError> {
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<Self, LubanError> {
         let type_id = buf.read_int();
         match type_id {
-            crate::ai::IsSet2::__ID__ => Ok(std::sync::Arc::new(crate::ai::IsSet2::new(buf)?)),
-            crate::ai::IsNotSet::__ID__ => Ok(std::sync::Arc::new(crate::ai::IsNotSet::new(buf)?)),
-            crate::ai::BinaryOperator::__ID__ => Ok(std::sync::Arc::new(crate::ai::BinaryOperator::new(buf)?)),
+            crate::ai::IsSet2::__ID__ => Ok(Self::IsSet2(std::sync::Arc::new(crate::ai::IsSet2::new(buf)?))),
+            crate::ai::IsNotSet::__ID__ => Ok(Self::IsNotSet(std::sync::Arc::new(crate::ai::IsNotSet::new(buf)?))),
+            crate::ai::BinaryOperator::__ID__ => Ok(Self::BinaryOperator(std::sync::Arc::new(crate::ai::BinaryOperator::new(buf)?))),
             _ => Err(LubanError::Bean(format!("Invalid type for KeyQueryOperator:{}", type_id)))
         }
     }
-}
 
-pub trait TKeyQueryOperator {
-}
-
-impl crate::ai::TKeyQueryOperator for crate::ai::IsSet2 {
-}
-
-impl crate::ai::TKeyQueryOperator for crate::ai::IsNotSet {
-}
-
-impl crate::ai::TKeyQueryOperator for crate::ai::BinaryOperator {
-}
-
-impl<'a> GetBase<'a, &'a dyn crate::ai::TKeyQueryOperator> for AbstractBase {
-    fn get_base(&'a self) -> Result<&'a dyn crate::ai::TKeyQueryOperator, LubanError> {
-        let base: Result<&crate::ai::IsSet2, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        match self {
+            Self::IsSet2(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::IsSet2 as *mut crate::ai::IsSet2); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::IsNotSet(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::IsNotSet as *mut crate::ai::IsNotSet); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::BinaryOperator(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::BinaryOperator as *mut crate::ai::BinaryOperator); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
         }
-        let base: Result<&crate::ai::IsNotSet, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::BinaryOperator, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-
-        Err(LubanError::Polymorphic(format!("Invalid type for KeyQueryOperator")))
     }
 }
 
-#[derive(Debug)]
-#[derive(macros::TryIntoBase)]
-pub struct IsSet2 {
-}
-
-impl IsSet2{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<IsSet2, LubanError> {
-        
-        Ok(IsSet2 { })
-    }
-
-    pub const __ID__: i32 = -843729664;
-}
 
 #[derive(Debug)]
-#[derive(macros::TryIntoBase)]
-pub struct IsNotSet {
-}
-
-impl IsNotSet{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<IsNotSet, LubanError> {
-        
-        Ok(IsNotSet { })
-    }
-
-    pub const __ID__: i32 = 790736255;
-}
-
-#[derive(Debug)]
-#[derive(macros::TryIntoBase)]
 pub struct BinaryOperator {
     pub oper: crate::ai::EOperator,
-    pub data: std::sync::Arc<AbstractBase>,
+    pub data: crate::ai::KeyData,
 }
 
 impl BinaryOperator{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<BinaryOperator, LubanError> {
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<BinaryOperator, LubanError> {
         let oper = buf.read_int().into();
         let data = crate::ai::KeyData::new(&mut buf)?;
         
         Ok(BinaryOperator { oper, data, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data.resolve_ref(tables);
     }
 
     pub const __ID__: i32 = -979891605;
 }
 
 #[derive(Debug)]
-pub struct Node {
-    pub id: i32,
-    pub node_name: String,
+pub struct IsNotSet {
+}
+
+impl IsNotSet{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<IsNotSet, LubanError> {
+        
+        Ok(IsNotSet { })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = 790736255;
+}
+
+#[derive(Debug)]
+pub struct IsSet2 {
+}
+
+impl IsSet2{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<IsSet2, LubanError> {
+        
+        Ok(IsSet2 { })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = -843729664;
+}
+
+#[derive(Debug)]
+pub enum Node {
+    UeSetDefaultFocus(std::sync::Arc<crate::ai::UeSetDefaultFocus>),
+    ExecuteTimeStatistic(std::sync::Arc<crate::ai::ExecuteTimeStatistic>),
+    ChooseTarget(std::sync::Arc<crate::ai::ChooseTarget>),
+    KeepFaceTarget(std::sync::Arc<crate::ai::KeepFaceTarget>),
+    GetOwnerPlayer(std::sync::Arc<crate::ai::GetOwnerPlayer>),
+    UpdateDailyBehaviorProps(std::sync::Arc<crate::ai::UpdateDailyBehaviorProps>),
+    UeLoop(std::sync::Arc<crate::ai::UeLoop>),
+    UeCooldown(std::sync::Arc<crate::ai::UeCooldown>),
+    UeTimeLimit(std::sync::Arc<crate::ai::UeTimeLimit>),
+    UeBlackboard(std::sync::Arc<crate::ai::UeBlackboard>),
+    UeForceSuccess(std::sync::Arc<crate::ai::UeForceSuccess>),
+    IsAtLocation(std::sync::Arc<crate::ai::IsAtLocation>),
+    DistanceLessThan(std::sync::Arc<crate::ai::DistanceLessThan>),
+    Sequence(std::sync::Arc<crate::ai::Sequence>),
+    Selector(std::sync::Arc<crate::ai::Selector>),
+    SimpleParallel(std::sync::Arc<crate::ai::SimpleParallel>),
+    UeWait(std::sync::Arc<crate::ai::UeWait>),
+    UeWaitBlackboardTime(std::sync::Arc<crate::ai::UeWaitBlackboardTime>),
+    MoveToTarget(std::sync::Arc<crate::ai::MoveToTarget>),
+    ChooseSkill(std::sync::Arc<crate::ai::ChooseSkill>),
+    MoveToRandomLocation(std::sync::Arc<crate::ai::MoveToRandomLocation>),
+    MoveToLocation(std::sync::Arc<crate::ai::MoveToLocation>),
+    DebugPrint(std::sync::Arc<crate::ai::DebugPrint>),
 }
 
 impl Node {
-    pub fn new(mut buf: &mut ByteBuf) -> Result<std::sync::Arc<AbstractBase>, LubanError> {
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<Self, LubanError> {
         let type_id = buf.read_int();
         match type_id {
-            crate::ai::UeSetDefaultFocus::__ID__ => Ok(std::sync::Arc::new(crate::ai::UeSetDefaultFocus::new(buf)?)),
-            crate::ai::ExecuteTimeStatistic::__ID__ => Ok(std::sync::Arc::new(crate::ai::ExecuteTimeStatistic::new(buf)?)),
-            crate::ai::ChooseTarget::__ID__ => Ok(std::sync::Arc::new(crate::ai::ChooseTarget::new(buf)?)),
-            crate::ai::KeepFaceTarget::__ID__ => Ok(std::sync::Arc::new(crate::ai::KeepFaceTarget::new(buf)?)),
-            crate::ai::GetOwnerPlayer::__ID__ => Ok(std::sync::Arc::new(crate::ai::GetOwnerPlayer::new(buf)?)),
-            crate::ai::UpdateDailyBehaviorProps::__ID__ => Ok(std::sync::Arc::new(crate::ai::UpdateDailyBehaviorProps::new(buf)?)),
-            crate::ai::UeLoop::__ID__ => Ok(std::sync::Arc::new(crate::ai::UeLoop::new(buf)?)),
-            crate::ai::UeCooldown::__ID__ => Ok(std::sync::Arc::new(crate::ai::UeCooldown::new(buf)?)),
-            crate::ai::UeTimeLimit::__ID__ => Ok(std::sync::Arc::new(crate::ai::UeTimeLimit::new(buf)?)),
-            crate::ai::UeBlackboard::__ID__ => Ok(std::sync::Arc::new(crate::ai::UeBlackboard::new(buf)?)),
-            crate::ai::UeForceSuccess::__ID__ => Ok(std::sync::Arc::new(crate::ai::UeForceSuccess::new(buf)?)),
-            crate::ai::IsAtLocation::__ID__ => Ok(std::sync::Arc::new(crate::ai::IsAtLocation::new(buf)?)),
-            crate::ai::DistanceLessThan::__ID__ => Ok(std::sync::Arc::new(crate::ai::DistanceLessThan::new(buf)?)),
-            crate::ai::Sequence::__ID__ => Ok(std::sync::Arc::new(crate::ai::Sequence::new(buf)?)),
-            crate::ai::Selector::__ID__ => Ok(std::sync::Arc::new(crate::ai::Selector::new(buf)?)),
-            crate::ai::SimpleParallel::__ID__ => Ok(std::sync::Arc::new(crate::ai::SimpleParallel::new(buf)?)),
-            crate::ai::UeWait::__ID__ => Ok(std::sync::Arc::new(crate::ai::UeWait::new(buf)?)),
-            crate::ai::UeWaitBlackboardTime::__ID__ => Ok(std::sync::Arc::new(crate::ai::UeWaitBlackboardTime::new(buf)?)),
-            crate::ai::MoveToTarget::__ID__ => Ok(std::sync::Arc::new(crate::ai::MoveToTarget::new(buf)?)),
-            crate::ai::ChooseSkill::__ID__ => Ok(std::sync::Arc::new(crate::ai::ChooseSkill::new(buf)?)),
-            crate::ai::MoveToRandomLocation::__ID__ => Ok(std::sync::Arc::new(crate::ai::MoveToRandomLocation::new(buf)?)),
-            crate::ai::MoveToLocation::__ID__ => Ok(std::sync::Arc::new(crate::ai::MoveToLocation::new(buf)?)),
-            crate::ai::DebugPrint::__ID__ => Ok(std::sync::Arc::new(crate::ai::DebugPrint::new(buf)?)),
+            crate::ai::UeSetDefaultFocus::__ID__ => Ok(Self::UeSetDefaultFocus(std::sync::Arc::new(crate::ai::UeSetDefaultFocus::new(buf)?))),
+            crate::ai::ExecuteTimeStatistic::__ID__ => Ok(Self::ExecuteTimeStatistic(std::sync::Arc::new(crate::ai::ExecuteTimeStatistic::new(buf)?))),
+            crate::ai::ChooseTarget::__ID__ => Ok(Self::ChooseTarget(std::sync::Arc::new(crate::ai::ChooseTarget::new(buf)?))),
+            crate::ai::KeepFaceTarget::__ID__ => Ok(Self::KeepFaceTarget(std::sync::Arc::new(crate::ai::KeepFaceTarget::new(buf)?))),
+            crate::ai::GetOwnerPlayer::__ID__ => Ok(Self::GetOwnerPlayer(std::sync::Arc::new(crate::ai::GetOwnerPlayer::new(buf)?))),
+            crate::ai::UpdateDailyBehaviorProps::__ID__ => Ok(Self::UpdateDailyBehaviorProps(std::sync::Arc::new(crate::ai::UpdateDailyBehaviorProps::new(buf)?))),
+            crate::ai::UeLoop::__ID__ => Ok(Self::UeLoop(std::sync::Arc::new(crate::ai::UeLoop::new(buf)?))),
+            crate::ai::UeCooldown::__ID__ => Ok(Self::UeCooldown(std::sync::Arc::new(crate::ai::UeCooldown::new(buf)?))),
+            crate::ai::UeTimeLimit::__ID__ => Ok(Self::UeTimeLimit(std::sync::Arc::new(crate::ai::UeTimeLimit::new(buf)?))),
+            crate::ai::UeBlackboard::__ID__ => Ok(Self::UeBlackboard(std::sync::Arc::new(crate::ai::UeBlackboard::new(buf)?))),
+            crate::ai::UeForceSuccess::__ID__ => Ok(Self::UeForceSuccess(std::sync::Arc::new(crate::ai::UeForceSuccess::new(buf)?))),
+            crate::ai::IsAtLocation::__ID__ => Ok(Self::IsAtLocation(std::sync::Arc::new(crate::ai::IsAtLocation::new(buf)?))),
+            crate::ai::DistanceLessThan::__ID__ => Ok(Self::DistanceLessThan(std::sync::Arc::new(crate::ai::DistanceLessThan::new(buf)?))),
+            crate::ai::Sequence::__ID__ => Ok(Self::Sequence(std::sync::Arc::new(crate::ai::Sequence::new(buf)?))),
+            crate::ai::Selector::__ID__ => Ok(Self::Selector(std::sync::Arc::new(crate::ai::Selector::new(buf)?))),
+            crate::ai::SimpleParallel::__ID__ => Ok(Self::SimpleParallel(std::sync::Arc::new(crate::ai::SimpleParallel::new(buf)?))),
+            crate::ai::UeWait::__ID__ => Ok(Self::UeWait(std::sync::Arc::new(crate::ai::UeWait::new(buf)?))),
+            crate::ai::UeWaitBlackboardTime::__ID__ => Ok(Self::UeWaitBlackboardTime(std::sync::Arc::new(crate::ai::UeWaitBlackboardTime::new(buf)?))),
+            crate::ai::MoveToTarget::__ID__ => Ok(Self::MoveToTarget(std::sync::Arc::new(crate::ai::MoveToTarget::new(buf)?))),
+            crate::ai::ChooseSkill::__ID__ => Ok(Self::ChooseSkill(std::sync::Arc::new(crate::ai::ChooseSkill::new(buf)?))),
+            crate::ai::MoveToRandomLocation::__ID__ => Ok(Self::MoveToRandomLocation(std::sync::Arc::new(crate::ai::MoveToRandomLocation::new(buf)?))),
+            crate::ai::MoveToLocation::__ID__ => Ok(Self::MoveToLocation(std::sync::Arc::new(crate::ai::MoveToLocation::new(buf)?))),
+            crate::ai::DebugPrint::__ID__ => Ok(Self::DebugPrint(std::sync::Arc::new(crate::ai::DebugPrint::new(buf)?))),
             _ => Err(LubanError::Bean(format!("Invalid type for Node:{}", type_id)))
         }
     }
-}
-
-pub trait TNode {
-    fn get_id(&self) -> &i32;
-    fn get_node_name(&self) -> &String;
-}
-
-impl crate::ai::TNode for crate::ai::UeSetDefaultFocus {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-}
-
-impl crate::ai::TNode for crate::ai::ExecuteTimeStatistic {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-}
-
-impl crate::ai::TNode for crate::ai::ChooseTarget {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-}
-
-impl crate::ai::TNode for crate::ai::KeepFaceTarget {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-}
-
-impl crate::ai::TNode for crate::ai::GetOwnerPlayer {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-}
-
-impl crate::ai::TNode for crate::ai::UpdateDailyBehaviorProps {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-}
-
-impl crate::ai::TNode for crate::ai::UeLoop {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-}
-
-impl crate::ai::TNode for crate::ai::UeCooldown {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-}
-
-impl crate::ai::TNode for crate::ai::UeTimeLimit {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-}
-
-impl crate::ai::TNode for crate::ai::UeBlackboard {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-}
-
-impl crate::ai::TNode for crate::ai::UeForceSuccess {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-}
-
-impl crate::ai::TNode for crate::ai::IsAtLocation {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-}
-
-impl crate::ai::TNode for crate::ai::DistanceLessThan {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-}
-
-impl crate::ai::TNode for crate::ai::Sequence {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-}
-
-impl crate::ai::TNode for crate::ai::Selector {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-}
-
-impl crate::ai::TNode for crate::ai::SimpleParallel {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-}
-
-impl crate::ai::TNode for crate::ai::UeWait {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-}
-
-impl crate::ai::TNode for crate::ai::UeWaitBlackboardTime {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-}
-
-impl crate::ai::TNode for crate::ai::MoveToTarget {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-}
-
-impl crate::ai::TNode for crate::ai::ChooseSkill {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-}
-
-impl crate::ai::TNode for crate::ai::MoveToRandomLocation {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-}
-
-impl crate::ai::TNode for crate::ai::MoveToLocation {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-}
-
-impl crate::ai::TNode for crate::ai::DebugPrint {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-}
-
-impl<'a> GetBase<'a, &'a dyn crate::ai::TNode> for AbstractBase {
-    fn get_base(&'a self) -> Result<&'a dyn crate::ai::TNode, LubanError> {
-        let base: Result<&crate::ai::UeSetDefaultFocus, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
+    
+    pub fn get_id(&self) -> &i32 {
+        match self {
+            Self::UeSetDefaultFocus(x) => { &x.id }
+            Self::ExecuteTimeStatistic(x) => { &x.id }
+            Self::ChooseTarget(x) => { &x.id }
+            Self::KeepFaceTarget(x) => { &x.id }
+            Self::GetOwnerPlayer(x) => { &x.id }
+            Self::UpdateDailyBehaviorProps(x) => { &x.id }
+            Self::UeLoop(x) => { &x.id }
+            Self::UeCooldown(x) => { &x.id }
+            Self::UeTimeLimit(x) => { &x.id }
+            Self::UeBlackboard(x) => { &x.id }
+            Self::UeForceSuccess(x) => { &x.id }
+            Self::IsAtLocation(x) => { &x.id }
+            Self::DistanceLessThan(x) => { &x.id }
+            Self::Sequence(x) => { &x.id }
+            Self::Selector(x) => { &x.id }
+            Self::SimpleParallel(x) => { &x.id }
+            Self::UeWait(x) => { &x.id }
+            Self::UeWaitBlackboardTime(x) => { &x.id }
+            Self::MoveToTarget(x) => { &x.id }
+            Self::ChooseSkill(x) => { &x.id }
+            Self::MoveToRandomLocation(x) => { &x.id }
+            Self::MoveToLocation(x) => { &x.id }
+            Self::DebugPrint(x) => { &x.id }
         }
-        let base: Result<&crate::ai::ExecuteTimeStatistic, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
+    }    
+    
+    pub fn get_node_name(&self) -> &String {
+        match self {
+            Self::UeSetDefaultFocus(x) => { &x.node_name }
+            Self::ExecuteTimeStatistic(x) => { &x.node_name }
+            Self::ChooseTarget(x) => { &x.node_name }
+            Self::KeepFaceTarget(x) => { &x.node_name }
+            Self::GetOwnerPlayer(x) => { &x.node_name }
+            Self::UpdateDailyBehaviorProps(x) => { &x.node_name }
+            Self::UeLoop(x) => { &x.node_name }
+            Self::UeCooldown(x) => { &x.node_name }
+            Self::UeTimeLimit(x) => { &x.node_name }
+            Self::UeBlackboard(x) => { &x.node_name }
+            Self::UeForceSuccess(x) => { &x.node_name }
+            Self::IsAtLocation(x) => { &x.node_name }
+            Self::DistanceLessThan(x) => { &x.node_name }
+            Self::Sequence(x) => { &x.node_name }
+            Self::Selector(x) => { &x.node_name }
+            Self::SimpleParallel(x) => { &x.node_name }
+            Self::UeWait(x) => { &x.node_name }
+            Self::UeWaitBlackboardTime(x) => { &x.node_name }
+            Self::MoveToTarget(x) => { &x.node_name }
+            Self::ChooseSkill(x) => { &x.node_name }
+            Self::MoveToRandomLocation(x) => { &x.node_name }
+            Self::MoveToLocation(x) => { &x.node_name }
+            Self::DebugPrint(x) => { &x.node_name }
         }
-        let base: Result<&crate::ai::ChooseTarget, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::KeepFaceTarget, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::GetOwnerPlayer, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::UpdateDailyBehaviorProps, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::UeLoop, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::UeCooldown, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::UeTimeLimit, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::UeBlackboard, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::UeForceSuccess, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::IsAtLocation, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::DistanceLessThan, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::Sequence, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::Selector, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::SimpleParallel, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::UeWait, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::UeWaitBlackboardTime, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::MoveToTarget, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::ChooseSkill, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::MoveToRandomLocation, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::MoveToLocation, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::DebugPrint, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
+    }    
 
-        Err(LubanError::Polymorphic(format!("Invalid type for Node")))
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        match self {
+            Self::UeSetDefaultFocus(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::UeSetDefaultFocus as *mut crate::ai::UeSetDefaultFocus); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::ExecuteTimeStatistic(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::ExecuteTimeStatistic as *mut crate::ai::ExecuteTimeStatistic); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::ChooseTarget(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::ChooseTarget as *mut crate::ai::ChooseTarget); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::KeepFaceTarget(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::KeepFaceTarget as *mut crate::ai::KeepFaceTarget); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::GetOwnerPlayer(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::GetOwnerPlayer as *mut crate::ai::GetOwnerPlayer); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::UpdateDailyBehaviorProps(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::UpdateDailyBehaviorProps as *mut crate::ai::UpdateDailyBehaviorProps); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::UeLoop(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::UeLoop as *mut crate::ai::UeLoop); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::UeCooldown(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::UeCooldown as *mut crate::ai::UeCooldown); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::UeTimeLimit(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::UeTimeLimit as *mut crate::ai::UeTimeLimit); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::UeBlackboard(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::UeBlackboard as *mut crate::ai::UeBlackboard); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::UeForceSuccess(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::UeForceSuccess as *mut crate::ai::UeForceSuccess); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::IsAtLocation(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::IsAtLocation as *mut crate::ai::IsAtLocation); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::DistanceLessThan(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::DistanceLessThan as *mut crate::ai::DistanceLessThan); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::Sequence(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::Sequence as *mut crate::ai::Sequence); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::Selector(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::Selector as *mut crate::ai::Selector); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::SimpleParallel(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::SimpleParallel as *mut crate::ai::SimpleParallel); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::UeWait(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::UeWait as *mut crate::ai::UeWait); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::UeWaitBlackboardTime(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::UeWaitBlackboardTime as *mut crate::ai::UeWaitBlackboardTime); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::MoveToTarget(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::MoveToTarget as *mut crate::ai::MoveToTarget); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::ChooseSkill(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::ChooseSkill as *mut crate::ai::ChooseSkill); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::MoveToRandomLocation(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::MoveToRandomLocation as *mut crate::ai::MoveToRandomLocation); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::MoveToLocation(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::MoveToLocation as *mut crate::ai::MoveToLocation); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::DebugPrint(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::DebugPrint as *mut crate::ai::DebugPrint); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+        }
     }
+}
+
+
+#[derive(Debug)]
+pub enum Decorator {
+    UeLoop(std::sync::Arc<crate::ai::UeLoop>),
+    UeCooldown(std::sync::Arc<crate::ai::UeCooldown>),
+    UeTimeLimit(std::sync::Arc<crate::ai::UeTimeLimit>),
+    UeBlackboard(std::sync::Arc<crate::ai::UeBlackboard>),
+    UeForceSuccess(std::sync::Arc<crate::ai::UeForceSuccess>),
+    IsAtLocation(std::sync::Arc<crate::ai::IsAtLocation>),
+    DistanceLessThan(std::sync::Arc<crate::ai::DistanceLessThan>),
+}
+
+impl Decorator {
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<Self, LubanError> {
+        let type_id = buf.read_int();
+        match type_id {
+            crate::ai::UeLoop::__ID__ => Ok(Self::UeLoop(std::sync::Arc::new(crate::ai::UeLoop::new(buf)?))),
+            crate::ai::UeCooldown::__ID__ => Ok(Self::UeCooldown(std::sync::Arc::new(crate::ai::UeCooldown::new(buf)?))),
+            crate::ai::UeTimeLimit::__ID__ => Ok(Self::UeTimeLimit(std::sync::Arc::new(crate::ai::UeTimeLimit::new(buf)?))),
+            crate::ai::UeBlackboard::__ID__ => Ok(Self::UeBlackboard(std::sync::Arc::new(crate::ai::UeBlackboard::new(buf)?))),
+            crate::ai::UeForceSuccess::__ID__ => Ok(Self::UeForceSuccess(std::sync::Arc::new(crate::ai::UeForceSuccess::new(buf)?))),
+            crate::ai::IsAtLocation::__ID__ => Ok(Self::IsAtLocation(std::sync::Arc::new(crate::ai::IsAtLocation::new(buf)?))),
+            crate::ai::DistanceLessThan::__ID__ => Ok(Self::DistanceLessThan(std::sync::Arc::new(crate::ai::DistanceLessThan::new(buf)?))),
+            _ => Err(LubanError::Bean(format!("Invalid type for Decorator:{}", type_id)))
+        }
+    }
+    
+    pub fn get_id(&self) -> &i32 {
+        match self {
+            Self::UeLoop(x) => { &x.id }
+            Self::UeCooldown(x) => { &x.id }
+            Self::UeTimeLimit(x) => { &x.id }
+            Self::UeBlackboard(x) => { &x.id }
+            Self::UeForceSuccess(x) => { &x.id }
+            Self::IsAtLocation(x) => { &x.id }
+            Self::DistanceLessThan(x) => { &x.id }
+        }
+    }    
+    
+    pub fn get_node_name(&self) -> &String {
+        match self {
+            Self::UeLoop(x) => { &x.node_name }
+            Self::UeCooldown(x) => { &x.node_name }
+            Self::UeTimeLimit(x) => { &x.node_name }
+            Self::UeBlackboard(x) => { &x.node_name }
+            Self::UeForceSuccess(x) => { &x.node_name }
+            Self::IsAtLocation(x) => { &x.node_name }
+            Self::DistanceLessThan(x) => { &x.node_name }
+        }
+    }    
+    
+    pub fn get_flow_abort_mode(&self) -> &crate::ai::EFlowAbortMode {
+        match self {
+            Self::UeLoop(x) => { &x.flow_abort_mode }
+            Self::UeCooldown(x) => { &x.flow_abort_mode }
+            Self::UeTimeLimit(x) => { &x.flow_abort_mode }
+            Self::UeBlackboard(x) => { &x.flow_abort_mode }
+            Self::UeForceSuccess(x) => { &x.flow_abort_mode }
+            Self::IsAtLocation(x) => { &x.flow_abort_mode }
+            Self::DistanceLessThan(x) => { &x.flow_abort_mode }
+        }
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        match self {
+            Self::UeLoop(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::UeLoop as *mut crate::ai::UeLoop); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::UeCooldown(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::UeCooldown as *mut crate::ai::UeCooldown); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::UeTimeLimit(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::UeTimeLimit as *mut crate::ai::UeTimeLimit); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::UeBlackboard(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::UeBlackboard as *mut crate::ai::UeBlackboard); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::UeForceSuccess(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::UeForceSuccess as *mut crate::ai::UeForceSuccess); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::IsAtLocation(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::IsAtLocation as *mut crate::ai::IsAtLocation); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::DistanceLessThan(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::DistanceLessThan as *mut crate::ai::DistanceLessThan); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+        }
+    }
+}
+
+
+#[derive(Debug)]
+pub struct DistanceLessThan {
+    pub id: i32,
+    pub node_name: String,
+    pub flow_abort_mode: crate::ai::EFlowAbortMode,
+    pub actor1_key: String,
+    pub actor2_key: String,
+    pub distance: f32,
+    pub reverse_result: bool,
+}
+
+impl DistanceLessThan{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<DistanceLessThan, LubanError> {
+        let id = buf.read_int();
+        let node_name = buf.read_string();
+        let flow_abort_mode = buf.read_int().into();
+        let actor1_key = buf.read_string();
+        let actor2_key = buf.read_string();
+        let distance = buf.read_float();
+        let reverse_result = buf.read_bool();
+        
+        Ok(DistanceLessThan { id, node_name, flow_abort_mode, actor1_key, actor2_key, distance, reverse_result, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = -1207170283;
 }
 
 #[derive(Debug)]
-#[derive(macros::TryIntoBase)]
-pub struct Service {
+pub struct IsAtLocation {
     pub id: i32,
     pub node_name: String,
+    pub flow_abort_mode: crate::ai::EFlowAbortMode,
+    pub acceptable_radius: f32,
+    pub keyboard_key: String,
+    pub inverse_condition: bool,
+}
+
+impl IsAtLocation{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<IsAtLocation, LubanError> {
+        let id = buf.read_int();
+        let node_name = buf.read_string();
+        let flow_abort_mode = buf.read_int().into();
+        let acceptable_radius = buf.read_float();
+        let keyboard_key = buf.read_string();
+        let inverse_condition = buf.read_bool();
+        
+        Ok(IsAtLocation { id, node_name, flow_abort_mode, acceptable_radius, keyboard_key, inverse_condition, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = 1255972344;
+}
+
+#[derive(Debug)]
+pub struct UeBlackboard {
+    pub id: i32,
+    pub node_name: String,
+    pub flow_abort_mode: crate::ai::EFlowAbortMode,
+    pub notify_observer: crate::ai::ENotifyObserverMode,
+    pub blackboard_key: String,
+    pub key_query: crate::ai::KeyQueryOperator,
+}
+
+impl UeBlackboard{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<UeBlackboard, LubanError> {
+        let id = buf.read_int();
+        let node_name = buf.read_string();
+        let flow_abort_mode = buf.read_int().into();
+        let notify_observer = buf.read_int().into();
+        let blackboard_key = buf.read_string();
+        let key_query = crate::ai::KeyQueryOperator::new(&mut buf)?;
+        
+        Ok(UeBlackboard { id, node_name, flow_abort_mode, notify_observer, blackboard_key, key_query, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.key_query.resolve_ref(tables);
+    }
+
+    pub const __ID__: i32 = -315297507;
+}
+
+#[derive(Debug)]
+pub struct UeCooldown {
+    pub id: i32,
+    pub node_name: String,
+    pub flow_abort_mode: crate::ai::EFlowAbortMode,
+    pub cooldown_time: f32,
+}
+
+impl UeCooldown{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<UeCooldown, LubanError> {
+        let id = buf.read_int();
+        let node_name = buf.read_string();
+        let flow_abort_mode = buf.read_int().into();
+        let cooldown_time = buf.read_float();
+        
+        Ok(UeCooldown { id, node_name, flow_abort_mode, cooldown_time, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = -951439423;
+}
+
+#[derive(Debug)]
+pub struct UeForceSuccess {
+    pub id: i32,
+    pub node_name: String,
+    pub flow_abort_mode: crate::ai::EFlowAbortMode,
+}
+
+impl UeForceSuccess{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<UeForceSuccess, LubanError> {
+        let id = buf.read_int();
+        let node_name = buf.read_string();
+        let flow_abort_mode = buf.read_int().into();
+        
+        Ok(UeForceSuccess { id, node_name, flow_abort_mode, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = 195054574;
+}
+
+#[derive(Debug)]
+pub struct UeLoop {
+    pub id: i32,
+    pub node_name: String,
+    pub flow_abort_mode: crate::ai::EFlowAbortMode,
+    pub num_loops: i32,
+    pub infinite_loop: bool,
+    pub infinite_loop_timeout_time: f32,
+}
+
+impl UeLoop{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<UeLoop, LubanError> {
+        let id = buf.read_int();
+        let node_name = buf.read_string();
+        let flow_abort_mode = buf.read_int().into();
+        let num_loops = buf.read_int();
+        let infinite_loop = buf.read_bool();
+        let infinite_loop_timeout_time = buf.read_float();
+        
+        Ok(UeLoop { id, node_name, flow_abort_mode, num_loops, infinite_loop, infinite_loop_timeout_time, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = -513308166;
+}
+
+#[derive(Debug)]
+pub struct UeTimeLimit {
+    pub id: i32,
+    pub node_name: String,
+    pub flow_abort_mode: crate::ai::EFlowAbortMode,
+    pub limit_time: f32,
+}
+
+impl UeTimeLimit{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<UeTimeLimit, LubanError> {
+        let id = buf.read_int();
+        let node_name = buf.read_string();
+        let flow_abort_mode = buf.read_int().into();
+        let limit_time = buf.read_float();
+        
+        Ok(UeTimeLimit { id, node_name, flow_abort_mode, limit_time, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = 338469720;
+}
+
+#[derive(Debug)]
+pub enum FlowNode {
+    Sequence(std::sync::Arc<crate::ai::Sequence>),
+    Selector(std::sync::Arc<crate::ai::Selector>),
+    SimpleParallel(std::sync::Arc<crate::ai::SimpleParallel>),
+    UeWait(std::sync::Arc<crate::ai::UeWait>),
+    UeWaitBlackboardTime(std::sync::Arc<crate::ai::UeWaitBlackboardTime>),
+    MoveToTarget(std::sync::Arc<crate::ai::MoveToTarget>),
+    ChooseSkill(std::sync::Arc<crate::ai::ChooseSkill>),
+    MoveToRandomLocation(std::sync::Arc<crate::ai::MoveToRandomLocation>),
+    MoveToLocation(std::sync::Arc<crate::ai::MoveToLocation>),
+    DebugPrint(std::sync::Arc<crate::ai::DebugPrint>),
+}
+
+impl FlowNode {
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<Self, LubanError> {
+        let type_id = buf.read_int();
+        match type_id {
+            crate::ai::Sequence::__ID__ => Ok(Self::Sequence(std::sync::Arc::new(crate::ai::Sequence::new(buf)?))),
+            crate::ai::Selector::__ID__ => Ok(Self::Selector(std::sync::Arc::new(crate::ai::Selector::new(buf)?))),
+            crate::ai::SimpleParallel::__ID__ => Ok(Self::SimpleParallel(std::sync::Arc::new(crate::ai::SimpleParallel::new(buf)?))),
+            crate::ai::UeWait::__ID__ => Ok(Self::UeWait(std::sync::Arc::new(crate::ai::UeWait::new(buf)?))),
+            crate::ai::UeWaitBlackboardTime::__ID__ => Ok(Self::UeWaitBlackboardTime(std::sync::Arc::new(crate::ai::UeWaitBlackboardTime::new(buf)?))),
+            crate::ai::MoveToTarget::__ID__ => Ok(Self::MoveToTarget(std::sync::Arc::new(crate::ai::MoveToTarget::new(buf)?))),
+            crate::ai::ChooseSkill::__ID__ => Ok(Self::ChooseSkill(std::sync::Arc::new(crate::ai::ChooseSkill::new(buf)?))),
+            crate::ai::MoveToRandomLocation::__ID__ => Ok(Self::MoveToRandomLocation(std::sync::Arc::new(crate::ai::MoveToRandomLocation::new(buf)?))),
+            crate::ai::MoveToLocation::__ID__ => Ok(Self::MoveToLocation(std::sync::Arc::new(crate::ai::MoveToLocation::new(buf)?))),
+            crate::ai::DebugPrint::__ID__ => Ok(Self::DebugPrint(std::sync::Arc::new(crate::ai::DebugPrint::new(buf)?))),
+            _ => Err(LubanError::Bean(format!("Invalid type for FlowNode:{}", type_id)))
+        }
+    }
+    
+    pub fn get_id(&self) -> &i32 {
+        match self {
+            Self::Sequence(x) => { &x.id }
+            Self::Selector(x) => { &x.id }
+            Self::SimpleParallel(x) => { &x.id }
+            Self::UeWait(x) => { &x.id }
+            Self::UeWaitBlackboardTime(x) => { &x.id }
+            Self::MoveToTarget(x) => { &x.id }
+            Self::ChooseSkill(x) => { &x.id }
+            Self::MoveToRandomLocation(x) => { &x.id }
+            Self::MoveToLocation(x) => { &x.id }
+            Self::DebugPrint(x) => { &x.id }
+        }
+    }    
+    
+    pub fn get_node_name(&self) -> &String {
+        match self {
+            Self::Sequence(x) => { &x.node_name }
+            Self::Selector(x) => { &x.node_name }
+            Self::SimpleParallel(x) => { &x.node_name }
+            Self::UeWait(x) => { &x.node_name }
+            Self::UeWaitBlackboardTime(x) => { &x.node_name }
+            Self::MoveToTarget(x) => { &x.node_name }
+            Self::ChooseSkill(x) => { &x.node_name }
+            Self::MoveToRandomLocation(x) => { &x.node_name }
+            Self::MoveToLocation(x) => { &x.node_name }
+            Self::DebugPrint(x) => { &x.node_name }
+        }
+    }    
+    
+    pub fn get_decorators(&self) -> &Vec<crate::ai::Decorator> {
+        match self {
+            Self::Sequence(x) => { &x.decorators }
+            Self::Selector(x) => { &x.decorators }
+            Self::SimpleParallel(x) => { &x.decorators }
+            Self::UeWait(x) => { &x.decorators }
+            Self::UeWaitBlackboardTime(x) => { &x.decorators }
+            Self::MoveToTarget(x) => { &x.decorators }
+            Self::ChooseSkill(x) => { &x.decorators }
+            Self::MoveToRandomLocation(x) => { &x.decorators }
+            Self::MoveToLocation(x) => { &x.decorators }
+            Self::DebugPrint(x) => { &x.decorators }
+        }
+    }    
+    
+    pub fn get_services(&self) -> &Vec<crate::ai::Service> {
+        match self {
+            Self::Sequence(x) => { &x.services }
+            Self::Selector(x) => { &x.services }
+            Self::SimpleParallel(x) => { &x.services }
+            Self::UeWait(x) => { &x.services }
+            Self::UeWaitBlackboardTime(x) => { &x.services }
+            Self::MoveToTarget(x) => { &x.services }
+            Self::ChooseSkill(x) => { &x.services }
+            Self::MoveToRandomLocation(x) => { &x.services }
+            Self::MoveToLocation(x) => { &x.services }
+            Self::DebugPrint(x) => { &x.services }
+        }
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        match self {
+            Self::Sequence(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::Sequence as *mut crate::ai::Sequence); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::Selector(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::Selector as *mut crate::ai::Selector); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::SimpleParallel(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::SimpleParallel as *mut crate::ai::SimpleParallel); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::UeWait(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::UeWait as *mut crate::ai::UeWait); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::UeWaitBlackboardTime(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::UeWaitBlackboardTime as *mut crate::ai::UeWaitBlackboardTime); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::MoveToTarget(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::MoveToTarget as *mut crate::ai::MoveToTarget); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::ChooseSkill(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::ChooseSkill as *mut crate::ai::ChooseSkill); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::MoveToRandomLocation(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::MoveToRandomLocation as *mut crate::ai::MoveToRandomLocation); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::MoveToLocation(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::MoveToLocation as *mut crate::ai::MoveToLocation); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::DebugPrint(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::DebugPrint as *mut crate::ai::DebugPrint); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+        }
+    }
+}
+
+
+#[derive(Debug)]
+pub enum ComposeNode {
+    Sequence(std::sync::Arc<crate::ai::Sequence>),
+    Selector(std::sync::Arc<crate::ai::Selector>),
+    SimpleParallel(std::sync::Arc<crate::ai::SimpleParallel>),
+}
+
+impl ComposeNode {
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<Self, LubanError> {
+        let type_id = buf.read_int();
+        match type_id {
+            crate::ai::Sequence::__ID__ => Ok(Self::Sequence(std::sync::Arc::new(crate::ai::Sequence::new(buf)?))),
+            crate::ai::Selector::__ID__ => Ok(Self::Selector(std::sync::Arc::new(crate::ai::Selector::new(buf)?))),
+            crate::ai::SimpleParallel::__ID__ => Ok(Self::SimpleParallel(std::sync::Arc::new(crate::ai::SimpleParallel::new(buf)?))),
+            _ => Err(LubanError::Bean(format!("Invalid type for ComposeNode:{}", type_id)))
+        }
+    }
+    
+    pub fn get_id(&self) -> &i32 {
+        match self {
+            Self::Sequence(x) => { &x.id }
+            Self::Selector(x) => { &x.id }
+            Self::SimpleParallel(x) => { &x.id }
+        }
+    }    
+    
+    pub fn get_node_name(&self) -> &String {
+        match self {
+            Self::Sequence(x) => { &x.node_name }
+            Self::Selector(x) => { &x.node_name }
+            Self::SimpleParallel(x) => { &x.node_name }
+        }
+    }    
+    
+    pub fn get_decorators(&self) -> &Vec<crate::ai::Decorator> {
+        match self {
+            Self::Sequence(x) => { &x.decorators }
+            Self::Selector(x) => { &x.decorators }
+            Self::SimpleParallel(x) => { &x.decorators }
+        }
+    }    
+    
+    pub fn get_services(&self) -> &Vec<crate::ai::Service> {
+        match self {
+            Self::Sequence(x) => { &x.services }
+            Self::Selector(x) => { &x.services }
+            Self::SimpleParallel(x) => { &x.services }
+        }
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        match self {
+            Self::Sequence(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::Sequence as *mut crate::ai::Sequence); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::Selector(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::Selector as *mut crate::ai::Selector); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::SimpleParallel(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::SimpleParallel as *mut crate::ai::SimpleParallel); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+        }
+    }
+}
+
+
+#[derive(Debug)]
+pub struct Selector {
+    pub id: i32,
+    pub node_name: String,
+    pub decorators: Vec<crate::ai::Decorator>,
+    pub services: Vec<crate::ai::Service>,
+    pub children: Vec<crate::ai::FlowNode>,
+}
+
+impl Selector{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<Selector, LubanError> {
+        let id = buf.read_int();
+        let node_name = buf.read_string();
+        let decorators = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::Decorator::new(&mut buf)?); } _e0 };
+        let services = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::Service::new(&mut buf)?); } _e0 };
+        let children = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::FlowNode::new(&mut buf)?); } _e0 };
+        
+        Ok(Selector { id, node_name, decorators, services, children, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.decorators.iter_mut().for_each(|mut x| { x.resolve_ref(tables); });
+        self.services.iter_mut().for_each(|mut x| { x.resolve_ref(tables); });
+        self.children.iter_mut().for_each(|mut x| { x.resolve_ref(tables); });
+    }
+
+    pub const __ID__: i32 = -1946981627;
+}
+
+#[derive(Debug)]
+pub struct Sequence {
+    pub id: i32,
+    pub node_name: String,
+    pub decorators: Vec<crate::ai::Decorator>,
+    pub services: Vec<crate::ai::Service>,
+    pub children: Vec<crate::ai::FlowNode>,
+}
+
+impl Sequence{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<Sequence, LubanError> {
+        let id = buf.read_int();
+        let node_name = buf.read_string();
+        let decorators = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::Decorator::new(&mut buf)?); } _e0 };
+        let services = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::Service::new(&mut buf)?); } _e0 };
+        let children = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::FlowNode::new(&mut buf)?); } _e0 };
+        
+        Ok(Sequence { id, node_name, decorators, services, children, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.decorators.iter_mut().for_each(|mut x| { x.resolve_ref(tables); });
+        self.services.iter_mut().for_each(|mut x| { x.resolve_ref(tables); });
+        self.children.iter_mut().for_each(|mut x| { x.resolve_ref(tables); });
+    }
+
+    pub const __ID__: i32 = -1789006105;
+}
+
+#[derive(Debug)]
+pub struct SimpleParallel {
+    pub id: i32,
+    pub node_name: String,
+    pub decorators: Vec<crate::ai::Decorator>,
+    pub services: Vec<crate::ai::Service>,
+    pub finish_mode: crate::ai::EFinishMode,
+    pub main_task: crate::ai::Task,
+    pub background_node: crate::ai::FlowNode,
+}
+
+impl SimpleParallel{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<SimpleParallel, LubanError> {
+        let id = buf.read_int();
+        let node_name = buf.read_string();
+        let decorators = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::Decorator::new(&mut buf)?); } _e0 };
+        let services = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::Service::new(&mut buf)?); } _e0 };
+        let finish_mode = buf.read_int().into();
+        let main_task = crate::ai::Task::new(&mut buf)?;
+        let background_node = crate::ai::FlowNode::new(&mut buf)?;
+        
+        Ok(SimpleParallel { id, node_name, decorators, services, finish_mode, main_task, background_node, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.decorators.iter_mut().for_each(|mut x| { x.resolve_ref(tables); });
+        self.services.iter_mut().for_each(|mut x| { x.resolve_ref(tables); });
+        self.main_task.resolve_ref(tables);
+        self.background_node.resolve_ref(tables);
+    }
+
+    pub const __ID__: i32 = -1952582529;
+}
+
+#[derive(Debug)]
+pub enum Task {
+    UeWait(std::sync::Arc<crate::ai::UeWait>),
+    UeWaitBlackboardTime(std::sync::Arc<crate::ai::UeWaitBlackboardTime>),
+    MoveToTarget(std::sync::Arc<crate::ai::MoveToTarget>),
+    ChooseSkill(std::sync::Arc<crate::ai::ChooseSkill>),
+    MoveToRandomLocation(std::sync::Arc<crate::ai::MoveToRandomLocation>),
+    MoveToLocation(std::sync::Arc<crate::ai::MoveToLocation>),
+    DebugPrint(std::sync::Arc<crate::ai::DebugPrint>),
+}
+
+impl Task {
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<Self, LubanError> {
+        let type_id = buf.read_int();
+        match type_id {
+            crate::ai::UeWait::__ID__ => Ok(Self::UeWait(std::sync::Arc::new(crate::ai::UeWait::new(buf)?))),
+            crate::ai::UeWaitBlackboardTime::__ID__ => Ok(Self::UeWaitBlackboardTime(std::sync::Arc::new(crate::ai::UeWaitBlackboardTime::new(buf)?))),
+            crate::ai::MoveToTarget::__ID__ => Ok(Self::MoveToTarget(std::sync::Arc::new(crate::ai::MoveToTarget::new(buf)?))),
+            crate::ai::ChooseSkill::__ID__ => Ok(Self::ChooseSkill(std::sync::Arc::new(crate::ai::ChooseSkill::new(buf)?))),
+            crate::ai::MoveToRandomLocation::__ID__ => Ok(Self::MoveToRandomLocation(std::sync::Arc::new(crate::ai::MoveToRandomLocation::new(buf)?))),
+            crate::ai::MoveToLocation::__ID__ => Ok(Self::MoveToLocation(std::sync::Arc::new(crate::ai::MoveToLocation::new(buf)?))),
+            crate::ai::DebugPrint::__ID__ => Ok(Self::DebugPrint(std::sync::Arc::new(crate::ai::DebugPrint::new(buf)?))),
+            _ => Err(LubanError::Bean(format!("Invalid type for Task:{}", type_id)))
+        }
+    }
+    
+    pub fn get_id(&self) -> &i32 {
+        match self {
+            Self::UeWait(x) => { &x.id }
+            Self::UeWaitBlackboardTime(x) => { &x.id }
+            Self::MoveToTarget(x) => { &x.id }
+            Self::ChooseSkill(x) => { &x.id }
+            Self::MoveToRandomLocation(x) => { &x.id }
+            Self::MoveToLocation(x) => { &x.id }
+            Self::DebugPrint(x) => { &x.id }
+        }
+    }    
+    
+    pub fn get_node_name(&self) -> &String {
+        match self {
+            Self::UeWait(x) => { &x.node_name }
+            Self::UeWaitBlackboardTime(x) => { &x.node_name }
+            Self::MoveToTarget(x) => { &x.node_name }
+            Self::ChooseSkill(x) => { &x.node_name }
+            Self::MoveToRandomLocation(x) => { &x.node_name }
+            Self::MoveToLocation(x) => { &x.node_name }
+            Self::DebugPrint(x) => { &x.node_name }
+        }
+    }    
+    
+    pub fn get_decorators(&self) -> &Vec<crate::ai::Decorator> {
+        match self {
+            Self::UeWait(x) => { &x.decorators }
+            Self::UeWaitBlackboardTime(x) => { &x.decorators }
+            Self::MoveToTarget(x) => { &x.decorators }
+            Self::ChooseSkill(x) => { &x.decorators }
+            Self::MoveToRandomLocation(x) => { &x.decorators }
+            Self::MoveToLocation(x) => { &x.decorators }
+            Self::DebugPrint(x) => { &x.decorators }
+        }
+    }    
+    
+    pub fn get_services(&self) -> &Vec<crate::ai::Service> {
+        match self {
+            Self::UeWait(x) => { &x.services }
+            Self::UeWaitBlackboardTime(x) => { &x.services }
+            Self::MoveToTarget(x) => { &x.services }
+            Self::ChooseSkill(x) => { &x.services }
+            Self::MoveToRandomLocation(x) => { &x.services }
+            Self::MoveToLocation(x) => { &x.services }
+            Self::DebugPrint(x) => { &x.services }
+        }
+    }    
+    
+    pub fn get_ignore_restart_self(&self) -> &bool {
+        match self {
+            Self::UeWait(x) => { &x.ignore_restart_self }
+            Self::UeWaitBlackboardTime(x) => { &x.ignore_restart_self }
+            Self::MoveToTarget(x) => { &x.ignore_restart_self }
+            Self::ChooseSkill(x) => { &x.ignore_restart_self }
+            Self::MoveToRandomLocation(x) => { &x.ignore_restart_self }
+            Self::MoveToLocation(x) => { &x.ignore_restart_self }
+            Self::DebugPrint(x) => { &x.ignore_restart_self }
+        }
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        match self {
+            Self::UeWait(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::UeWait as *mut crate::ai::UeWait); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::UeWaitBlackboardTime(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::UeWaitBlackboardTime as *mut crate::ai::UeWaitBlackboardTime); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::MoveToTarget(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::MoveToTarget as *mut crate::ai::MoveToTarget); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::ChooseSkill(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::ChooseSkill as *mut crate::ai::ChooseSkill); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::MoveToRandomLocation(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::MoveToRandomLocation as *mut crate::ai::MoveToRandomLocation); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::MoveToLocation(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::MoveToLocation as *mut crate::ai::MoveToLocation); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::DebugPrint(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::DebugPrint as *mut crate::ai::DebugPrint); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+        }
+    }
+}
+
+
+#[derive(Debug)]
+pub struct ChooseSkill {
+    pub id: i32,
+    pub node_name: String,
+    pub decorators: Vec<crate::ai::Decorator>,
+    pub services: Vec<crate::ai::Service>,
+    pub ignore_restart_self: bool,
+    pub target_actor_key: String,
+    pub result_skill_id_key: String,
+}
+
+impl ChooseSkill{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<ChooseSkill, LubanError> {
+        let id = buf.read_int();
+        let node_name = buf.read_string();
+        let decorators = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::Decorator::new(&mut buf)?); } _e0 };
+        let services = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::Service::new(&mut buf)?); } _e0 };
+        let ignore_restart_self = buf.read_bool();
+        let target_actor_key = buf.read_string();
+        let result_skill_id_key = buf.read_string();
+        
+        Ok(ChooseSkill { id, node_name, decorators, services, ignore_restart_self, target_actor_key, result_skill_id_key, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.decorators.iter_mut().for_each(|mut x| { x.resolve_ref(tables); });
+        self.services.iter_mut().for_each(|mut x| { x.resolve_ref(tables); });
+    }
+
+    pub const __ID__: i32 = -918812268;
+}
+
+#[derive(Debug)]
+pub struct DebugPrint {
+    pub id: i32,
+    pub node_name: String,
+    pub decorators: Vec<crate::ai::Decorator>,
+    pub services: Vec<crate::ai::Service>,
+    pub ignore_restart_self: bool,
+    pub text: String,
+}
+
+impl DebugPrint{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<DebugPrint, LubanError> {
+        let id = buf.read_int();
+        let node_name = buf.read_string();
+        let decorators = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::Decorator::new(&mut buf)?); } _e0 };
+        let services = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::Service::new(&mut buf)?); } _e0 };
+        let ignore_restart_self = buf.read_bool();
+        let text = buf.read_string();
+        
+        Ok(DebugPrint { id, node_name, decorators, services, ignore_restart_self, text, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.decorators.iter_mut().for_each(|mut x| { x.resolve_ref(tables); });
+        self.services.iter_mut().for_each(|mut x| { x.resolve_ref(tables); });
+    }
+
+    pub const __ID__: i32 = 1357409728;
+}
+
+#[derive(Debug)]
+pub struct MoveToLocation {
+    pub id: i32,
+    pub node_name: String,
+    pub decorators: Vec<crate::ai::Decorator>,
+    pub services: Vec<crate::ai::Service>,
+    pub ignore_restart_self: bool,
+    pub acceptable_radius: f32,
+}
+
+impl MoveToLocation{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<MoveToLocation, LubanError> {
+        let id = buf.read_int();
+        let node_name = buf.read_string();
+        let decorators = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::Decorator::new(&mut buf)?); } _e0 };
+        let services = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::Service::new(&mut buf)?); } _e0 };
+        let ignore_restart_self = buf.read_bool();
+        let acceptable_radius = buf.read_float();
+        
+        Ok(MoveToLocation { id, node_name, decorators, services, ignore_restart_self, acceptable_radius, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.decorators.iter_mut().for_each(|mut x| { x.resolve_ref(tables); });
+        self.services.iter_mut().for_each(|mut x| { x.resolve_ref(tables); });
+    }
+
+    pub const __ID__: i32 = -969953113;
+}
+
+#[derive(Debug)]
+pub struct MoveToRandomLocation {
+    pub id: i32,
+    pub node_name: String,
+    pub decorators: Vec<crate::ai::Decorator>,
+    pub services: Vec<crate::ai::Service>,
+    pub ignore_restart_self: bool,
+    pub origin_position_key: String,
+    pub radius: f32,
+}
+
+impl MoveToRandomLocation{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<MoveToRandomLocation, LubanError> {
+        let id = buf.read_int();
+        let node_name = buf.read_string();
+        let decorators = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::Decorator::new(&mut buf)?); } _e0 };
+        let services = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::Service::new(&mut buf)?); } _e0 };
+        let ignore_restart_self = buf.read_bool();
+        let origin_position_key = buf.read_string();
+        let radius = buf.read_float();
+        
+        Ok(MoveToRandomLocation { id, node_name, decorators, services, ignore_restart_self, origin_position_key, radius, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.decorators.iter_mut().for_each(|mut x| { x.resolve_ref(tables); });
+        self.services.iter_mut().for_each(|mut x| { x.resolve_ref(tables); });
+    }
+
+    pub const __ID__: i32 = -2140042998;
+}
+
+#[derive(Debug)]
+pub struct MoveToTarget {
+    pub id: i32,
+    pub node_name: String,
+    pub decorators: Vec<crate::ai::Decorator>,
+    pub services: Vec<crate::ai::Service>,
+    pub ignore_restart_self: bool,
+    pub target_actor_key: String,
+    pub acceptable_radius: f32,
+}
+
+impl MoveToTarget{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<MoveToTarget, LubanError> {
+        let id = buf.read_int();
+        let node_name = buf.read_string();
+        let decorators = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::Decorator::new(&mut buf)?); } _e0 };
+        let services = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::Service::new(&mut buf)?); } _e0 };
+        let ignore_restart_self = buf.read_bool();
+        let target_actor_key = buf.read_string();
+        let acceptable_radius = buf.read_float();
+        
+        Ok(MoveToTarget { id, node_name, decorators, services, ignore_restart_self, target_actor_key, acceptable_radius, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.decorators.iter_mut().for_each(|mut x| { x.resolve_ref(tables); });
+        self.services.iter_mut().for_each(|mut x| { x.resolve_ref(tables); });
+    }
+
+    pub const __ID__: i32 = 514987779;
+}
+
+#[derive(Debug)]
+pub struct UeWait {
+    pub id: i32,
+    pub node_name: String,
+    pub decorators: Vec<crate::ai::Decorator>,
+    pub services: Vec<crate::ai::Service>,
+    pub ignore_restart_self: bool,
+    pub wait_time: f32,
+    pub random_deviation: f32,
+}
+
+impl UeWait{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<UeWait, LubanError> {
+        let id = buf.read_int();
+        let node_name = buf.read_string();
+        let decorators = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::Decorator::new(&mut buf)?); } _e0 };
+        let services = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::Service::new(&mut buf)?); } _e0 };
+        let ignore_restart_self = buf.read_bool();
+        let wait_time = buf.read_float();
+        let random_deviation = buf.read_float();
+        
+        Ok(UeWait { id, node_name, decorators, services, ignore_restart_self, wait_time, random_deviation, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.decorators.iter_mut().for_each(|mut x| { x.resolve_ref(tables); });
+        self.services.iter_mut().for_each(|mut x| { x.resolve_ref(tables); });
+    }
+
+    pub const __ID__: i32 = -512994101;
+}
+
+#[derive(Debug)]
+pub struct UeWaitBlackboardTime {
+    pub id: i32,
+    pub node_name: String,
+    pub decorators: Vec<crate::ai::Decorator>,
+    pub services: Vec<crate::ai::Service>,
+    pub ignore_restart_self: bool,
+    pub blackboard_key: String,
+}
+
+impl UeWaitBlackboardTime{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<UeWaitBlackboardTime, LubanError> {
+        let id = buf.read_int();
+        let node_name = buf.read_string();
+        let decorators = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::Decorator::new(&mut buf)?); } _e0 };
+        let services = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::Service::new(&mut buf)?); } _e0 };
+        let ignore_restart_self = buf.read_bool();
+        let blackboard_key = buf.read_string();
+        
+        Ok(UeWaitBlackboardTime { id, node_name, decorators, services, ignore_restart_self, blackboard_key, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.decorators.iter_mut().for_each(|mut x| { x.resolve_ref(tables); });
+        self.services.iter_mut().for_each(|mut x| { x.resolve_ref(tables); });
+    }
+
+    pub const __ID__: i32 = 1215378271;
+}
+
+#[derive(Debug)]
+pub enum Service {
+    UeSetDefaultFocus(std::sync::Arc<crate::ai::UeSetDefaultFocus>),
+    ExecuteTimeStatistic(std::sync::Arc<crate::ai::ExecuteTimeStatistic>),
+    ChooseTarget(std::sync::Arc<crate::ai::ChooseTarget>),
+    KeepFaceTarget(std::sync::Arc<crate::ai::KeepFaceTarget>),
+    GetOwnerPlayer(std::sync::Arc<crate::ai::GetOwnerPlayer>),
+    UpdateDailyBehaviorProps(std::sync::Arc<crate::ai::UpdateDailyBehaviorProps>),
 }
 
 impl Service {
-    pub fn new(mut buf: &mut ByteBuf) -> Result<std::sync::Arc<AbstractBase>, LubanError> {
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<Self, LubanError> {
         let type_id = buf.read_int();
         match type_id {
-            crate::ai::UeSetDefaultFocus::__ID__ => Ok(std::sync::Arc::new(crate::ai::UeSetDefaultFocus::new(buf)?)),
-            crate::ai::ExecuteTimeStatistic::__ID__ => Ok(std::sync::Arc::new(crate::ai::ExecuteTimeStatistic::new(buf)?)),
-            crate::ai::ChooseTarget::__ID__ => Ok(std::sync::Arc::new(crate::ai::ChooseTarget::new(buf)?)),
-            crate::ai::KeepFaceTarget::__ID__ => Ok(std::sync::Arc::new(crate::ai::KeepFaceTarget::new(buf)?)),
-            crate::ai::GetOwnerPlayer::__ID__ => Ok(std::sync::Arc::new(crate::ai::GetOwnerPlayer::new(buf)?)),
-            crate::ai::UpdateDailyBehaviorProps::__ID__ => Ok(std::sync::Arc::new(crate::ai::UpdateDailyBehaviorProps::new(buf)?)),
+            crate::ai::UeSetDefaultFocus::__ID__ => Ok(Self::UeSetDefaultFocus(std::sync::Arc::new(crate::ai::UeSetDefaultFocus::new(buf)?))),
+            crate::ai::ExecuteTimeStatistic::__ID__ => Ok(Self::ExecuteTimeStatistic(std::sync::Arc::new(crate::ai::ExecuteTimeStatistic::new(buf)?))),
+            crate::ai::ChooseTarget::__ID__ => Ok(Self::ChooseTarget(std::sync::Arc::new(crate::ai::ChooseTarget::new(buf)?))),
+            crate::ai::KeepFaceTarget::__ID__ => Ok(Self::KeepFaceTarget(std::sync::Arc::new(crate::ai::KeepFaceTarget::new(buf)?))),
+            crate::ai::GetOwnerPlayer::__ID__ => Ok(Self::GetOwnerPlayer(std::sync::Arc::new(crate::ai::GetOwnerPlayer::new(buf)?))),
+            crate::ai::UpdateDailyBehaviorProps::__ID__ => Ok(Self::UpdateDailyBehaviorProps(std::sync::Arc::new(crate::ai::UpdateDailyBehaviorProps::new(buf)?))),
             _ => Err(LubanError::Bean(format!("Invalid type for Service:{}", type_id)))
         }
     }
-}
-
-pub trait TService {
-    fn get_id(&self) -> &i32;
-    fn get_node_name(&self) -> &String;
-}
-
-impl crate::ai::TService for crate::ai::UeSetDefaultFocus {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-}
-
-impl crate::ai::TService for crate::ai::ExecuteTimeStatistic {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-}
-
-impl crate::ai::TService for crate::ai::ChooseTarget {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-}
-
-impl crate::ai::TService for crate::ai::KeepFaceTarget {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-}
-
-impl crate::ai::TService for crate::ai::GetOwnerPlayer {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-}
-
-impl crate::ai::TService for crate::ai::UpdateDailyBehaviorProps {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-}
-
-impl<'a> GetBase<'a, &'a dyn crate::ai::TService> for AbstractBase {
-    fn get_base(&'a self) -> Result<&'a dyn crate::ai::TService, LubanError> {
-        let base: Result<&crate::ai::UeSetDefaultFocus, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
+    
+    pub fn get_id(&self) -> &i32 {
+        match self {
+            Self::UeSetDefaultFocus(x) => { &x.id }
+            Self::ExecuteTimeStatistic(x) => { &x.id }
+            Self::ChooseTarget(x) => { &x.id }
+            Self::KeepFaceTarget(x) => { &x.id }
+            Self::GetOwnerPlayer(x) => { &x.id }
+            Self::UpdateDailyBehaviorProps(x) => { &x.id }
         }
-        let base: Result<&crate::ai::ExecuteTimeStatistic, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
+    }    
+    
+    pub fn get_node_name(&self) -> &String {
+        match self {
+            Self::UeSetDefaultFocus(x) => { &x.node_name }
+            Self::ExecuteTimeStatistic(x) => { &x.node_name }
+            Self::ChooseTarget(x) => { &x.node_name }
+            Self::KeepFaceTarget(x) => { &x.node_name }
+            Self::GetOwnerPlayer(x) => { &x.node_name }
+            Self::UpdateDailyBehaviorProps(x) => { &x.node_name }
         }
-        let base: Result<&crate::ai::ChooseTarget, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::KeepFaceTarget, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::GetOwnerPlayer, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::UpdateDailyBehaviorProps, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
+    }    
 
-        Err(LubanError::Polymorphic(format!("Invalid type for Service")))
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        match self {
+            Self::UeSetDefaultFocus(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::UeSetDefaultFocus as *mut crate::ai::UeSetDefaultFocus); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::ExecuteTimeStatistic(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::ExecuteTimeStatistic as *mut crate::ai::ExecuteTimeStatistic); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::ChooseTarget(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::ChooseTarget as *mut crate::ai::ChooseTarget); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::KeepFaceTarget(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::KeepFaceTarget as *mut crate::ai::KeepFaceTarget); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::GetOwnerPlayer(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::GetOwnerPlayer as *mut crate::ai::GetOwnerPlayer); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::UpdateDailyBehaviorProps(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::UpdateDailyBehaviorProps as *mut crate::ai::UpdateDailyBehaviorProps); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+        }
     }
 }
+
 
 #[derive(Debug)]
-#[derive(macros::TryIntoBase)]
-pub struct UeSetDefaultFocus {
-    pub id: i32,
-    pub node_name: String,
-    pub keyboard_key: String,
-}
-
-impl UeSetDefaultFocus{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<UeSetDefaultFocus, LubanError> {
-        let id = buf.read_int();
-        let node_name = buf.read_string();
-        let keyboard_key = buf.read_string();
-        
-        Ok(UeSetDefaultFocus { id, node_name, keyboard_key, })
-    }
-
-    pub const __ID__: i32 = 1812449155;
-}
-
-#[derive(Debug)]
-#[derive(macros::TryIntoBase)]
-pub struct ExecuteTimeStatistic {
-    pub id: i32,
-    pub node_name: String,
-}
-
-impl ExecuteTimeStatistic{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<ExecuteTimeStatistic, LubanError> {
-        let id = buf.read_int();
-        let node_name = buf.read_string();
-        
-        Ok(ExecuteTimeStatistic { id, node_name, })
-    }
-
-    pub const __ID__: i32 = 990693812;
-}
-
-#[derive(Debug)]
-#[derive(macros::TryIntoBase)]
 pub struct ChooseTarget {
     pub id: i32,
     pub node_name: String,
@@ -903,39 +1458,41 @@ pub struct ChooseTarget {
 }
 
 impl ChooseTarget{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<ChooseTarget, LubanError> {
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<ChooseTarget, LubanError> {
         let id = buf.read_int();
         let node_name = buf.read_string();
         let result_target_key = buf.read_string();
         
         Ok(ChooseTarget { id, node_name, result_target_key, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
     }
 
     pub const __ID__: i32 = 1601247918;
 }
 
 #[derive(Debug)]
-#[derive(macros::TryIntoBase)]
-pub struct KeepFaceTarget {
+pub struct ExecuteTimeStatistic {
     pub id: i32,
     pub node_name: String,
-    pub target_actor_key: String,
 }
 
-impl KeepFaceTarget{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<KeepFaceTarget, LubanError> {
+impl ExecuteTimeStatistic{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<ExecuteTimeStatistic, LubanError> {
         let id = buf.read_int();
         let node_name = buf.read_string();
-        let target_actor_key = buf.read_string();
         
-        Ok(KeepFaceTarget { id, node_name, target_actor_key, })
+        Ok(ExecuteTimeStatistic { id, node_name, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
     }
 
-    pub const __ID__: i32 = 1195270745;
+    pub const __ID__: i32 = 990693812;
 }
 
 #[derive(Debug)]
-#[derive(macros::TryIntoBase)]
 pub struct GetOwnerPlayer {
     pub id: i32,
     pub node_name: String,
@@ -943,19 +1500,65 @@ pub struct GetOwnerPlayer {
 }
 
 impl GetOwnerPlayer{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<GetOwnerPlayer, LubanError> {
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<GetOwnerPlayer, LubanError> {
         let id = buf.read_int();
         let node_name = buf.read_string();
         let player_actor_key = buf.read_string();
         
         Ok(GetOwnerPlayer { id, node_name, player_actor_key, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
     }
 
     pub const __ID__: i32 = -999247644;
 }
 
 #[derive(Debug)]
-#[derive(macros::TryIntoBase)]
+pub struct KeepFaceTarget {
+    pub id: i32,
+    pub node_name: String,
+    pub target_actor_key: String,
+}
+
+impl KeepFaceTarget{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<KeepFaceTarget, LubanError> {
+        let id = buf.read_int();
+        let node_name = buf.read_string();
+        let target_actor_key = buf.read_string();
+        
+        Ok(KeepFaceTarget { id, node_name, target_actor_key, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = 1195270745;
+}
+
+#[derive(Debug)]
+pub struct UeSetDefaultFocus {
+    pub id: i32,
+    pub node_name: String,
+    pub keyboard_key: String,
+}
+
+impl UeSetDefaultFocus{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<UeSetDefaultFocus, LubanError> {
+        let id = buf.read_int();
+        let node_name = buf.read_string();
+        let keyboard_key = buf.read_string();
+        
+        Ok(UeSetDefaultFocus { id, node_name, keyboard_key, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = 1812449155;
+}
+
+#[derive(Debug)]
 pub struct UpdateDailyBehaviorProps {
     pub id: i32,
     pub node_name: String,
@@ -971,7 +1574,7 @@ pub struct UpdateDailyBehaviorProps {
 }
 
 impl UpdateDailyBehaviorProps{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<UpdateDailyBehaviorProps, LubanError> {
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<UpdateDailyBehaviorProps, LubanError> {
         let id = buf.read_int();
         let node_name = buf.read_string();
         let satiety_key = buf.read_string();
@@ -985,1136 +1588,12 @@ impl UpdateDailyBehaviorProps{
         let mood_upper_threshold_key = buf.read_string();
         
         Ok(UpdateDailyBehaviorProps { id, node_name, satiety_key, energy_key, mood_key, satiety_lower_threshold_key, satiety_upper_threshold_key, energy_lower_threshold_key, energy_upper_threshold_key, mood_lower_threshold_key, mood_upper_threshold_key, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
     }
 
     pub const __ID__: i32 = -61887372;
-}
-
-#[derive(Debug)]
-#[derive(macros::TryIntoBase)]
-pub struct Decorator {
-    pub id: i32,
-    pub node_name: String,
-    pub flow_abort_mode: crate::ai::EFlowAbortMode,
-}
-
-impl Decorator {
-    pub fn new(mut buf: &mut ByteBuf) -> Result<std::sync::Arc<AbstractBase>, LubanError> {
-        let type_id = buf.read_int();
-        match type_id {
-            crate::ai::UeLoop::__ID__ => Ok(std::sync::Arc::new(crate::ai::UeLoop::new(buf)?)),
-            crate::ai::UeCooldown::__ID__ => Ok(std::sync::Arc::new(crate::ai::UeCooldown::new(buf)?)),
-            crate::ai::UeTimeLimit::__ID__ => Ok(std::sync::Arc::new(crate::ai::UeTimeLimit::new(buf)?)),
-            crate::ai::UeBlackboard::__ID__ => Ok(std::sync::Arc::new(crate::ai::UeBlackboard::new(buf)?)),
-            crate::ai::UeForceSuccess::__ID__ => Ok(std::sync::Arc::new(crate::ai::UeForceSuccess::new(buf)?)),
-            crate::ai::IsAtLocation::__ID__ => Ok(std::sync::Arc::new(crate::ai::IsAtLocation::new(buf)?)),
-            crate::ai::DistanceLessThan::__ID__ => Ok(std::sync::Arc::new(crate::ai::DistanceLessThan::new(buf)?)),
-            _ => Err(LubanError::Bean(format!("Invalid type for Decorator:{}", type_id)))
-        }
-    }
-}
-
-pub trait TDecorator {
-    fn get_id(&self) -> &i32;
-    fn get_node_name(&self) -> &String;
-    fn get_flow_abort_mode(&self) -> &crate::ai::EFlowAbortMode;
-}
-
-impl crate::ai::TDecorator for crate::ai::UeLoop {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-    fn get_flow_abort_mode(&self) -> &crate::ai::EFlowAbortMode {
-        &self.flow_abort_mode
-    }
-}
-
-impl crate::ai::TDecorator for crate::ai::UeCooldown {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-    fn get_flow_abort_mode(&self) -> &crate::ai::EFlowAbortMode {
-        &self.flow_abort_mode
-    }
-}
-
-impl crate::ai::TDecorator for crate::ai::UeTimeLimit {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-    fn get_flow_abort_mode(&self) -> &crate::ai::EFlowAbortMode {
-        &self.flow_abort_mode
-    }
-}
-
-impl crate::ai::TDecorator for crate::ai::UeBlackboard {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-    fn get_flow_abort_mode(&self) -> &crate::ai::EFlowAbortMode {
-        &self.flow_abort_mode
-    }
-}
-
-impl crate::ai::TDecorator for crate::ai::UeForceSuccess {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-    fn get_flow_abort_mode(&self) -> &crate::ai::EFlowAbortMode {
-        &self.flow_abort_mode
-    }
-}
-
-impl crate::ai::TDecorator for crate::ai::IsAtLocation {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-    fn get_flow_abort_mode(&self) -> &crate::ai::EFlowAbortMode {
-        &self.flow_abort_mode
-    }
-}
-
-impl crate::ai::TDecorator for crate::ai::DistanceLessThan {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-    fn get_flow_abort_mode(&self) -> &crate::ai::EFlowAbortMode {
-        &self.flow_abort_mode
-    }
-}
-
-impl<'a> GetBase<'a, &'a dyn crate::ai::TDecorator> for AbstractBase {
-    fn get_base(&'a self) -> Result<&'a dyn crate::ai::TDecorator, LubanError> {
-        let base: Result<&crate::ai::UeLoop, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::UeCooldown, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::UeTimeLimit, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::UeBlackboard, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::UeForceSuccess, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::IsAtLocation, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::DistanceLessThan, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-
-        Err(LubanError::Polymorphic(format!("Invalid type for Decorator")))
-    }
-}
-
-#[derive(Debug)]
-#[derive(macros::TryIntoBase)]
-pub struct UeLoop {
-    pub id: i32,
-    pub node_name: String,
-    pub flow_abort_mode: crate::ai::EFlowAbortMode,
-    pub num_loops: i32,
-    pub infinite_loop: bool,
-    pub infinite_loop_timeout_time: f32,
-}
-
-impl UeLoop{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<UeLoop, LubanError> {
-        let id = buf.read_int();
-        let node_name = buf.read_string();
-        let flow_abort_mode = buf.read_int().into();
-        let num_loops = buf.read_int();
-        let infinite_loop = buf.read_bool();
-        let infinite_loop_timeout_time = buf.read_float();
-        
-        Ok(UeLoop { id, node_name, flow_abort_mode, num_loops, infinite_loop, infinite_loop_timeout_time, })
-    }
-
-    pub const __ID__: i32 = -513308166;
-}
-
-#[derive(Debug)]
-#[derive(macros::TryIntoBase)]
-pub struct UeCooldown {
-    pub id: i32,
-    pub node_name: String,
-    pub flow_abort_mode: crate::ai::EFlowAbortMode,
-    pub cooldown_time: f32,
-}
-
-impl UeCooldown{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<UeCooldown, LubanError> {
-        let id = buf.read_int();
-        let node_name = buf.read_string();
-        let flow_abort_mode = buf.read_int().into();
-        let cooldown_time = buf.read_float();
-        
-        Ok(UeCooldown { id, node_name, flow_abort_mode, cooldown_time, })
-    }
-
-    pub const __ID__: i32 = -951439423;
-}
-
-#[derive(Debug)]
-#[derive(macros::TryIntoBase)]
-pub struct UeTimeLimit {
-    pub id: i32,
-    pub node_name: String,
-    pub flow_abort_mode: crate::ai::EFlowAbortMode,
-    pub limit_time: f32,
-}
-
-impl UeTimeLimit{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<UeTimeLimit, LubanError> {
-        let id = buf.read_int();
-        let node_name = buf.read_string();
-        let flow_abort_mode = buf.read_int().into();
-        let limit_time = buf.read_float();
-        
-        Ok(UeTimeLimit { id, node_name, flow_abort_mode, limit_time, })
-    }
-
-    pub const __ID__: i32 = 338469720;
-}
-
-#[derive(Debug)]
-#[derive(macros::TryIntoBase)]
-pub struct UeBlackboard {
-    pub id: i32,
-    pub node_name: String,
-    pub flow_abort_mode: crate::ai::EFlowAbortMode,
-    pub notify_observer: crate::ai::ENotifyObserverMode,
-    pub blackboard_key: String,
-    pub key_query: std::sync::Arc<AbstractBase>,
-}
-
-impl UeBlackboard{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<UeBlackboard, LubanError> {
-        let id = buf.read_int();
-        let node_name = buf.read_string();
-        let flow_abort_mode = buf.read_int().into();
-        let notify_observer = buf.read_int().into();
-        let blackboard_key = buf.read_string();
-        let key_query = crate::ai::KeyQueryOperator::new(&mut buf)?;
-        
-        Ok(UeBlackboard { id, node_name, flow_abort_mode, notify_observer, blackboard_key, key_query, })
-    }
-
-    pub const __ID__: i32 = -315297507;
-}
-
-#[derive(Debug)]
-#[derive(macros::TryIntoBase)]
-pub struct UeForceSuccess {
-    pub id: i32,
-    pub node_name: String,
-    pub flow_abort_mode: crate::ai::EFlowAbortMode,
-}
-
-impl UeForceSuccess{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<UeForceSuccess, LubanError> {
-        let id = buf.read_int();
-        let node_name = buf.read_string();
-        let flow_abort_mode = buf.read_int().into();
-        
-        Ok(UeForceSuccess { id, node_name, flow_abort_mode, })
-    }
-
-    pub const __ID__: i32 = 195054574;
-}
-
-#[derive(Debug)]
-#[derive(macros::TryIntoBase)]
-pub struct IsAtLocation {
-    pub id: i32,
-    pub node_name: String,
-    pub flow_abort_mode: crate::ai::EFlowAbortMode,
-    pub acceptable_radius: f32,
-    pub keyboard_key: String,
-    pub inverse_condition: bool,
-}
-
-impl IsAtLocation{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<IsAtLocation, LubanError> {
-        let id = buf.read_int();
-        let node_name = buf.read_string();
-        let flow_abort_mode = buf.read_int().into();
-        let acceptable_radius = buf.read_float();
-        let keyboard_key = buf.read_string();
-        let inverse_condition = buf.read_bool();
-        
-        Ok(IsAtLocation { id, node_name, flow_abort_mode, acceptable_radius, keyboard_key, inverse_condition, })
-    }
-
-    pub const __ID__: i32 = 1255972344;
-}
-
-#[derive(Debug)]
-#[derive(macros::TryIntoBase)]
-pub struct DistanceLessThan {
-    pub id: i32,
-    pub node_name: String,
-    pub flow_abort_mode: crate::ai::EFlowAbortMode,
-    pub actor1_key: String,
-    pub actor2_key: String,
-    pub distance: f32,
-    pub reverse_result: bool,
-}
-
-impl DistanceLessThan{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<DistanceLessThan, LubanError> {
-        let id = buf.read_int();
-        let node_name = buf.read_string();
-        let flow_abort_mode = buf.read_int().into();
-        let actor1_key = buf.read_string();
-        let actor2_key = buf.read_string();
-        let distance = buf.read_float();
-        let reverse_result = buf.read_bool();
-        
-        Ok(DistanceLessThan { id, node_name, flow_abort_mode, actor1_key, actor2_key, distance, reverse_result, })
-    }
-
-    pub const __ID__: i32 = -1207170283;
-}
-
-#[derive(Debug)]
-#[derive(macros::TryIntoBase)]
-pub struct FlowNode {
-    pub id: i32,
-    pub node_name: String,
-    pub decorators: Vec<std::sync::Arc<AbstractBase>>,
-    pub services: Vec<std::sync::Arc<AbstractBase>>,
-}
-
-impl FlowNode {
-    pub fn new(mut buf: &mut ByteBuf) -> Result<std::sync::Arc<AbstractBase>, LubanError> {
-        let type_id = buf.read_int();
-        match type_id {
-            crate::ai::Sequence::__ID__ => Ok(std::sync::Arc::new(crate::ai::Sequence::new(buf)?)),
-            crate::ai::Selector::__ID__ => Ok(std::sync::Arc::new(crate::ai::Selector::new(buf)?)),
-            crate::ai::SimpleParallel::__ID__ => Ok(std::sync::Arc::new(crate::ai::SimpleParallel::new(buf)?)),
-            crate::ai::UeWait::__ID__ => Ok(std::sync::Arc::new(crate::ai::UeWait::new(buf)?)),
-            crate::ai::UeWaitBlackboardTime::__ID__ => Ok(std::sync::Arc::new(crate::ai::UeWaitBlackboardTime::new(buf)?)),
-            crate::ai::MoveToTarget::__ID__ => Ok(std::sync::Arc::new(crate::ai::MoveToTarget::new(buf)?)),
-            crate::ai::ChooseSkill::__ID__ => Ok(std::sync::Arc::new(crate::ai::ChooseSkill::new(buf)?)),
-            crate::ai::MoveToRandomLocation::__ID__ => Ok(std::sync::Arc::new(crate::ai::MoveToRandomLocation::new(buf)?)),
-            crate::ai::MoveToLocation::__ID__ => Ok(std::sync::Arc::new(crate::ai::MoveToLocation::new(buf)?)),
-            crate::ai::DebugPrint::__ID__ => Ok(std::sync::Arc::new(crate::ai::DebugPrint::new(buf)?)),
-            _ => Err(LubanError::Bean(format!("Invalid type for FlowNode:{}", type_id)))
-        }
-    }
-}
-
-pub trait TFlowNode {
-    fn get_id(&self) -> &i32;
-    fn get_node_name(&self) -> &String;
-    fn get_decorators(&self) -> &Vec<std::sync::Arc<AbstractBase>>;
-    fn get_services(&self) -> &Vec<std::sync::Arc<AbstractBase>>;
-}
-
-impl crate::ai::TFlowNode for crate::ai::Sequence {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-    fn get_decorators(&self) -> &Vec<std::sync::Arc<AbstractBase>> {
-        &self.decorators
-    }
-    fn get_services(&self) -> &Vec<std::sync::Arc<AbstractBase>> {
-        &self.services
-    }
-}
-
-impl crate::ai::TFlowNode for crate::ai::Selector {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-    fn get_decorators(&self) -> &Vec<std::sync::Arc<AbstractBase>> {
-        &self.decorators
-    }
-    fn get_services(&self) -> &Vec<std::sync::Arc<AbstractBase>> {
-        &self.services
-    }
-}
-
-impl crate::ai::TFlowNode for crate::ai::SimpleParallel {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-    fn get_decorators(&self) -> &Vec<std::sync::Arc<AbstractBase>> {
-        &self.decorators
-    }
-    fn get_services(&self) -> &Vec<std::sync::Arc<AbstractBase>> {
-        &self.services
-    }
-}
-
-impl crate::ai::TFlowNode for crate::ai::UeWait {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-    fn get_decorators(&self) -> &Vec<std::sync::Arc<AbstractBase>> {
-        &self.decorators
-    }
-    fn get_services(&self) -> &Vec<std::sync::Arc<AbstractBase>> {
-        &self.services
-    }
-}
-
-impl crate::ai::TFlowNode for crate::ai::UeWaitBlackboardTime {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-    fn get_decorators(&self) -> &Vec<std::sync::Arc<AbstractBase>> {
-        &self.decorators
-    }
-    fn get_services(&self) -> &Vec<std::sync::Arc<AbstractBase>> {
-        &self.services
-    }
-}
-
-impl crate::ai::TFlowNode for crate::ai::MoveToTarget {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-    fn get_decorators(&self) -> &Vec<std::sync::Arc<AbstractBase>> {
-        &self.decorators
-    }
-    fn get_services(&self) -> &Vec<std::sync::Arc<AbstractBase>> {
-        &self.services
-    }
-}
-
-impl crate::ai::TFlowNode for crate::ai::ChooseSkill {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-    fn get_decorators(&self) -> &Vec<std::sync::Arc<AbstractBase>> {
-        &self.decorators
-    }
-    fn get_services(&self) -> &Vec<std::sync::Arc<AbstractBase>> {
-        &self.services
-    }
-}
-
-impl crate::ai::TFlowNode for crate::ai::MoveToRandomLocation {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-    fn get_decorators(&self) -> &Vec<std::sync::Arc<AbstractBase>> {
-        &self.decorators
-    }
-    fn get_services(&self) -> &Vec<std::sync::Arc<AbstractBase>> {
-        &self.services
-    }
-}
-
-impl crate::ai::TFlowNode for crate::ai::MoveToLocation {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-    fn get_decorators(&self) -> &Vec<std::sync::Arc<AbstractBase>> {
-        &self.decorators
-    }
-    fn get_services(&self) -> &Vec<std::sync::Arc<AbstractBase>> {
-        &self.services
-    }
-}
-
-impl crate::ai::TFlowNode for crate::ai::DebugPrint {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-    fn get_decorators(&self) -> &Vec<std::sync::Arc<AbstractBase>> {
-        &self.decorators
-    }
-    fn get_services(&self) -> &Vec<std::sync::Arc<AbstractBase>> {
-        &self.services
-    }
-}
-
-impl<'a> GetBase<'a, &'a dyn crate::ai::TFlowNode> for AbstractBase {
-    fn get_base(&'a self) -> Result<&'a dyn crate::ai::TFlowNode, LubanError> {
-        let base: Result<&crate::ai::Sequence, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::Selector, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::SimpleParallel, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::UeWait, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::UeWaitBlackboardTime, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::MoveToTarget, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::ChooseSkill, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::MoveToRandomLocation, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::MoveToLocation, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::DebugPrint, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-
-        Err(LubanError::Polymorphic(format!("Invalid type for FlowNode")))
-    }
-}
-
-#[derive(Debug)]
-#[derive(macros::TryIntoBase)]
-pub struct ComposeNode {
-    pub id: i32,
-    pub node_name: String,
-    pub decorators: Vec<std::sync::Arc<AbstractBase>>,
-    pub services: Vec<std::sync::Arc<AbstractBase>>,
-}
-
-impl ComposeNode {
-    pub fn new(mut buf: &mut ByteBuf) -> Result<std::sync::Arc<AbstractBase>, LubanError> {
-        let type_id = buf.read_int();
-        match type_id {
-            crate::ai::Sequence::__ID__ => Ok(std::sync::Arc::new(crate::ai::Sequence::new(buf)?)),
-            crate::ai::Selector::__ID__ => Ok(std::sync::Arc::new(crate::ai::Selector::new(buf)?)),
-            crate::ai::SimpleParallel::__ID__ => Ok(std::sync::Arc::new(crate::ai::SimpleParallel::new(buf)?)),
-            _ => Err(LubanError::Bean(format!("Invalid type for ComposeNode:{}", type_id)))
-        }
-    }
-}
-
-pub trait TComposeNode {
-    fn get_id(&self) -> &i32;
-    fn get_node_name(&self) -> &String;
-    fn get_decorators(&self) -> &Vec<std::sync::Arc<AbstractBase>>;
-    fn get_services(&self) -> &Vec<std::sync::Arc<AbstractBase>>;
-}
-
-impl crate::ai::TComposeNode for crate::ai::Sequence {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-    fn get_decorators(&self) -> &Vec<std::sync::Arc<AbstractBase>> {
-        &self.decorators
-    }
-    fn get_services(&self) -> &Vec<std::sync::Arc<AbstractBase>> {
-        &self.services
-    }
-}
-
-impl crate::ai::TComposeNode for crate::ai::Selector {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-    fn get_decorators(&self) -> &Vec<std::sync::Arc<AbstractBase>> {
-        &self.decorators
-    }
-    fn get_services(&self) -> &Vec<std::sync::Arc<AbstractBase>> {
-        &self.services
-    }
-}
-
-impl crate::ai::TComposeNode for crate::ai::SimpleParallel {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-    fn get_decorators(&self) -> &Vec<std::sync::Arc<AbstractBase>> {
-        &self.decorators
-    }
-    fn get_services(&self) -> &Vec<std::sync::Arc<AbstractBase>> {
-        &self.services
-    }
-}
-
-impl<'a> GetBase<'a, &'a dyn crate::ai::TComposeNode> for AbstractBase {
-    fn get_base(&'a self) -> Result<&'a dyn crate::ai::TComposeNode, LubanError> {
-        let base: Result<&crate::ai::Sequence, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::Selector, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::SimpleParallel, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-
-        Err(LubanError::Polymorphic(format!("Invalid type for ComposeNode")))
-    }
-}
-
-#[derive(Debug)]
-#[derive(macros::TryIntoBase)]
-pub struct Sequence {
-    pub id: i32,
-    pub node_name: String,
-    pub decorators: Vec<std::sync::Arc<AbstractBase>>,
-    pub services: Vec<std::sync::Arc<AbstractBase>>,
-    pub children: Vec<std::sync::Arc<AbstractBase>>,
-}
-
-impl Sequence{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<Sequence, LubanError> {
-        let id = buf.read_int();
-        let node_name = buf.read_string();
-        let decorators = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::Decorator::new(&mut buf)?); } _e0 };
-        let services = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::Service::new(&mut buf)?); } _e0 };
-        let children = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::FlowNode::new(&mut buf)?); } _e0 };
-        
-        Ok(Sequence { id, node_name, decorators, services, children, })
-    }
-
-    pub const __ID__: i32 = -1789006105;
-}
-
-#[derive(Debug)]
-#[derive(macros::TryIntoBase)]
-pub struct Selector {
-    pub id: i32,
-    pub node_name: String,
-    pub decorators: Vec<std::sync::Arc<AbstractBase>>,
-    pub services: Vec<std::sync::Arc<AbstractBase>>,
-    pub children: Vec<std::sync::Arc<AbstractBase>>,
-}
-
-impl Selector{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<Selector, LubanError> {
-        let id = buf.read_int();
-        let node_name = buf.read_string();
-        let decorators = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::Decorator::new(&mut buf)?); } _e0 };
-        let services = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::Service::new(&mut buf)?); } _e0 };
-        let children = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::FlowNode::new(&mut buf)?); } _e0 };
-        
-        Ok(Selector { id, node_name, decorators, services, children, })
-    }
-
-    pub const __ID__: i32 = -1946981627;
-}
-
-#[derive(Debug)]
-#[derive(macros::TryIntoBase)]
-pub struct SimpleParallel {
-    pub id: i32,
-    pub node_name: String,
-    pub decorators: Vec<std::sync::Arc<AbstractBase>>,
-    pub services: Vec<std::sync::Arc<AbstractBase>>,
-    pub finish_mode: crate::ai::EFinishMode,
-    pub main_task: std::sync::Arc<AbstractBase>,
-    pub background_node: std::sync::Arc<AbstractBase>,
-}
-
-impl SimpleParallel{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<SimpleParallel, LubanError> {
-        let id = buf.read_int();
-        let node_name = buf.read_string();
-        let decorators = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::Decorator::new(&mut buf)?); } _e0 };
-        let services = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::Service::new(&mut buf)?); } _e0 };
-        let finish_mode = buf.read_int().into();
-        let main_task = crate::ai::Task::new(&mut buf)?;
-        let background_node = crate::ai::FlowNode::new(&mut buf)?;
-        
-        Ok(SimpleParallel { id, node_name, decorators, services, finish_mode, main_task, background_node, })
-    }
-
-    pub const __ID__: i32 = -1952582529;
-}
-
-#[derive(Debug)]
-#[derive(macros::TryIntoBase)]
-pub struct Task {
-    pub id: i32,
-    pub node_name: String,
-    pub decorators: Vec<std::sync::Arc<AbstractBase>>,
-    pub services: Vec<std::sync::Arc<AbstractBase>>,
-    pub ignore_restart_self: bool,
-}
-
-impl Task {
-    pub fn new(mut buf: &mut ByteBuf) -> Result<std::sync::Arc<AbstractBase>, LubanError> {
-        let type_id = buf.read_int();
-        match type_id {
-            crate::ai::UeWait::__ID__ => Ok(std::sync::Arc::new(crate::ai::UeWait::new(buf)?)),
-            crate::ai::UeWaitBlackboardTime::__ID__ => Ok(std::sync::Arc::new(crate::ai::UeWaitBlackboardTime::new(buf)?)),
-            crate::ai::MoveToTarget::__ID__ => Ok(std::sync::Arc::new(crate::ai::MoveToTarget::new(buf)?)),
-            crate::ai::ChooseSkill::__ID__ => Ok(std::sync::Arc::new(crate::ai::ChooseSkill::new(buf)?)),
-            crate::ai::MoveToRandomLocation::__ID__ => Ok(std::sync::Arc::new(crate::ai::MoveToRandomLocation::new(buf)?)),
-            crate::ai::MoveToLocation::__ID__ => Ok(std::sync::Arc::new(crate::ai::MoveToLocation::new(buf)?)),
-            crate::ai::DebugPrint::__ID__ => Ok(std::sync::Arc::new(crate::ai::DebugPrint::new(buf)?)),
-            _ => Err(LubanError::Bean(format!("Invalid type for Task:{}", type_id)))
-        }
-    }
-}
-
-pub trait TTask {
-    fn get_id(&self) -> &i32;
-    fn get_node_name(&self) -> &String;
-    fn get_decorators(&self) -> &Vec<std::sync::Arc<AbstractBase>>;
-    fn get_services(&self) -> &Vec<std::sync::Arc<AbstractBase>>;
-    fn get_ignore_restart_self(&self) -> &bool;
-}
-
-impl crate::ai::TTask for crate::ai::UeWait {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-    fn get_decorators(&self) -> &Vec<std::sync::Arc<AbstractBase>> {
-        &self.decorators
-    }
-    fn get_services(&self) -> &Vec<std::sync::Arc<AbstractBase>> {
-        &self.services
-    }
-    fn get_ignore_restart_self(&self) -> &bool {
-        &self.ignore_restart_self
-    }
-}
-
-impl crate::ai::TTask for crate::ai::UeWaitBlackboardTime {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-    fn get_decorators(&self) -> &Vec<std::sync::Arc<AbstractBase>> {
-        &self.decorators
-    }
-    fn get_services(&self) -> &Vec<std::sync::Arc<AbstractBase>> {
-        &self.services
-    }
-    fn get_ignore_restart_self(&self) -> &bool {
-        &self.ignore_restart_self
-    }
-}
-
-impl crate::ai::TTask for crate::ai::MoveToTarget {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-    fn get_decorators(&self) -> &Vec<std::sync::Arc<AbstractBase>> {
-        &self.decorators
-    }
-    fn get_services(&self) -> &Vec<std::sync::Arc<AbstractBase>> {
-        &self.services
-    }
-    fn get_ignore_restart_self(&self) -> &bool {
-        &self.ignore_restart_self
-    }
-}
-
-impl crate::ai::TTask for crate::ai::ChooseSkill {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-    fn get_decorators(&self) -> &Vec<std::sync::Arc<AbstractBase>> {
-        &self.decorators
-    }
-    fn get_services(&self) -> &Vec<std::sync::Arc<AbstractBase>> {
-        &self.services
-    }
-    fn get_ignore_restart_self(&self) -> &bool {
-        &self.ignore_restart_self
-    }
-}
-
-impl crate::ai::TTask for crate::ai::MoveToRandomLocation {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-    fn get_decorators(&self) -> &Vec<std::sync::Arc<AbstractBase>> {
-        &self.decorators
-    }
-    fn get_services(&self) -> &Vec<std::sync::Arc<AbstractBase>> {
-        &self.services
-    }
-    fn get_ignore_restart_self(&self) -> &bool {
-        &self.ignore_restart_self
-    }
-}
-
-impl crate::ai::TTask for crate::ai::MoveToLocation {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-    fn get_decorators(&self) -> &Vec<std::sync::Arc<AbstractBase>> {
-        &self.decorators
-    }
-    fn get_services(&self) -> &Vec<std::sync::Arc<AbstractBase>> {
-        &self.services
-    }
-    fn get_ignore_restart_self(&self) -> &bool {
-        &self.ignore_restart_self
-    }
-}
-
-impl crate::ai::TTask for crate::ai::DebugPrint {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_node_name(&self) -> &String {
-        &self.node_name
-    }
-    fn get_decorators(&self) -> &Vec<std::sync::Arc<AbstractBase>> {
-        &self.decorators
-    }
-    fn get_services(&self) -> &Vec<std::sync::Arc<AbstractBase>> {
-        &self.services
-    }
-    fn get_ignore_restart_self(&self) -> &bool {
-        &self.ignore_restart_self
-    }
-}
-
-impl<'a> GetBase<'a, &'a dyn crate::ai::TTask> for AbstractBase {
-    fn get_base(&'a self) -> Result<&'a dyn crate::ai::TTask, LubanError> {
-        let base: Result<&crate::ai::UeWait, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::UeWaitBlackboardTime, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::MoveToTarget, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::ChooseSkill, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::MoveToRandomLocation, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::MoveToLocation, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::ai::DebugPrint, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-
-        Err(LubanError::Polymorphic(format!("Invalid type for Task")))
-    }
-}
-
-#[derive(Debug)]
-#[derive(macros::TryIntoBase)]
-pub struct UeWait {
-    pub id: i32,
-    pub node_name: String,
-    pub decorators: Vec<std::sync::Arc<AbstractBase>>,
-    pub services: Vec<std::sync::Arc<AbstractBase>>,
-    pub ignore_restart_self: bool,
-    pub wait_time: f32,
-    pub random_deviation: f32,
-}
-
-impl UeWait{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<UeWait, LubanError> {
-        let id = buf.read_int();
-        let node_name = buf.read_string();
-        let decorators = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::Decorator::new(&mut buf)?); } _e0 };
-        let services = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::Service::new(&mut buf)?); } _e0 };
-        let ignore_restart_self = buf.read_bool();
-        let wait_time = buf.read_float();
-        let random_deviation = buf.read_float();
-        
-        Ok(UeWait { id, node_name, decorators, services, ignore_restart_self, wait_time, random_deviation, })
-    }
-
-    pub const __ID__: i32 = -512994101;
-}
-
-#[derive(Debug)]
-#[derive(macros::TryIntoBase)]
-pub struct UeWaitBlackboardTime {
-    pub id: i32,
-    pub node_name: String,
-    pub decorators: Vec<std::sync::Arc<AbstractBase>>,
-    pub services: Vec<std::sync::Arc<AbstractBase>>,
-    pub ignore_restart_self: bool,
-    pub blackboard_key: String,
-}
-
-impl UeWaitBlackboardTime{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<UeWaitBlackboardTime, LubanError> {
-        let id = buf.read_int();
-        let node_name = buf.read_string();
-        let decorators = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::Decorator::new(&mut buf)?); } _e0 };
-        let services = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::Service::new(&mut buf)?); } _e0 };
-        let ignore_restart_self = buf.read_bool();
-        let blackboard_key = buf.read_string();
-        
-        Ok(UeWaitBlackboardTime { id, node_name, decorators, services, ignore_restart_self, blackboard_key, })
-    }
-
-    pub const __ID__: i32 = 1215378271;
-}
-
-#[derive(Debug)]
-#[derive(macros::TryIntoBase)]
-pub struct MoveToTarget {
-    pub id: i32,
-    pub node_name: String,
-    pub decorators: Vec<std::sync::Arc<AbstractBase>>,
-    pub services: Vec<std::sync::Arc<AbstractBase>>,
-    pub ignore_restart_self: bool,
-    pub target_actor_key: String,
-    pub acceptable_radius: f32,
-}
-
-impl MoveToTarget{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<MoveToTarget, LubanError> {
-        let id = buf.read_int();
-        let node_name = buf.read_string();
-        let decorators = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::Decorator::new(&mut buf)?); } _e0 };
-        let services = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::Service::new(&mut buf)?); } _e0 };
-        let ignore_restart_self = buf.read_bool();
-        let target_actor_key = buf.read_string();
-        let acceptable_radius = buf.read_float();
-        
-        Ok(MoveToTarget { id, node_name, decorators, services, ignore_restart_self, target_actor_key, acceptable_radius, })
-    }
-
-    pub const __ID__: i32 = 514987779;
-}
-
-#[derive(Debug)]
-#[derive(macros::TryIntoBase)]
-pub struct ChooseSkill {
-    pub id: i32,
-    pub node_name: String,
-    pub decorators: Vec<std::sync::Arc<AbstractBase>>,
-    pub services: Vec<std::sync::Arc<AbstractBase>>,
-    pub ignore_restart_self: bool,
-    pub target_actor_key: String,
-    pub result_skill_id_key: String,
-}
-
-impl ChooseSkill{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<ChooseSkill, LubanError> {
-        let id = buf.read_int();
-        let node_name = buf.read_string();
-        let decorators = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::Decorator::new(&mut buf)?); } _e0 };
-        let services = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::Service::new(&mut buf)?); } _e0 };
-        let ignore_restart_self = buf.read_bool();
-        let target_actor_key = buf.read_string();
-        let result_skill_id_key = buf.read_string();
-        
-        Ok(ChooseSkill { id, node_name, decorators, services, ignore_restart_self, target_actor_key, result_skill_id_key, })
-    }
-
-    pub const __ID__: i32 = -918812268;
-}
-
-#[derive(Debug)]
-#[derive(macros::TryIntoBase)]
-pub struct MoveToRandomLocation {
-    pub id: i32,
-    pub node_name: String,
-    pub decorators: Vec<std::sync::Arc<AbstractBase>>,
-    pub services: Vec<std::sync::Arc<AbstractBase>>,
-    pub ignore_restart_self: bool,
-    pub origin_position_key: String,
-    pub radius: f32,
-}
-
-impl MoveToRandomLocation{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<MoveToRandomLocation, LubanError> {
-        let id = buf.read_int();
-        let node_name = buf.read_string();
-        let decorators = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::Decorator::new(&mut buf)?); } _e0 };
-        let services = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::Service::new(&mut buf)?); } _e0 };
-        let ignore_restart_self = buf.read_bool();
-        let origin_position_key = buf.read_string();
-        let radius = buf.read_float();
-        
-        Ok(MoveToRandomLocation { id, node_name, decorators, services, ignore_restart_self, origin_position_key, radius, })
-    }
-
-    pub const __ID__: i32 = -2140042998;
-}
-
-#[derive(Debug)]
-#[derive(macros::TryIntoBase)]
-pub struct MoveToLocation {
-    pub id: i32,
-    pub node_name: String,
-    pub decorators: Vec<std::sync::Arc<AbstractBase>>,
-    pub services: Vec<std::sync::Arc<AbstractBase>>,
-    pub ignore_restart_self: bool,
-    pub acceptable_radius: f32,
-}
-
-impl MoveToLocation{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<MoveToLocation, LubanError> {
-        let id = buf.read_int();
-        let node_name = buf.read_string();
-        let decorators = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::Decorator::new(&mut buf)?); } _e0 };
-        let services = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::Service::new(&mut buf)?); } _e0 };
-        let ignore_restart_self = buf.read_bool();
-        let acceptable_radius = buf.read_float();
-        
-        Ok(MoveToLocation { id, node_name, decorators, services, ignore_restart_self, acceptable_radius, })
-    }
-
-    pub const __ID__: i32 = -969953113;
-}
-
-#[derive(Debug)]
-#[derive(macros::TryIntoBase)]
-pub struct DebugPrint {
-    pub id: i32,
-    pub node_name: String,
-    pub decorators: Vec<std::sync::Arc<AbstractBase>>,
-    pub services: Vec<std::sync::Arc<AbstractBase>>,
-    pub ignore_restart_self: bool,
-    pub text: String,
-}
-
-impl DebugPrint{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<DebugPrint, LubanError> {
-        let id = buf.read_int();
-        let node_name = buf.read_string();
-        let decorators = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::Decorator::new(&mut buf)?); } _e0 };
-        let services = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::ai::Service::new(&mut buf)?); } _e0 };
-        let ignore_restart_self = buf.read_bool();
-        let text = buf.read_string();
-        
-        Ok(DebugPrint { id, node_name, decorators, services, ignore_restart_self, text, })
-    }
-
-    pub const __ID__: i32 = 1357409728;
-}
-
-#[derive(Debug)]
-pub struct BehaviorTree {
-    pub id: i32,
-    pub name: String,
-    pub desc: String,
-    pub blackboard_id: String,
-    pub root: std::sync::Arc<AbstractBase>,
-}
-
-impl BehaviorTree{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<BehaviorTree, LubanError> {
-        let id = buf.read_int();
-        let name = buf.read_string();
-        let desc = buf.read_string();
-        let blackboard_id = buf.read_string();
-        let root = crate::ai::ComposeNode::new(&mut buf)?;
-        
-        Ok(BehaviorTree { id, name, desc, blackboard_id, root, })
-    }
-
-    pub const __ID__: i32 = 159552822;
 }
 
 
@@ -2125,7 +1604,7 @@ pub struct TbBlackboard {
 }
 
 impl TbBlackboard {
-    pub fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbBlackboard>, LubanError> {
+    pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbBlackboard>, LubanError> {
         let mut data_map: std::collections::HashMap<String, std::sync::Arc<crate::ai::Blackboard>> = Default::default();
         let mut data_list: Vec<std::sync::Arc<crate::ai::Blackboard>> = vec![];
 
@@ -2140,6 +1619,12 @@ impl TbBlackboard {
 
     pub fn get(&self, key: &String) -> Option<std::sync::Arc<crate::ai::Blackboard>> {
         self.data_map.get(key).map(|x| x.clone())
+    }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data_list.iter_mut().for_each(|mut x| {
+           let mut b = Box::from_raw(x.as_ref() as *const crate::ai::Blackboard as *mut crate::ai::Blackboard); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+        });
     }
 }
 
@@ -2159,7 +1644,7 @@ pub struct TbBehaviorTree {
 }
 
 impl TbBehaviorTree {
-    pub fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbBehaviorTree>, LubanError> {
+    pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbBehaviorTree>, LubanError> {
         let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::ai::BehaviorTree>> = Default::default();
         let mut data_list: Vec<std::sync::Arc<crate::ai::BehaviorTree>> = vec![];
 
@@ -2174,6 +1659,12 @@ impl TbBehaviorTree {
 
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::ai::BehaviorTree>> {
         self.data_map.get(key).map(|x| x.clone())
+    }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data_list.iter_mut().for_each(|mut x| {
+           let mut b = Box::from_raw(x.as_ref() as *const crate::ai::BehaviorTree as *mut crate::ai::BehaviorTree); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+        });
     }
 }
 

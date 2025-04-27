@@ -19,7 +19,7 @@ pub enum EBoolOperator {
 
 impl From<i32> for EBoolOperator {
     fn from(value: i32) -> Self {
-        match value { 
+        match value {
             0 => EBoolOperator::AND,
             1 => EBoolOperator::OR,
             _ => panic!("Invalid value for EBoolOperator:{}", value),
@@ -34,67 +34,17 @@ pub struct DateTimeRange {
 }
 
 impl DateTimeRange{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<DateTimeRange, LubanError> {
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<DateTimeRange, LubanError> {
         let mut start_time = if buf.read_bool() { Some(buf.read_ulong()) } else { None };
         let mut end_time = if buf.read_bool() { Some(buf.read_ulong()) } else { None };
         
         Ok(DateTimeRange { start_time, end_time, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
     }
 
     pub const __ID__: i32 = 1642200959;
-}
-
-#[derive(Debug)]
-pub struct TimeOfDay {
-    pub hour: i32,
-    pub minute: i32,
-    pub second: i32,
-}
-
-impl TimeOfDay{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<TimeOfDay, LubanError> {
-        let hour = buf.read_int();
-        let minute = buf.read_int();
-        let second = buf.read_int();
-        
-        Ok(TimeOfDay { hour, minute, second, })
-    }
-
-    pub const __ID__: i32 = -1728347371;
-}
-
-#[derive(Debug)]
-pub struct OneDayTimeRange {
-    pub start_time: crate::common::TimeOfDay,
-    pub end_time: crate::common::TimeOfDay,
-}
-
-impl OneDayTimeRange{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<OneDayTimeRange, LubanError> {
-        let start_time = crate::common::TimeOfDay::new(&mut buf)?;
-        let end_time = crate::common::TimeOfDay::new(&mut buf)?;
-        
-        Ok(OneDayTimeRange { start_time, end_time, })
-    }
-
-    pub const __ID__: i32 = 1628814743;
-}
-
-#[derive(Debug)]
-pub struct IntRange {
-    pub min: i32,
-    pub max: i32,
-}
-
-impl IntRange{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<IntRange, LubanError> {
-        let min = buf.read_int();
-        let max = buf.read_int();
-        
-        Ok(IntRange { min, max, })
-    }
-
-    pub const __ID__: i32 = -751013039;
 }
 
 #[derive(Debug)]
@@ -104,11 +54,14 @@ pub struct FloatRange {
 }
 
 impl FloatRange{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<FloatRange, LubanError> {
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<FloatRange, LubanError> {
         let min = buf.read_float();
         let max = buf.read_float();
         
         Ok(FloatRange { min, max, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
     }
 
     pub const __ID__: i32 = 561922116;
@@ -127,7 +80,7 @@ pub struct GlobalConfig {
 }
 
 impl GlobalConfig{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<GlobalConfig, LubanError> {
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<GlobalConfig, LubanError> {
         let x1 = buf.read_int();
         let x2 = buf.read_int();
         let x3 = buf.read_int();
@@ -137,9 +90,76 @@ impl GlobalConfig{
         let x7 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_int()); } _e0 };
         
         Ok(GlobalConfig { x1, x2, x3, x4, x5, x6, x7, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
     }
 
     pub const __ID__: i32 = -848234488;
+}
+
+#[derive(Debug)]
+pub struct IntRange {
+    pub min: i32,
+    pub max: i32,
+}
+
+impl IntRange{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<IntRange, LubanError> {
+        let min = buf.read_int();
+        let max = buf.read_int();
+        
+        Ok(IntRange { min, max, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = -751013039;
+}
+
+#[derive(Debug)]
+pub struct OneDayTimeRange {
+    pub start_time: crate::common::TimeOfDay,
+    pub end_time: crate::common::TimeOfDay,
+}
+
+impl OneDayTimeRange{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<OneDayTimeRange, LubanError> {
+        let start_time = crate::common::TimeOfDay::new(&mut buf)?;
+        let end_time = crate::common::TimeOfDay::new(&mut buf)?;
+        
+        Ok(OneDayTimeRange { start_time, end_time, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.start_time.resolve_ref(tables);
+        self.end_time.resolve_ref(tables);
+    }
+
+    pub const __ID__: i32 = 1628814743;
+}
+
+#[derive(Debug)]
+pub struct TimeOfDay {
+    pub hour: i32,
+    pub minute: i32,
+    pub second: i32,
+}
+
+impl TimeOfDay{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<TimeOfDay, LubanError> {
+        let hour = buf.read_int();
+        let minute = buf.read_int();
+        let second = buf.read_int();
+        
+        Ok(TimeOfDay { hour, minute, second, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = -1728347371;
 }
 
 
@@ -149,11 +169,15 @@ pub struct TbGlobalConfig {
 }
 
 impl TbGlobalConfig {
-    pub fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbGlobalConfig>, LubanError> {
+    pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbGlobalConfig>, LubanError> {
         let n = buf.read_size();
         if n != 1 { return Err(LubanError::Table(format!("table mode=one, but size != 1"))); }
         let data = crate::common::GlobalConfig::new(&mut buf)?;
         Ok(std::sync::Arc::new(TbGlobalConfig { data }))
+    }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data.resolve_ref(tables);
     }
 }
 

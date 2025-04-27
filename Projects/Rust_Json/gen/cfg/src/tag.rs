@@ -18,11 +18,14 @@ pub struct TestTag {
 }
 
 impl TestTag{
-    pub fn new(json: &serde_json::Value) -> Result<TestTag, LubanError> {
+    pub(crate) fn new(json: &serde_json::Value) -> Result<TestTag, LubanError> {
         let id = (json["id"].as_i64().unwrap() as i32);
         let value = json["value"].as_str().unwrap().to_string();
         
         Ok(TestTag { id, value, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
     }
 }
 
@@ -34,7 +37,7 @@ pub struct TbTestTag {
 }
 
 impl TbTestTag {
-    pub fn new(json: &serde_json::Value) -> Result<std::sync::Arc<TbTestTag>, LubanError> {
+    pub(crate) fn new(json: &serde_json::Value) -> Result<std::sync::Arc<TbTestTag>, LubanError> {
         let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::tag::TestTag>> = Default::default();
         let mut data_list: Vec<std::sync::Arc<crate::tag::TestTag>> = vec![];
 
@@ -49,6 +52,12 @@ impl TbTestTag {
 
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::tag::TestTag>> {
         self.data_map.get(key).map(|x| x.clone())
+    }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data_list.iter_mut().for_each(|mut x| {
+           let mut b = Box::from_raw(x.as_ref() as *const crate::tag::TestTag as *mut crate::tag::TestTag); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+        });
     }
 }
 

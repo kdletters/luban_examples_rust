@@ -11,6 +11,58 @@
 use super::*;
 use serde::Deserialize;
 
+#[derive(Deserialize, Debug, Hash, Eq, PartialEq, macros::EnumFromNum)]
+pub enum EBoolOperator {
+    AND = 0,
+    OR = 1,
+}
+
+impl From<i32> for EBoolOperator {
+    fn from(value: i32) -> Self {
+        match value {
+            0 => EBoolOperator::AND,
+            1 => EBoolOperator::OR,
+            _ => panic!("Invalid value for EBoolOperator:{}", value),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct DateTimeRange {
+    pub start_time: Option<u64>,
+    pub end_time: Option<u64>,
+}
+
+impl DateTimeRange{
+    pub(crate) fn new(json: &serde_json::Value) -> Result<DateTimeRange, LubanError> {
+        let mut start_time = None; if let Some(value) = json.get("start_time") { start_time = Some((json["start_time"].as_i64().unwrap() as u64)); }
+        let mut end_time = None; if let Some(value) = json.get("end_time") { end_time = Some((json["end_time"].as_i64().unwrap() as u64)); }
+        
+        Ok(DateTimeRange { start_time, end_time, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+}
+
+#[derive(Debug)]
+pub struct FloatRange {
+    pub min: f32,
+    pub max: f32,
+}
+
+impl FloatRange{
+    pub(crate) fn new(json: &serde_json::Value) -> Result<FloatRange, LubanError> {
+        let min = (json["min"].as_f64().unwrap() as f32);
+        let max = (json["max"].as_f64().unwrap() as f32);
+        
+        Ok(FloatRange { min, max, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+}
+
 #[derive(Debug)]
 pub struct GlobalConfig {
     /// 背包容量
@@ -24,7 +76,7 @@ pub struct GlobalConfig {
 }
 
 impl GlobalConfig{
-    pub fn new(json: &serde_json::Value) -> Result<GlobalConfig, LubanError> {
+    pub(crate) fn new(json: &serde_json::Value) -> Result<GlobalConfig, LubanError> {
         let x1 = (json["x1"].as_i64().unwrap() as i32);
         let x2 = (json["x2"].as_i64().unwrap() as i32);
         let x3 = (json["x3"].as_i64().unwrap() as i32);
@@ -34,6 +86,67 @@ impl GlobalConfig{
         let x7 = json["x7"].as_array().unwrap().iter().map(|field| (field.as_i64().unwrap() as i32)).collect();
         
         Ok(GlobalConfig { x1, x2, x3, x4, x5, x6, x7, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+}
+
+#[derive(Debug)]
+pub struct IntRange {
+    pub min: i32,
+    pub max: i32,
+}
+
+impl IntRange{
+    pub(crate) fn new(json: &serde_json::Value) -> Result<IntRange, LubanError> {
+        let min = (json["min"].as_i64().unwrap() as i32);
+        let max = (json["max"].as_i64().unwrap() as i32);
+        
+        Ok(IntRange { min, max, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+}
+
+#[derive(Debug)]
+pub struct OneDayTimeRange {
+    pub start_time: crate::common::TimeOfDay,
+    pub end_time: crate::common::TimeOfDay,
+}
+
+impl OneDayTimeRange{
+    pub(crate) fn new(json: &serde_json::Value) -> Result<OneDayTimeRange, LubanError> {
+        let start_time = crate::common::TimeOfDay::new(&json["start_time"])?;
+        let end_time = crate::common::TimeOfDay::new(&json["end_time"])?;
+        
+        Ok(OneDayTimeRange { start_time, end_time, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.start_time.resolve_ref(tables);
+        self.end_time.resolve_ref(tables);
+    }
+}
+
+#[derive(Debug)]
+pub struct TimeOfDay {
+    pub hour: i32,
+    pub minute: i32,
+    pub second: i32,
+}
+
+impl TimeOfDay{
+    pub(crate) fn new(json: &serde_json::Value) -> Result<TimeOfDay, LubanError> {
+        let hour = (json["hour"].as_i64().unwrap() as i32);
+        let minute = (json["minute"].as_i64().unwrap() as i32);
+        let second = (json["second"].as_i64().unwrap() as i32);
+        
+        Ok(TimeOfDay { hour, minute, second, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
     }
 }
 
@@ -44,12 +157,16 @@ pub struct TbGlobalConfig {
 }
 
 impl TbGlobalConfig {
-    pub fn new(json: &serde_json::Value) -> Result<std::sync::Arc<TbGlobalConfig>, LubanError> {
+    pub(crate) fn new(json: &serde_json::Value) -> Result<std::sync::Arc<TbGlobalConfig>, LubanError> {
         let json = json.as_array().unwrap();
         let n = json.len();
         if n != 1 { return Err(LubanError::Table(format!("table mode=one, but size != 1"))); }
         let data = crate::common::GlobalConfig::new(&json[0])?;
         Ok(std::sync::Arc::new(TbGlobalConfig { data }))
+    }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data.resolve_ref(tables);
     }
 }
 

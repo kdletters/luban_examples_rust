@@ -9,8 +9,37 @@
 
 pub mod login;
 
+use std::fmt::{Display, Formatter};
 use super::*;
 use luban_lib::*;
+
+bitflags::bitflags! {    
+    #[derive(Debug, Hash, Eq, PartialEq)]
+    pub struct AccessFlag : u32 {
+        const WRITE = 1;
+        const READ = 2;
+        const TRUNCATE = 4;
+        const NEW = 8;
+        const READ_WRITE = 3;
+    }
+}
+#[derive(Debug, Hash, Eq, PartialEq, macros::EnumFromNum)]
+pub enum AudioType2 {
+    UNKNOWN = 0,
+    ACC = 1,
+    AIFF = 2,
+}
+
+impl From<i32> for AudioType2 {
+    fn from(value: i32) -> Self {
+        match value {
+            0 => AudioType2::UNKNOWN,
+            1 => AudioType2::ACC,
+            2 => AudioType2::AIFF,
+            _ => panic!("Invalid value for AudioType2:{}", value),
+        }
+    }
+}
 
 #[derive(Debug, Hash, Eq, PartialEq, macros::EnumFromNum)]
 pub enum DemoEnum {
@@ -28,7 +57,7 @@ pub enum DemoEnum {
 
 impl From<i32> for DemoEnum {
     fn from(value: i32) -> Self {
-        match value { 
+        match value {
             0 => DemoEnum::NONE,
             1 => DemoEnum::A,
             2 => DemoEnum::B,
@@ -40,7 +69,7 @@ impl From<i32> for DemoEnum {
     }
 }
 
-bitflags::bitflags!{    
+bitflags::bitflags! {    
     #[derive(Debug, Hash, Eq, PartialEq)]
     pub struct DemoFlag : u32 {
         const A = 1;
@@ -50,30 +79,13 @@ bitflags::bitflags!{
     }
 }
 #[derive(Debug, Hash, Eq, PartialEq, macros::EnumFromNum)]
-pub enum ETestUeType {
-    ///白
-    WHITE = 0,
-    BLACK = 1,
-}
-
-impl From<i32> for ETestUeType {
-    fn from(value: i32) -> Self {
-        match value { 
-            0 => ETestUeType::WHITE,
-            1 => ETestUeType::BLACK,
-            _ => panic!("Invalid value for ETestUeType:{}", value),
-        }
-    }
-}
-
-#[derive(Debug, Hash, Eq, PartialEq, macros::EnumFromNum)]
 pub enum ETestEmptyEnum {
     None
 }
 
 impl From<i32> for ETestEmptyEnum {
     fn from(value: i32) -> Self {
-        match value { 
+        match value {
             _ => panic!("Invalid value for ETestEmptyEnum:{}", value),
         }
     }
@@ -88,29 +100,11 @@ pub enum ETestEmptyEnum2 {
 
 impl From<i32> for ETestEmptyEnum2 {
     fn from(value: i32) -> Self {
-        match value { 
+        match value {
             255 => ETestEmptyEnum2::SMALL_THAN_256,
             256 => ETestEmptyEnum2::X_256,
             257 => ETestEmptyEnum2::X_257,
             _ => panic!("Invalid value for ETestEmptyEnum2:{}", value),
-        }
-    }
-}
-
-#[derive(Debug, Hash, Eq, PartialEq, macros::EnumFromNum)]
-pub enum AudioType2 {
-    UNKNOWN = 0,
-    ACC = 1,
-    AIFF = 2,
-}
-
-impl From<i32> for AudioType2 {
-    fn from(value: i32) -> Self {
-        match value { 
-            0 => AudioType2::UNKNOWN,
-            1 => AudioType2::ACC,
-            2 => AudioType2::AIFF,
-            _ => panic!("Invalid value for AudioType2:{}", value),
         }
     }
 }
@@ -129,7 +123,7 @@ pub enum ETestQuality {
 
 impl From<i32> for ETestQuality {
     fn from(value: i32) -> Self {
-        match value { 
+        match value {
             1 => ETestQuality::A,
             2 => ETestQuality::B,
             3 => ETestQuality::C,
@@ -139,210 +133,161 @@ impl From<i32> for ETestQuality {
     }
 }
 
-bitflags::bitflags!{    
-    #[derive(Debug, Hash, Eq, PartialEq)]
-    pub struct AccessFlag : u32 {
-        const WRITE = 1;
-        const READ = 2;
-        const TRUNCATE = 4;
-        const NEW = 8;
-        const READ_WRITE = 3;
-    }
-}
-#[derive(Debug)]
-pub struct DemoType1 {
-    pub x1: i32,
+#[derive(Debug, Hash, Eq, PartialEq, macros::EnumFromNum)]
+pub enum ETestUeType {
+    ///白
+    WHITE = 0,
+    BLACK = 1,
 }
 
-impl DemoType1{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<DemoType1, LubanError> {
-        let x1 = buf.read_int();
+impl From<i32> for ETestUeType {
+    fn from(value: i32) -> Self {
+        match value {
+            0 => ETestUeType::WHITE,
+            1 => ETestUeType::BLACK,
+            _ => panic!("Invalid value for ETestUeType:{}", value),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct AutoImport2 {
+    /// 这是id
+    pub id: i32,
+    /// 字段x1
+    pub x1: bool,
+    pub x5: i64,
+    pub x6: f32,
+    pub x8: i32,
+    pub x10: String,
+    pub x13: crate::test::DemoEnum,
+    pub x13_2: crate::test::DemoFlag,
+    pub x14: crate::test::DemoDynamic,
+    pub x15: crate::test::Shape,
+    pub v2: crate::vec2,
+    pub t1: u64,
+    pub k1: Vec<i32>,
+    pub k2: Vec<i32>,
+    pub k8: std::collections::HashMap<i32, i32>,
+    pub k9: Vec<crate::test::DemoE2>,
+    pub k10: Vec<crate::vec3>,
+    pub k11: Vec<crate::vec4>,
+    pub v11: Option<crate::vec3>,
+}
+
+impl AutoImport2{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<AutoImport2, LubanError> {
+        let id = buf.read_int();
+        let x1 = buf.read_bool();
+        let x5 = buf.read_long();
+        let x6 = buf.read_float();
+        let x8 = buf.read_int();
+        let x10 = buf.read_string();
+        let x13 = buf.read_int().into();
+        let x13_2 = crate::test::DemoFlag::from_bits_truncate(buf.read_uint());
+        let x14 = crate::test::DemoDynamic::new(&mut buf)?;
+        let x15 = crate::test::Shape::new(&mut buf)?;
+        let v2 = crate::vec2::new(&mut buf)?;
+        let t1 = buf.read_ulong();
+        let k1 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_int()); } _e0 };
+        let k2 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_int()); } _e0 };
+        let k8 = {let n0 = std::cmp::min(buf.read_size(), buf.size()); let mut _e0 = std::collections::HashMap::with_capacity(n0 * 3 / 2);for i0 in 0..n0 { let _k0 = buf.read_int(); let _v0 = buf.read_int(); _e0.insert(_k0, _v0);} _e0 };
+        let k9 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::test::DemoE2::new(&mut buf)?); } _e0 };
+        let k10 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::vec3::new(&mut buf)?); } _e0 };
+        let k11 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::vec4::new(&mut buf)?); } _e0 };
+        let mut v11 = if buf.read_bool() { Some(crate::vec3::new(&mut buf)?) } else { None };
         
-        Ok(DemoType1 { x1, })
+        Ok(AutoImport2 { id, x1, x5, x6, x8, x10, x13, x13_2, x14, x15, v2, t1, k1, k2, k8, k9, k10, k11, v11, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.x14.resolve_ref(tables);
+        self.x15.resolve_ref(tables);
     }
 
-    pub const __ID__: i32 = -367048296;
+    pub const __ID__: i32 = 417472770;
 }
 
 #[derive(Debug)]
-pub struct DemoDynamic {
-    pub x1: i32,
+pub struct CompactString {
+    pub id: i32,
+    pub s2: String,
+    pub s3: String,
 }
 
-impl DemoDynamic {
-    pub fn new(mut buf: &mut ByteBuf) -> Result<std::sync::Arc<AbstractBase>, LubanError> {
-        let type_id = buf.read_int();
-        match type_id {
-            crate::test::DemoD2::__ID__ => Ok(std::sync::Arc::new(crate::test::DemoD2::new(buf)?)),
-            crate::test::DemoE1::__ID__ => Ok(std::sync::Arc::new(crate::test::DemoE1::new(buf)?)),
-            crate::test::login::RoleInfo::__ID__ => Ok(std::sync::Arc::new(crate::test::login::RoleInfo::new(buf)?)),
-            crate::test::DemoD5::__ID__ => Ok(std::sync::Arc::new(crate::test::DemoD5::new(buf)?)),
-            _ => Err(LubanError::Bean(format!("Invalid type for DemoDynamic:{}", type_id)))
-        }
-    }
-}
-
-pub trait TDemoDynamic {
-    fn get_x1(&self) -> &i32;
-}
-
-impl crate::test::TDemoDynamic for crate::test::DemoD2 {
-    fn get_x1(&self) -> &i32 {
-        &self.x1
-    }
-}
-
-impl crate::test::TDemoDynamic for crate::test::DemoE1 {
-    fn get_x1(&self) -> &i32 {
-        &self.x1
-    }
-}
-
-impl crate::test::TDemoDynamic for crate::test::login::RoleInfo {
-    fn get_x1(&self) -> &i32 {
-        &self.x1
-    }
-}
-
-impl crate::test::TDemoDynamic for crate::test::DemoD5 {
-    fn get_x1(&self) -> &i32 {
-        &self.x1
-    }
-}
-
-impl<'a> GetBase<'a, &'a dyn crate::test::TDemoDynamic> for AbstractBase {
-    fn get_base(&'a self) -> Result<&'a dyn crate::test::TDemoDynamic, LubanError> {
-        let base: Result<&crate::test::DemoD2, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::test::DemoE1, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::test::login::RoleInfo, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::test::DemoD5, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-
-        Err(LubanError::Polymorphic(format!("Invalid type for DemoDynamic")))
-    }
-}
-
-#[derive(Debug)]
-#[derive(macros::TryIntoBase)]
-pub struct DemoD2 {
-    pub x1: i32,
-    pub x2: i32,
-}
-
-impl DemoD2{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<DemoD2, LubanError> {
-        let x1 = buf.read_int();
-        let x2 = buf.read_int();
+impl CompactString{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<CompactString, LubanError> {
+        let id = buf.read_int();
+        let s2 = buf.read_string();
+        let s3 = buf.read_string();
         
-        Ok(DemoD2 { x1, x2, })
+        Ok(CompactString { id, s2, s3, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
     }
 
-    pub const __ID__: i32 = -2138341747;
+    pub const __ID__: i32 = 1968089240;
 }
 
 #[derive(Debug)]
-#[derive(macros::TryIntoBase)]
-pub struct DemoD3 {
-    pub x1: i32,
-    pub x3: i32,
+pub struct CompositeJsonTable1 {
+    pub id: i32,
+    pub x: String,
 }
 
-impl DemoD3 {
-    pub fn new(mut buf: &mut ByteBuf) -> Result<std::sync::Arc<AbstractBase>, LubanError> {
-        let type_id = buf.read_int();
-        match type_id {
-            crate::test::DemoE1::__ID__ => Ok(std::sync::Arc::new(crate::test::DemoE1::new(buf)?)),
-            crate::test::login::RoleInfo::__ID__ => Ok(std::sync::Arc::new(crate::test::login::RoleInfo::new(buf)?)),
-            _ => Err(LubanError::Bean(format!("Invalid type for DemoD3:{}", type_id)))
-        }
-    }
-}
-
-pub trait TDemoD3 {
-    fn get_x1(&self) -> &i32;
-    fn get_x3(&self) -> &i32;
-}
-
-impl crate::test::TDemoD3 for crate::test::DemoE1 {
-    fn get_x1(&self) -> &i32 {
-        &self.x1
-    }
-    fn get_x3(&self) -> &i32 {
-        &self.x3
-    }
-}
-
-impl crate::test::TDemoD3 for crate::test::login::RoleInfo {
-    fn get_x1(&self) -> &i32 {
-        &self.x1
-    }
-    fn get_x3(&self) -> &i32 {
-        &self.x3
-    }
-}
-
-impl<'a> GetBase<'a, &'a dyn crate::test::TDemoD3> for AbstractBase {
-    fn get_base(&'a self) -> Result<&'a dyn crate::test::TDemoD3, LubanError> {
-        let base: Result<&crate::test::DemoE1, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::test::login::RoleInfo, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-
-        Err(LubanError::Polymorphic(format!("Invalid type for DemoD3")))
-    }
-}
-
-#[derive(Debug)]
-#[derive(macros::TryIntoBase)]
-pub struct DemoE1 {
-    pub x1: i32,
-    pub x3: i32,
-    pub x4: i32,
-}
-
-impl DemoE1{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<DemoE1, LubanError> {
-        let x1 = buf.read_int();
-        let x3 = buf.read_int();
-        let x4 = buf.read_int();
+impl CompositeJsonTable1{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<CompositeJsonTable1, LubanError> {
+        let id = buf.read_int();
+        let x = buf.read_string();
         
-        Ok(DemoE1 { x1, x3, x4, })
+        Ok(CompositeJsonTable1 { id, x, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
     }
 
-    pub const __ID__: i32 = -2138341717;
+    pub const __ID__: i32 = 1566207894;
 }
 
 #[derive(Debug)]
-#[derive(macros::TryIntoBase)]
-pub struct DemoD5 {
-    pub x1: i32,
-    pub time: crate::test::DateTimeRange,
+pub struct CompositeJsonTable2 {
+    pub id: i32,
+    pub y: i32,
 }
 
-impl DemoD5{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<DemoD5, LubanError> {
-        let x1 = buf.read_int();
-        let time = crate::test::DateTimeRange::new(&mut buf)?;
+impl CompositeJsonTable2{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<CompositeJsonTable2, LubanError> {
+        let id = buf.read_int();
+        let y = buf.read_int();
         
-        Ok(DemoD5 { x1, time, })
+        Ok(CompositeJsonTable2 { id, y, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
     }
 
-    pub const __ID__: i32 = -2138341744;
+    pub const __ID__: i32 = 1566207895;
+}
+
+#[derive(Debug)]
+pub struct CompositeJsonTable3 {
+    pub a: i32,
+    pub b: i32,
+}
+
+impl CompositeJsonTable3{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<CompositeJsonTable3, LubanError> {
+        let a = buf.read_int();
+        let b = buf.read_int();
+        
+        Ok(CompositeJsonTable3 { a, b, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = 1566207896;
 }
 
 #[derive(Debug)]
@@ -352,14 +297,217 @@ pub struct DateTimeRange {
 }
 
 impl DateTimeRange{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<DateTimeRange, LubanError> {
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<DateTimeRange, LubanError> {
         let start_time = buf.read_ulong();
         let end_time = buf.read_ulong();
         
         Ok(DateTimeRange { start_time, end_time, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
     }
 
     pub const __ID__: i32 = 495315430;
+}
+
+#[derive(Debug)]
+pub struct DefineFromExcel2 {
+    /// 这是id
+    pub id: i32,
+    /// 字段x1
+    pub x1: bool,
+    pub x5: i64,
+    pub x6: f32,
+    pub x8: i32,
+    pub x10: String,
+    pub x13: crate::test::DemoEnum,
+    pub x13_2: crate::test::DemoFlag,
+    pub x14: crate::test::DemoDynamic,
+    pub x15: crate::test::Shape,
+    pub v2: crate::vec2,
+    pub t1: u64,
+    pub k1: Vec<i32>,
+    pub k2: Vec<i32>,
+    pub k8: std::collections::HashMap<i32, i32>,
+    pub k9: Vec<crate::test::DemoE2>,
+    pub k10: Vec<crate::vec3>,
+    pub k11: Vec<crate::vec4>,
+    pub v11: Option<crate::vec3>,
+}
+
+impl DefineFromExcel2{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<DefineFromExcel2, LubanError> {
+        let id = buf.read_int();
+        let x1 = buf.read_bool();
+        let x5 = buf.read_long();
+        let x6 = buf.read_float();
+        let x8 = buf.read_int();
+        let x10 = buf.read_string();
+        let x13 = buf.read_int().into();
+        let x13_2 = crate::test::DemoFlag::from_bits_truncate(buf.read_uint());
+        let x14 = crate::test::DemoDynamic::new(&mut buf)?;
+        let x15 = crate::test::Shape::new(&mut buf)?;
+        let v2 = crate::vec2::new(&mut buf)?;
+        let t1 = buf.read_ulong();
+        let k1 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_int()); } _e0 };
+        let k2 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_int()); } _e0 };
+        let k8 = {let n0 = std::cmp::min(buf.read_size(), buf.size()); let mut _e0 = std::collections::HashMap::with_capacity(n0 * 3 / 2);for i0 in 0..n0 { let _k0 = buf.read_int(); let _v0 = buf.read_int(); _e0.insert(_k0, _v0);} _e0 };
+        let k9 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::test::DemoE2::new(&mut buf)?); } _e0 };
+        let k10 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::vec3::new(&mut buf)?); } _e0 };
+        let k11 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::vec4::new(&mut buf)?); } _e0 };
+        let mut v11 = if buf.read_bool() { Some(crate::vec3::new(&mut buf)?) } else { None };
+        
+        Ok(DefineFromExcel2 { id, x1, x5, x6, x8, x10, x13, x13_2, x14, x15, v2, t1, k1, k2, k8, k9, k10, k11, v11, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.x14.resolve_ref(tables);
+        self.x15.resolve_ref(tables);
+    }
+
+    pub const __ID__: i32 = 688816828;
+}
+
+#[derive(Debug)]
+pub enum DemoDynamic {
+    DemoD2(std::sync::Arc<crate::test::DemoD2>),
+    DemoE1(std::sync::Arc<crate::test::DemoE1>),
+    RoleInfo(std::sync::Arc<crate::test::login::RoleInfo>),
+    DemoD5(std::sync::Arc<crate::test::DemoD5>),
+}
+
+impl DemoDynamic {
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<Self, LubanError> {
+        let type_id = buf.read_int();
+        match type_id {
+            crate::test::DemoD2::__ID__ => Ok(Self::DemoD2(std::sync::Arc::new(crate::test::DemoD2::new(buf)?))),
+            crate::test::DemoE1::__ID__ => Ok(Self::DemoE1(std::sync::Arc::new(crate::test::DemoE1::new(buf)?))),
+            crate::test::login::RoleInfo::__ID__ => Ok(Self::RoleInfo(std::sync::Arc::new(crate::test::login::RoleInfo::new(buf)?))),
+            crate::test::DemoD5::__ID__ => Ok(Self::DemoD5(std::sync::Arc::new(crate::test::DemoD5::new(buf)?))),
+            _ => Err(LubanError::Bean(format!("Invalid type for DemoDynamic:{}", type_id)))
+        }
+    }
+    
+    pub fn get_x1(&self) -> &i32 {
+        match self {
+            Self::DemoD2(x) => { &x.x1 }
+            Self::DemoE1(x) => { &x.x1 }
+            Self::RoleInfo(x) => { &x.x1 }
+            Self::DemoD5(x) => { &x.x1 }
+        }
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        match self {
+            Self::DemoD2(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::test::DemoD2 as *mut crate::test::DemoD2); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::DemoE1(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::test::DemoE1 as *mut crate::test::DemoE1); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::RoleInfo(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::test::login::RoleInfo as *mut crate::test::login::RoleInfo); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::DemoD5(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::test::DemoD5 as *mut crate::test::DemoD5); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+        }
+    }
+}
+
+
+#[derive(Debug)]
+pub struct DemoD2 {
+    pub x1: i32,
+    pub x2: i32,
+}
+
+impl DemoD2{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<DemoD2, LubanError> {
+        let x1 = buf.read_int();
+        let x2 = buf.read_int();
+        
+        Ok(DemoD2 { x1, x2, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = -2138341747;
+}
+
+#[derive(Debug)]
+pub enum DemoD3 {
+    DemoE1(std::sync::Arc<crate::test::DemoE1>),
+    RoleInfo(std::sync::Arc<crate::test::login::RoleInfo>),
+}
+
+impl DemoD3 {
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<Self, LubanError> {
+        let type_id = buf.read_int();
+        match type_id {
+            crate::test::DemoE1::__ID__ => Ok(Self::DemoE1(std::sync::Arc::new(crate::test::DemoE1::new(buf)?))),
+            crate::test::login::RoleInfo::__ID__ => Ok(Self::RoleInfo(std::sync::Arc::new(crate::test::login::RoleInfo::new(buf)?))),
+            _ => Err(LubanError::Bean(format!("Invalid type for DemoD3:{}", type_id)))
+        }
+    }
+    
+    pub fn get_x1(&self) -> &i32 {
+        match self {
+            Self::DemoE1(x) => { &x.x1 }
+            Self::RoleInfo(x) => { &x.x1 }
+        }
+    }    
+    
+    pub fn get_x3(&self) -> &i32 {
+        match self {
+            Self::DemoE1(x) => { &x.x3 }
+            Self::RoleInfo(x) => { &x.x3 }
+        }
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        match self {
+            Self::DemoE1(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::test::DemoE1 as *mut crate::test::DemoE1); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::RoleInfo(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::test::login::RoleInfo as *mut crate::test::login::RoleInfo); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+        }
+    }
+}
+
+
+#[derive(Debug)]
+pub struct DemoE1 {
+    pub x1: i32,
+    pub x3: i32,
+    pub x4: i32,
+}
+
+impl DemoE1{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<DemoE1, LubanError> {
+        let x1 = buf.read_int();
+        let x3 = buf.read_int();
+        let x4 = buf.read_int();
+        
+        Ok(DemoE1 { x1, x3, x4, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = -2138341717;
+}
+
+#[derive(Debug)]
+pub struct DemoD5 {
+    pub x1: i32,
+    pub time: crate::test::DateTimeRange,
+}
+
+impl DemoD5{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<DemoD5, LubanError> {
+        let x1 = buf.read_int();
+        let time = crate::test::DateTimeRange::new(&mut buf)?;
+        
+        Ok(DemoD5 { x1, time, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.time.resolve_ref(tables);
+    }
+
+    pub const __ID__: i32 = -2138341744;
 }
 
 #[derive(Debug)]
@@ -369,11 +517,14 @@ pub struct DemoE2 {
 }
 
 impl DemoE2{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<DemoE2, LubanError> {
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<DemoE2, LubanError> {
         let mut y1 = if buf.read_bool() { Some(buf.read_int()) } else { None };
         let y2 = buf.read_bool();
         
         Ok(DemoE2 { y1, y2, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
     }
 
     pub const __ID__: i32 = -2138341716;
@@ -391,7 +542,7 @@ pub struct DemoExplicitType {
 }
 
 impl DemoExplicitType{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<DemoExplicitType, LubanError> {
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<DemoExplicitType, LubanError> {
         let x1 = buf.read_byte();
         let x2 = buf.read_short();
         let x3 = buf.read_int();
@@ -401,9 +552,133 @@ impl DemoExplicitType{
         let x7 = buf.read_long();
         
         Ok(DemoExplicitType { x1, x2, x3, x4, x5, x6, x7, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
     }
 
     pub const __ID__: i32 = 370351885;
+}
+
+#[derive(Debug)]
+pub struct DemoGroup {
+    pub id: i32,
+    pub x1: i32,
+    pub x1_ref: Option<std::sync::Arc<crate::test::DemoGroup>>,
+    pub x2: i32,
+    pub x2_ref: Option<std::sync::Arc<crate::test::DemoGroup>>,
+    pub x3: i32,
+    pub x3_ref: Option<std::sync::Arc<crate::test::DemoGroup>>,
+    pub x4: i32,
+    pub x5: crate::test::InnerGroup,
+}
+
+impl DemoGroup{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<DemoGroup, LubanError> {
+        let id = buf.read_int();
+        let x1 = buf.read_int();
+        let x1_ref = None;
+        let x2 = buf.read_int();
+        let x2_ref = None;
+        let x3 = buf.read_int();
+        let x3_ref = None;
+        let x4 = buf.read_int();
+        let x5 = crate::test::InnerGroup::new(&mut buf)?;
+        
+        Ok(DemoGroup { id, x1, x1_ref, x2, x2_ref, x3, x3_ref, x4, x5, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.x1_ref = tables.TbDemoGroup_C.get(&self.x1);
+        self.x2_ref = tables.TbDemoGroup_S.get(&self.x2);
+        self.x3_ref = tables.TbDemoGroup_E.get(&self.x3);
+        self.x5.resolve_ref(tables);
+    }
+
+    pub const __ID__: i32 = -379263008;
+}
+
+#[derive(Debug)]
+pub struct DemoPrimitiveTypesTable {
+    pub x1: bool,
+    pub x2: u8,
+    pub x3: i16,
+    pub x4: i32,
+    pub x5: i64,
+    pub x6: f32,
+    pub x7: f64,
+    pub s1: String,
+    pub s2: String,
+    pub v2: crate::vec2,
+    pub v3: crate::vec3,
+    pub v4: crate::vec4,
+    pub t1: u64,
+}
+
+impl DemoPrimitiveTypesTable{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<DemoPrimitiveTypesTable, LubanError> {
+        let x1 = buf.read_bool();
+        let x2 = buf.read_byte();
+        let x3 = buf.read_short();
+        let x4 = buf.read_int();
+        let x5 = buf.read_long();
+        let x6 = buf.read_float();
+        let x7 = buf.read_double();
+        let s1 = buf.read_string();
+        let s2 = buf.read_string();
+        let v2 = crate::vec2::new(&mut buf)?;
+        let v3 = crate::vec3::new(&mut buf)?;
+        let v4 = crate::vec4::new(&mut buf)?;
+        let t1 = buf.read_ulong();
+        
+        Ok(DemoPrimitiveTypesTable { x1, x2, x3, x4, x5, x6, x7, s1, s2, v2, v3, v4, t1, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = -370934083;
+}
+
+#[derive(Debug)]
+pub struct DemoSingletonType {
+    pub id: i32,
+    pub name: String,
+    pub date: crate::test::DemoDynamic,
+}
+
+impl DemoSingletonType{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<DemoSingletonType, LubanError> {
+        let id = buf.read_int();
+        let name = buf.read_string();
+        let date = crate::test::DemoDynamic::new(&mut buf)?;
+        
+        Ok(DemoSingletonType { id, name, date, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.date.resolve_ref(tables);
+    }
+
+    pub const __ID__: i32 = 539196998;
+}
+
+#[derive(Debug)]
+pub struct DemoType1 {
+    pub x1: i32,
+}
+
+impl DemoType1{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<DemoType1, LubanError> {
+        let x1 = buf.read_int();
+        
+        Ok(DemoType1 { x1, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = -367048296;
 }
 
 #[derive(Debug)]
@@ -421,19 +696,20 @@ pub struct DemoType2 {
     pub x10: String,
     pub x12: crate::test::DemoType1,
     pub x13: crate::test::DemoEnum,
-    pub x14: std::sync::Arc<AbstractBase>,
+    pub x14: crate::test::DemoDynamic,
     pub s1: String,
     pub t1: u64,
     pub k1: Vec<i32>,
     pub k2: Vec<i32>,
     pub k5: std::collections::HashSet<i32>,
     pub k8: std::collections::HashMap<i32, i32>,
+    pub k8_ref: Option<std::sync::Arc<std::collections::HashMap<i32, Option<std::sync::Arc<crate::test::DemoType2>>>>>,
     pub k9: Vec<crate::test::DemoE2>,
-    pub k15: Vec<std::sync::Arc<AbstractBase>>,
+    pub k15: Vec<crate::test::DemoDynamic>,
 }
 
 impl DemoType2{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<DemoType2, LubanError> {
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<DemoType2, LubanError> {
         let x4 = buf.read_int();
         let x1 = buf.read_bool();
         let x2 = buf.read_byte();
@@ -454,72 +730,326 @@ impl DemoType2{
         let k2 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_int()); } _e0 };
         let k5 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = std::collections::HashSet::default(); for i0 in 0..n0 { _e0.insert(buf.read_int()); } _e0 };
         let k8 = {let n0 = std::cmp::min(buf.read_size(), buf.size()); let mut _e0 = std::collections::HashMap::with_capacity(n0 * 3 / 2);for i0 in 0..n0 { let _k0 = buf.read_int(); let _v0 = buf.read_int(); _e0.insert(_k0, _v0);} _e0 };
+        let k8_ref = None;
         let k9 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::test::DemoE2::new(&mut buf)?); } _e0 };
         let k15 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::test::DemoDynamic::new(&mut buf)?); } _e0 };
         
-        Ok(DemoType2 { x4, x1, x2, x3, x5, x6, x7, x8_0, x8, x9, x10, x12, x13, x14, s1, t1, k1, k2, k5, k8, k9, k15, })
+        Ok(DemoType2 { x4, x1, x2, x3, x5, x6, x7, x8_0, x8, x9, x10, x12, x13, x14, s1, t1, k1, k2, k5, k8, k8_ref, k9, k15, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.x12.resolve_ref(tables);
+        self.x14.resolve_ref(tables);
+        self.k8_ref = Some(std::sync::Arc::new(self.k8.iter().map(|x| (x.0.clone(), tables.TbFullTypes.get(x.1))).collect()));
+        self.k15.iter_mut().for_each(|mut x| { x.resolve_ref(tables); });
     }
 
     pub const __ID__: i32 = -367048295;
 }
 
 #[derive(Debug)]
-pub struct DemoSingletonType {
+pub struct DetectEncoding {
     pub id: i32,
     pub name: String,
-    pub date: std::sync::Arc<AbstractBase>,
 }
 
-impl DemoSingletonType{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<DemoSingletonType, LubanError> {
+impl DetectEncoding{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<DetectEncoding, LubanError> {
         let id = buf.read_int();
         let name = buf.read_string();
-        let date = crate::test::DemoDynamic::new(&mut buf)?;
         
-        Ok(DemoSingletonType { id, name, date, })
+        Ok(DetectEncoding { id, name, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
     }
 
-    pub const __ID__: i32 = 539196998;
+    pub const __ID__: i32 = -1154609646;
 }
 
 #[derive(Debug)]
-pub struct NotIndexList {
+pub struct ExcelFromJson {
+    pub x4: i32,
+    pub x1: bool,
+    pub x5: i64,
+    pub x6: f32,
+    pub s1: String,
+    pub s2: String,
+    pub t1: u64,
+    pub x12: crate::test::DemoType1,
+    pub x13: crate::test::DemoEnum,
+    pub x14: crate::test::DemoDynamic,
+    pub k1: Vec<i32>,
+    pub k8: std::collections::HashMap<i32, i32>,
+    pub k9: Vec<crate::test::DemoE2>,
+    pub k15: Vec<crate::test::DemoDynamic>,
+}
+
+impl ExcelFromJson{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<ExcelFromJson, LubanError> {
+        let x4 = buf.read_int();
+        let x1 = buf.read_bool();
+        let x5 = buf.read_long();
+        let x6 = buf.read_float();
+        let s1 = buf.read_string();
+        let s2 = buf.read_string();
+        let t1 = buf.read_ulong();
+        let x12 = crate::test::DemoType1::new(&mut buf)?;
+        let x13 = buf.read_int().into();
+        let x14 = crate::test::DemoDynamic::new(&mut buf)?;
+        let k1 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_int()); } _e0 };
+        let k8 = {let n0 = std::cmp::min(buf.read_size(), buf.size()); let mut _e0 = std::collections::HashMap::with_capacity(n0 * 3 / 2);for i0 in 0..n0 { let _k0 = buf.read_int(); let _v0 = buf.read_int(); _e0.insert(_k0, _v0);} _e0 };
+        let k9 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::test::DemoE2::new(&mut buf)?); } _e0 };
+        let k15 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::test::DemoDynamic::new(&mut buf)?); } _e0 };
+        
+        Ok(ExcelFromJson { x4, x1, x5, x6, s1, s2, t1, x12, x13, x14, k1, k8, k9, k15, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.x12.resolve_ref(tables);
+        self.x14.resolve_ref(tables);
+        self.k15.iter_mut().for_each(|mut x| { x.resolve_ref(tables); });
+    }
+
+    pub const __ID__: i32 = -1485706483;
+}
+
+#[derive(Debug)]
+pub struct ExcelFromJsonMultiRow {
+    pub id: i32,
     pub x: i32,
-    pub y: i32,
+    pub items: Vec<crate::test::TestRow>,
 }
 
-impl NotIndexList{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<NotIndexList, LubanError> {
+impl ExcelFromJsonMultiRow{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<ExcelFromJsonMultiRow, LubanError> {
+        let id = buf.read_int();
         let x = buf.read_int();
-        let y = buf.read_int();
+        let items = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::test::TestRow::new(&mut buf)?); } _e0 };
         
-        Ok(NotIndexList { x, y, })
+        Ok(ExcelFromJsonMultiRow { id, x, items, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.items.iter_mut().for_each(|mut x| { x.resolve_ref(tables); });
     }
 
-    pub const __ID__: i32 = -50446599;
+    pub const __ID__: i32 = 715335694;
 }
 
 #[derive(Debug)]
-pub struct MultiUnionIndexList {
-    pub id1: i32,
-    pub id2: i64,
-    pub id3: String,
-    pub num: i32,
-    pub desc: String,
+pub struct Foo {
+    pub y1: i32,
+    pub y2: i32,
+    pub y3: i32,
 }
 
-impl MultiUnionIndexList{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<MultiUnionIndexList, LubanError> {
-        let id1 = buf.read_int();
-        let id2 = buf.read_long();
-        let id3 = buf.read_string();
-        let num = buf.read_int();
-        let desc = buf.read_string();
+impl Foo{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<Foo, LubanError> {
+        let y1 = buf.read_int();
+        let y2 = buf.read_int();
+        let y3 = buf.read_int();
         
-        Ok(MultiUnionIndexList { id1, id2, id3, num, desc, })
+        Ok(Foo { y1, y2, y3, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
     }
 
-    pub const __ID__: i32 = 1966847134;
+    pub const __ID__: i32 = -1147950774;
+}
+
+#[derive(Debug)]
+pub struct H1 {
+    pub y2: crate::test::H2,
+    pub y3: i32,
+}
+
+impl H1{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<H1, LubanError> {
+        let y2 = crate::test::H2::new(&mut buf)?;
+        let y3 = buf.read_int();
+        
+        Ok(H1 { y2, y3, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.y2.resolve_ref(tables);
+    }
+
+    pub const __ID__: i32 = -1422503995;
+}
+
+#[derive(Debug)]
+pub struct H2 {
+    pub z2: i32,
+    pub z3: i32,
+}
+
+impl H2{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<H2, LubanError> {
+        let z2 = buf.read_int();
+        let z3 = buf.read_int();
+        
+        Ok(H2 { z2, z3, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = -1422503994;
+}
+
+#[derive(Debug)]
+pub struct InnerGroup {
+    pub y1: i32,
+    pub y2: i32,
+    pub y3: i32,
+    pub y4: i32,
+}
+
+impl InnerGroup{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<InnerGroup, LubanError> {
+        let y1 = buf.read_int();
+        let y2 = buf.read_int();
+        let y3 = buf.read_int();
+        let y4 = buf.read_int();
+        
+        Ok(InnerGroup { y1, y2, y3, y4, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = -587873083;
+}
+
+#[derive(Debug)]
+pub enum ItemBase {
+    Item(std::sync::Arc<crate::test::Item>),
+    Equipment(std::sync::Arc<crate::test::Equipment>),
+    Decorator(std::sync::Arc<crate::test::Decorator>),
+}
+
+impl ItemBase {
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<Self, LubanError> {
+        let type_id = buf.read_int();
+        match type_id {
+            crate::test::Item::__ID__ => Ok(Self::Item(std::sync::Arc::new(crate::test::Item::new(buf)?))),
+            crate::test::Equipment::__ID__ => Ok(Self::Equipment(std::sync::Arc::new(crate::test::Equipment::new(buf)?))),
+            crate::test::Decorator::__ID__ => Ok(Self::Decorator(std::sync::Arc::new(crate::test::Decorator::new(buf)?))),
+            _ => Err(LubanError::Bean(format!("Invalid type for ItemBase:{}", type_id)))
+        }
+    }
+    
+    pub fn get_id(&self) -> &i32 {
+        match self {
+            Self::Item(x) => { &x.id }
+            Self::Equipment(x) => { &x.id }
+            Self::Decorator(x) => { &x.id }
+        }
+    }    
+    
+    pub fn get_name(&self) -> &String {
+        match self {
+            Self::Item(x) => { &x.name }
+            Self::Equipment(x) => { &x.name }
+            Self::Decorator(x) => { &x.name }
+        }
+    }    
+    
+    pub fn get_desc(&self) -> &String {
+        match self {
+            Self::Item(x) => { &x.desc }
+            Self::Equipment(x) => { &x.desc }
+            Self::Decorator(x) => { &x.desc }
+        }
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        match self {
+            Self::Item(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::test::Item as *mut crate::test::Item); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::Equipment(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::test::Equipment as *mut crate::test::Equipment); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::Decorator(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::test::Decorator as *mut crate::test::Decorator); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+        }
+    }
+}
+
+
+#[derive(Debug)]
+pub struct Decorator {
+    pub id: i32,
+    pub name: String,
+    pub desc: String,
+    pub duration: i32,
+}
+
+impl Decorator{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<Decorator, LubanError> {
+        let id = buf.read_int();
+        let name = buf.read_string();
+        let desc = buf.read_string();
+        let duration = buf.read_int();
+        
+        Ok(Decorator { id, name, desc, duration, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = -625155649;
+}
+
+#[derive(Debug)]
+pub struct Equipment {
+    pub id: i32,
+    pub name: String,
+    pub desc: String,
+    pub attr: crate::test::DemoEnum,
+    pub value: i32,
+}
+
+impl Equipment{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<Equipment, LubanError> {
+        let id = buf.read_int();
+        let name = buf.read_string();
+        let desc = buf.read_string();
+        let attr = buf.read_int().into();
+        let value = buf.read_int();
+        
+        Ok(Equipment { id, name, desc, attr, value, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = -76837102;
+}
+
+#[derive(Debug)]
+pub struct Item {
+    pub id: i32,
+    pub name: String,
+    pub desc: String,
+    pub num: i32,
+    pub price: i32,
+}
+
+impl Item{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<Item, LubanError> {
+        let id = buf.read_int();
+        let name = buf.read_string();
+        let desc = buf.read_string();
+        let num = buf.read_int();
+        let price = buf.read_int();
+        
+        Ok(Item { id, name, desc, num, price, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = -1226641649;
 }
 
 #[derive(Debug)]
@@ -532,7 +1062,7 @@ pub struct MultiIndexList {
 }
 
 impl MultiIndexList{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<MultiIndexList, LubanError> {
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<MultiIndexList, LubanError> {
         let id1 = buf.read_int();
         let id2 = buf.read_long();
         let id3 = buf.read_string();
@@ -540,62 +1070,12 @@ impl MultiIndexList{
         let desc = buf.read_string();
         
         Ok(MultiIndexList { id1, id2, id3, num, desc, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
     }
 
     pub const __ID__: i32 = 2016237651;
-}
-
-#[derive(Debug)]
-pub struct MultiRowType1 {
-    pub id: i32,
-    pub x: i32,
-}
-
-impl MultiRowType1{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<MultiRowType1, LubanError> {
-        let id = buf.read_int();
-        let x = buf.read_int();
-        
-        Ok(MultiRowType1 { id, x, })
-    }
-
-    pub const __ID__: i32 = 540474970;
-}
-
-#[derive(Debug)]
-pub struct MultiRowType2 {
-    pub id: i32,
-    pub x: i32,
-    pub y: f32,
-}
-
-impl MultiRowType2{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<MultiRowType2, LubanError> {
-        let id = buf.read_int();
-        let x = buf.read_int();
-        let y = buf.read_float();
-        
-        Ok(MultiRowType2 { id, x, y, })
-    }
-
-    pub const __ID__: i32 = 540474971;
-}
-
-#[derive(Debug)]
-pub struct MultiRowType3 {
-    pub id: i32,
-    pub items: Vec<crate::test::MultiRowType1>,
-}
-
-impl MultiRowType3{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<MultiRowType3, LubanError> {
-        let id = buf.read_int();
-        let items = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::test::MultiRowType1::new(&mut buf)?); } _e0 };
-        
-        Ok(MultiRowType3 { id, items, })
-    }
-
-    pub const __ID__: i32 = 540474972;
 }
 
 #[derive(Debug)]
@@ -612,7 +1092,7 @@ pub struct MultiRowRecord {
 }
 
 impl MultiRowRecord{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<MultiRowRecord, LubanError> {
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<MultiRowRecord, LubanError> {
         let id = buf.read_int();
         let name = buf.read_string();
         let one_rows = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::test::MultiRowType1::new(&mut buf)?); } _e0 };
@@ -624,28 +1104,575 @@ impl MultiRowRecord{
         let multi_rows7 = {let n0 = std::cmp::min(buf.read_size(), buf.size()); let mut _e0 = std::collections::HashMap::with_capacity(n0 * 3 / 2);for i0 in 0..n0 { let _k0 = buf.read_int(); let _v0 = buf.read_int(); _e0.insert(_k0, _v0);} _e0 };
         
         Ok(MultiRowRecord { id, name, one_rows, multi_rows1, multi_rows2, multi_rows4, multi_rows5, multi_rows6, multi_rows7, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.one_rows.iter_mut().for_each(|mut x| { x.resolve_ref(tables); });
+        self.multi_rows1.iter_mut().for_each(|mut x| { x.resolve_ref(tables); });
+        self.multi_rows2.iter_mut().for_each(|mut x| { x.resolve_ref(tables); });
+        self.multi_rows4.values_mut().for_each(|x| { x.resolve_ref(tables) });
+        self.multi_rows5.iter_mut().for_each(|mut x| { x.resolve_ref(tables); });
+        self.multi_rows6.values_mut().for_each(|x| { x.resolve_ref(tables) });
     }
 
     pub const __ID__: i32 = -501249394;
 }
 
 #[derive(Debug)]
-pub struct Foo {
-    pub y1: i32,
-    pub y2: i32,
-    pub y3: i32,
+pub struct MultiRowTitle {
+    pub id: i32,
+    pub name: String,
+    pub x1: crate::test::H1,
+    pub x2_0: Option<crate::test::H2>,
+    pub x2: Vec<crate::test::H2>,
+    pub x3: Vec<crate::test::H2>,
+    pub x4: Vec<crate::test::H2>,
 }
 
-impl Foo{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<Foo, LubanError> {
-        let y1 = buf.read_int();
-        let y2 = buf.read_int();
-        let y3 = buf.read_int();
+impl MultiRowTitle{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<MultiRowTitle, LubanError> {
+        let id = buf.read_int();
+        let name = buf.read_string();
+        let x1 = crate::test::H1::new(&mut buf)?;
+        let mut x2_0 = if buf.read_bool() { Some(crate::test::H2::new(&mut buf)?) } else { None };
+        let x2 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::test::H2::new(&mut buf)?); } _e0 };
+        let x3 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::test::H2::new(&mut buf)?); } _e0 };
+        let x4 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::test::H2::new(&mut buf)?); } _e0 };
         
-        Ok(Foo { y1, y2, y3, })
+        Ok(MultiRowTitle { id, name, x1, x2_0, x2, x3, x4, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.x1.resolve_ref(tables);
+        if let Some(x) = &mut self.x2_0 { x.resolve_ref(tables); }
+        self.x2.iter_mut().for_each(|mut x| { x.resolve_ref(tables); });
+        self.x3.iter_mut().for_each(|mut x| { x.resolve_ref(tables); });
+        self.x4.iter_mut().for_each(|mut x| { x.resolve_ref(tables); });
     }
 
-    pub const __ID__: i32 = -1147950774;
+    pub const __ID__: i32 = 540002427;
+}
+
+#[derive(Debug)]
+pub struct MultiRowType1 {
+    pub id: i32,
+    pub x: i32,
+}
+
+impl MultiRowType1{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<MultiRowType1, LubanError> {
+        let id = buf.read_int();
+        let x = buf.read_int();
+        
+        Ok(MultiRowType1 { id, x, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = 540474970;
+}
+
+#[derive(Debug)]
+pub struct MultiRowType2 {
+    pub id: i32,
+    pub x: i32,
+    pub y: f32,
+}
+
+impl MultiRowType2{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<MultiRowType2, LubanError> {
+        let id = buf.read_int();
+        let x = buf.read_int();
+        let y = buf.read_float();
+        
+        Ok(MultiRowType2 { id, x, y, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = 540474971;
+}
+
+#[derive(Debug)]
+pub struct MultiRowType3 {
+    pub id: i32,
+    pub items: Vec<crate::test::MultiRowType1>,
+}
+
+impl MultiRowType3{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<MultiRowType3, LubanError> {
+        let id = buf.read_int();
+        let items = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::test::MultiRowType1::new(&mut buf)?); } _e0 };
+        
+        Ok(MultiRowType3 { id, items, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.items.iter_mut().for_each(|mut x| { x.resolve_ref(tables); });
+    }
+
+    pub const __ID__: i32 = 540474972;
+}
+
+#[derive(Debug)]
+pub struct MultiUnionIndexList {
+    pub id1: i32,
+    pub id2: i64,
+    pub id3: String,
+    pub num: i32,
+    pub desc: String,
+}
+
+impl MultiUnionIndexList{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<MultiUnionIndexList, LubanError> {
+        let id1 = buf.read_int();
+        let id2 = buf.read_long();
+        let id3 = buf.read_string();
+        let num = buf.read_int();
+        let desc = buf.read_string();
+        
+        Ok(MultiUnionIndexList { id1, id2, id3, num, desc, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = 1966847134;
+}
+
+#[derive(Debug)]
+pub struct NotIndexList {
+    pub x: i32,
+    pub y: i32,
+}
+
+impl NotIndexList{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<NotIndexList, LubanError> {
+        let x = buf.read_int();
+        let y = buf.read_int();
+        
+        Ok(NotIndexList { x, y, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = -50446599;
+}
+
+#[derive(Debug)]
+pub struct Path {
+    pub id: i32,
+    pub res: String,
+}
+
+impl Path{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<Path, LubanError> {
+        let id = buf.read_int();
+        let res = buf.read_string();
+        
+        Ok(Path { id, res, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = -1226450911;
+}
+
+#[derive(Debug)]
+pub enum RefDynamicBase {
+    RefBean(std::sync::Arc<crate::test::RefBean>),
+}
+
+impl RefDynamicBase {
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<Self, LubanError> {
+        let type_id = buf.read_int();
+        match type_id {
+            crate::test::RefBean::__ID__ => Ok(Self::RefBean(std::sync::Arc::new(crate::test::RefBean::new(buf)?))),
+            _ => Err(LubanError::Bean(format!("Invalid type for RefDynamicBase:{}", type_id)))
+        }
+    }
+    
+    pub fn get_x(&self) -> &i32 {
+        match self {
+            Self::RefBean(x) => { &x.x }
+        }
+    }    
+        
+    pub fn get_x_ref(&self) -> &Option<std::sync::Arc<crate::test::TestBeRef>> {
+        match self {
+            Self::RefBean(x) => { &x.x_ref }
+        }        
+    }
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        match self {
+            Self::RefBean(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::test::RefBean as *mut crate::test::RefBean); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+        }
+    }
+}
+
+
+#[derive(Debug)]
+pub struct RefBean {
+    pub x: i32,
+    pub x_ref: Option<std::sync::Arc<crate::test::TestBeRef>>,
+    pub arr: Vec<i32>,
+    pub arr_ref: Option<std::sync::Arc<Vec<Option<std::sync::Arc<crate::test::TestBeRef>>>>>,
+}
+
+impl RefBean{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<RefBean, LubanError> {
+        let x = buf.read_int();
+        let x_ref = None;
+        let arr = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_int()); } _e0 };
+        let arr_ref = None;
+        
+        Ok(RefBean { x, x_ref, arr, arr_ref, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.x_ref = tables.TbTestBeRef.get(&self.x);
+        self.arr_ref = Some(std::sync::Arc::new(self.arr.iter().map(|x| tables.TbTestBeRef.get(x)).collect()));
+    }
+
+    pub const __ID__: i32 = 1963260263;
+}
+
+#[derive(Debug)]
+pub struct SepBean1 {
+    pub a: i32,
+    pub b: i32,
+    pub c: String,
+}
+
+impl SepBean1{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<SepBean1, LubanError> {
+        let a = buf.read_int();
+        let b = buf.read_int();
+        let c = buf.read_string();
+        
+        Ok(SepBean1 { a, b, c, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = -1534339393;
+}
+
+#[derive(Debug)]
+pub struct SepVector {
+    pub x: i32,
+    pub y: i32,
+    pub z: i32,
+}
+
+impl SepVector{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<SepVector, LubanError> {
+        let x = buf.read_int();
+        let y = buf.read_int();
+        let z = buf.read_int();
+        
+        Ok(SepVector { x, y, z, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = 252769477;
+}
+
+#[derive(Debug)]
+pub enum Shape {
+    Circle(std::sync::Arc<crate::test::Circle>),
+    Rectangle(std::sync::Arc<crate::test2::Rectangle>),
+}
+
+impl Shape {
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<Self, LubanError> {
+        let type_id = buf.read_int();
+        match type_id {
+            crate::test::Circle::__ID__ => Ok(Self::Circle(std::sync::Arc::new(crate::test::Circle::new(buf)?))),
+            crate::test2::Rectangle::__ID__ => Ok(Self::Rectangle(std::sync::Arc::new(crate::test2::Rectangle::new(buf)?))),
+            _ => Err(LubanError::Bean(format!("Invalid type for Shape:{}", type_id)))
+        }
+    }
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        match self {
+            Self::Circle(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::test::Circle as *mut crate::test::Circle); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::Rectangle(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::test2::Rectangle as *mut crate::test2::Rectangle); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+        }
+    }
+}
+
+
+#[derive(Debug)]
+pub struct Circle {
+    /// 半径
+    pub radius: f32,
+}
+
+impl Circle{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<Circle, LubanError> {
+        let radius = buf.read_float();
+        
+        Ok(Circle { radius, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = 2131829196;
+}
+
+#[derive(Debug)]
+pub struct Test3 {
+    pub x: i32,
+    pub y: i32,
+}
+
+impl Test3{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<Test3, LubanError> {
+        let x = buf.read_int();
+        let y = buf.read_int();
+        
+        Ok(Test3 { x, y, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = 638540133;
+}
+
+#[derive(Debug)]
+pub struct TestBeRef {
+    pub id: i32,
+    pub count: i32,
+}
+
+impl TestBeRef{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<TestBeRef, LubanError> {
+        let id = buf.read_int();
+        let count = buf.read_int();
+        
+        Ok(TestBeRef { id, count, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = 1934403938;
+}
+
+#[derive(Debug)]
+pub struct TestExcelBean1 {
+    /// 最高品质
+    pub x1: i32,
+    /// 黑色的
+    pub x2: String,
+    /// 蓝色的
+    pub x3: i32,
+    /// 最差品质
+    pub x4: f32,
+}
+
+impl TestExcelBean1{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<TestExcelBean1, LubanError> {
+        let x1 = buf.read_int();
+        let x2 = buf.read_string();
+        let x3 = buf.read_int();
+        let x4 = buf.read_float();
+        
+        Ok(TestExcelBean1 { x1, x2, x3, x4, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = -1738345160;
+}
+
+#[derive(Debug)]
+pub struct TestExcelBean2 {
+    /// 最高品质
+    pub y1: i32,
+    /// 黑色的
+    pub y2: String,
+    /// 蓝色的
+    pub y3: f32,
+}
+
+impl TestExcelBean2{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<TestExcelBean2, LubanError> {
+        let y1 = buf.read_int();
+        let y2 = buf.read_string();
+        let y3 = buf.read_float();
+        
+        Ok(TestExcelBean2 { y1, y2, y3, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = -1738345159;
+}
+
+#[derive(Debug)]
+pub struct TestFieldAlias {
+    pub id: i32,
+    pub name: String,
+}
+
+impl TestFieldAlias{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<TestFieldAlias, LubanError> {
+        let id = buf.read_int();
+        let name = buf.read_string();
+        
+        Ok(TestFieldAlias { id, name, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = 285625508;
+}
+
+#[derive(Debug)]
+pub struct TestFieldVariant {
+    pub id: i32,
+    pub name: String,
+}
+
+impl TestFieldVariant{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<TestFieldVariant, LubanError> {
+        let id = buf.read_int();
+        let name = buf.read_string();
+        
+        Ok(TestFieldVariant { id, name, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = 759529945;
+}
+
+#[derive(Debug)]
+pub struct TestFieldVariant2 {
+    pub id: i32,
+    pub name: String,
+}
+
+impl TestFieldVariant2{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<TestFieldVariant2, LubanError> {
+        let id = buf.read_int();
+        let name = buf.read_string();
+        
+        Ok(TestFieldVariant2 { id, name, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = 2070591865;
+}
+
+#[derive(Debug)]
+pub struct TestGlobal {
+    pub unlock_equip: i32,
+    pub unlock_hero: i32,
+}
+
+impl TestGlobal{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<TestGlobal, LubanError> {
+        let unlock_equip = buf.read_int();
+        let unlock_hero = buf.read_int();
+        
+        Ok(TestGlobal { unlock_equip, unlock_hero, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = -12548655;
+}
+
+#[derive(Debug)]
+pub struct TestIndex {
+    pub id: i32,
+    pub eles: Vec<crate::test::DemoType1>,
+}
+
+impl TestIndex{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<TestIndex, LubanError> {
+        let id = buf.read_int();
+        let eles = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::test::DemoType1::new(&mut buf)?); } _e0 };
+        
+        Ok(TestIndex { id, eles, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.eles.iter_mut().for_each(|mut x| { x.resolve_ref(tables); });
+    }
+
+    pub const __ID__: i32 = 1941154020;
+}
+
+#[derive(Debug)]
+pub struct TestMap {
+    pub id: i32,
+    pub id_ref: Option<std::sync::Arc<crate::test::TestIndex>>,
+    pub x1: std::collections::HashMap<i32, i32>,
+    pub x2: std::collections::HashMap<i64, i32>,
+    pub x3: std::collections::HashMap<String, i32>,
+    pub x4: std::collections::HashMap<crate::test::DemoEnum, i32>,
+}
+
+impl TestMap{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<TestMap, LubanError> {
+        let id = buf.read_int();
+        let id_ref = None;
+        let x1 = {let n0 = std::cmp::min(buf.read_size(), buf.size()); let mut _e0 = std::collections::HashMap::with_capacity(n0 * 3 / 2);for i0 in 0..n0 { let _k0 = buf.read_int(); let _v0 = buf.read_int(); _e0.insert(_k0, _v0);} _e0 };
+        let x2 = {let n0 = std::cmp::min(buf.read_size(), buf.size()); let mut _e0 = std::collections::HashMap::with_capacity(n0 * 3 / 2);for i0 in 0..n0 { let _k0 = buf.read_long(); let _v0 = buf.read_int(); _e0.insert(_k0, _v0);} _e0 };
+        let x3 = {let n0 = std::cmp::min(buf.read_size(), buf.size()); let mut _e0 = std::collections::HashMap::with_capacity(n0 * 3 / 2);for i0 in 0..n0 { let _k0 = buf.read_string(); let _v0 = buf.read_int(); _e0.insert(_k0, _v0);} _e0 };
+        let x4 = {let n0 = std::cmp::min(buf.read_size(), buf.size()); let mut _e0 = std::collections::HashMap::with_capacity(n0 * 3 / 2);for i0 in 0..n0 { let _k0 = buf.read_int().into(); let _v0 = buf.read_int(); _e0.insert(_k0, _v0);} _e0 };
+        
+        Ok(TestMap { id, id_ref, x1, x2, x3, x4, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.id_ref = tables.TbTestIndex.get(&self.id);
+    }
+
+    pub const __ID__: i32 = -543227410;
+}
+
+#[derive(Debug)]
+pub struct TestMapper {
+    pub id: i32,
+    pub audio_type: crate::AudioType,
+    pub v2: crate::vec2,
+}
+
+impl TestMapper{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<TestMapper, LubanError> {
+        let id = buf.read_int();
+        let audio_type = buf.read_int().into();
+        let v2 = crate::vec2::new(&mut buf)?;
+        
+        Ok(TestMapper { id, audio_type, v2, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = 149110895;
 }
 
 #[derive(Debug)]
@@ -657,16 +1684,329 @@ pub struct TestMultiColumn {
 }
 
 impl TestMultiColumn{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<TestMultiColumn, LubanError> {
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<TestMultiColumn, LubanError> {
         let id = buf.read_int();
         let a = crate::test::Foo::new(&mut buf)?;
         let b = crate::test::Foo::new(&mut buf)?;
         let c = crate::test::Foo::new(&mut buf)?;
         
         Ok(TestMultiColumn { id, a, b, c, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.a.resolve_ref(tables);
+        self.b.resolve_ref(tables);
+        self.c.resolve_ref(tables);
     }
 
     pub const __ID__: i32 = -294473599;
+}
+
+#[derive(Debug)]
+pub struct TestNull {
+    pub id: i32,
+    pub x1: Option<i32>,
+    pub x2: Option<crate::test::DemoEnum>,
+    pub x3: Option<crate::test::DemoType1>,
+    pub x4: Option<crate::test::DemoDynamic>,
+    pub s1: Option<String>,
+    pub s2: Option<String>,
+}
+
+impl TestNull{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<TestNull, LubanError> {
+        let id = buf.read_int();
+        let mut x1 = if buf.read_bool() { Some(buf.read_int()) } else { None };
+        let mut x2 = if buf.read_bool() { Some(buf.read_int().into()) } else { None };
+        let mut x3 = if buf.read_bool() { Some(crate::test::DemoType1::new(&mut buf)?) } else { None };
+        let mut x4 = if buf.read_bool() { Some(crate::test::DemoDynamic::new(&mut buf)?) } else { None };
+        let mut s1 = if buf.read_bool() { Some(buf.read_string()) } else { None };
+        let mut s2 = if buf.read_bool() { Some(buf.read_string()) } else { None };
+        
+        Ok(TestNull { id, x1, x2, x3, x4, s1, s2, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        if let Some(x) = &mut self.x3 { x.resolve_ref(tables); }
+        if let Some(x) = &mut self.x4 { x.resolve_ref(tables); }
+    }
+
+    pub const __ID__: i32 = 339868469;
+}
+
+#[derive(Debug)]
+pub struct TestRange {
+    pub id: i32,
+    pub f1: f32,
+    pub f2: f32,
+    pub d1: f64,
+    pub d2: f64,
+    pub i1: i32,
+    pub i2: i32,
+    pub i3: i32,
+    pub i4: i32,
+    pub l1: i64,
+    pub l2: i64,
+    pub l3: i64,
+    pub l4: i64,
+}
+
+impl TestRange{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<TestRange, LubanError> {
+        let id = buf.read_int();
+        let f1 = buf.read_float();
+        let f2 = buf.read_float();
+        let d1 = buf.read_double();
+        let d2 = buf.read_double();
+        let i1 = buf.read_int();
+        let i2 = buf.read_int();
+        let i3 = buf.read_int();
+        let i4 = buf.read_int();
+        let l1 = buf.read_long();
+        let l2 = buf.read_long();
+        let l3 = buf.read_long();
+        let l4 = buf.read_long();
+        
+        Ok(TestRange { id, f1, f2, d1, d2, i1, i2, i3, i4, l1, l2, l3, l4, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = 1949088079;
+}
+
+#[derive(Debug)]
+pub struct TestRef {
+    pub id: i32,
+    pub x1: i32,
+    pub x1_ref: Option<std::sync::Arc<crate::test::TestBeRef>>,
+    pub x1_2: i32,
+    pub x1_2_ref: Option<std::sync::Arc<crate::test::TestBeRef>>,
+    pub x2: i32,
+    pub x3: i32,
+    pub x4: i32,
+    pub x4_ref: Option<std::sync::Arc<crate::tag::TestTag>>,
+    pub a1: Vec<i32>,
+    pub a1_ref: Option<std::sync::Arc<Vec<Option<std::sync::Arc<crate::test::TestBeRef>>>>>,
+    pub a2: Vec<i32>,
+    pub a2_ref: Option<std::sync::Arc<Vec<Option<std::sync::Arc<crate::test::TestBeRef>>>>>,
+    pub b1: Vec<i32>,
+    pub b1_ref: Option<std::sync::Arc<Vec<Option<std::sync::Arc<crate::test::TestBeRef>>>>>,
+    pub b2: Vec<i32>,
+    pub b2_ref: Option<std::sync::Arc<Vec<Option<std::sync::Arc<crate::test::TestBeRef>>>>>,
+    pub c1: std::collections::HashSet<i32>,
+    pub c1_ref: Option<std::sync::Arc<Vec<Option<std::sync::Arc<crate::test::TestBeRef>>>>>,
+    pub c2: std::collections::HashSet<i32>,
+    pub c2_ref: Option<std::sync::Arc<Vec<Option<std::sync::Arc<crate::test::TestBeRef>>>>>,
+    pub d1: std::collections::HashMap<i32, i32>,
+    pub d1_ref: Option<std::sync::Arc<std::collections::HashMap<i32, Option<std::sync::Arc<crate::test::TestBeRef>>>>>,
+    pub d2: std::collections::HashMap<i32, i32>,
+    pub d2_ref: Option<std::sync::Arc<std::collections::HashMap<i32, Option<std::sync::Arc<crate::test::TestBeRef>>>>>,
+    pub e1: i32,
+    pub e2: i64,
+    pub e3: String,
+    pub f1: i32,
+    pub f2: i64,
+    pub f3: String,
+    pub s1: crate::test::RefDynamicBase,
+}
+
+impl TestRef{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<TestRef, LubanError> {
+        let id = buf.read_int();
+        let x1 = buf.read_int();
+        let x1_ref = None;
+        let x1_2 = buf.read_int();
+        let x1_2_ref = None;
+        let x2 = buf.read_int();
+        let x3 = buf.read_int();
+        let x4 = buf.read_int();
+        let x4_ref = None;
+        let a1 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_int()); } _e0 };
+        let a1_ref = None;
+        let a2 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_int()); } _e0 };
+        let a2_ref = None;
+        let b1 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_int()); } _e0 };
+        let b1_ref = None;
+        let b2 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_int()); } _e0 };
+        let b2_ref = None;
+        let c1 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = std::collections::HashSet::default(); for i0 in 0..n0 { _e0.insert(buf.read_int()); } _e0 };
+        let c1_ref = None;
+        let c2 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = std::collections::HashSet::default(); for i0 in 0..n0 { _e0.insert(buf.read_int()); } _e0 };
+        let c2_ref = None;
+        let d1 = {let n0 = std::cmp::min(buf.read_size(), buf.size()); let mut _e0 = std::collections::HashMap::with_capacity(n0 * 3 / 2);for i0 in 0..n0 { let _k0 = buf.read_int(); let _v0 = buf.read_int(); _e0.insert(_k0, _v0);} _e0 };
+        let d1_ref = None;
+        let d2 = {let n0 = std::cmp::min(buf.read_size(), buf.size()); let mut _e0 = std::collections::HashMap::with_capacity(n0 * 3 / 2);for i0 in 0..n0 { let _k0 = buf.read_int(); let _v0 = buf.read_int(); _e0.insert(_k0, _v0);} _e0 };
+        let d2_ref = None;
+        let e1 = buf.read_int();
+        let e2 = buf.read_long();
+        let e3 = buf.read_string();
+        let f1 = buf.read_int();
+        let f2 = buf.read_long();
+        let f3 = buf.read_string();
+        let s1 = crate::test::RefDynamicBase::new(&mut buf)?;
+        
+        Ok(TestRef { id, x1, x1_ref, x1_2, x1_2_ref, x2, x3, x4, x4_ref, a1, a1_ref, a2, a2_ref, b1, b1_ref, b2, b2_ref, c1, c1_ref, c2, c2_ref, d1, d1_ref, d2, d2_ref, e1, e2, e3, f1, f2, f3, s1, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.x1_ref = tables.TbTestBeRef.get(&self.x1);
+        self.x1_2_ref = tables.TbTestBeRef.get(&self.x1_2);
+        self.x4_ref = tables.TbTestTag.get(&self.x4);
+        self.a1_ref = Some(std::sync::Arc::new(self.a1.iter().map(|x| tables.TbTestBeRef.get(x)).collect()));
+        self.a2_ref = Some(std::sync::Arc::new(self.a2.iter().map(|x| tables.TbTestBeRef.get(x)).collect()));
+        self.b1_ref = Some(std::sync::Arc::new(self.b1.iter().map(|x| tables.TbTestBeRef.get(x)).collect()));
+        self.b2_ref = Some(std::sync::Arc::new(self.b2.iter().map(|x| tables.TbTestBeRef.get(x)).collect()));
+        //HashSet does not support yet, not every type implement [Eq] and [Hash],use list instead.
+        self.c1_ref = Some(std::sync::Arc::new(self.c1.iter().map(|x| tables.TbTestBeRef.get(x)).collect()));
+        //HashSet does not support yet, not every type implement [Eq] and [Hash],use list instead.
+        self.c2_ref = Some(std::sync::Arc::new(self.c2.iter().map(|x| tables.TbTestBeRef.get(x)).collect()));
+        self.d1_ref = Some(std::sync::Arc::new(self.d1.iter().map(|x| (x.0.clone(), tables.TbTestBeRef.get(x.1))).collect()));
+        self.d2_ref = Some(std::sync::Arc::new(self.d2.iter().map(|x| (x.0.clone(), tables.TbTestBeRef.get(x.1))).collect()));
+        self.s1.resolve_ref(tables);
+    }
+
+    pub const __ID__: i32 = -543222491;
+}
+
+#[derive(Debug)]
+pub struct TestRow {
+    pub x: i32,
+    pub y: bool,
+    pub z: String,
+    pub a: crate::test::Test3,
+    pub b: Vec<i32>,
+}
+
+impl TestRow{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<TestRow, LubanError> {
+        let x = buf.read_int();
+        let y = buf.read_bool();
+        let z = buf.read_string();
+        let a = crate::test::Test3::new(&mut buf)?;
+        let b = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_int()); } _e0 };
+        
+        Ok(TestRow { x, y, z, a, b, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.a.resolve_ref(tables);
+    }
+
+    pub const __ID__: i32 = -543222164;
+}
+
+#[derive(Debug)]
+pub struct TestScriptableObject {
+    pub id: i32,
+    pub desc: String,
+    pub rate: f32,
+    pub num: i32,
+    pub v2: crate::vec2,
+    pub v3: crate::vec3,
+    pub v4: crate::vec4,
+}
+
+impl TestScriptableObject{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<TestScriptableObject, LubanError> {
+        let id = buf.read_int();
+        let desc = buf.read_string();
+        let rate = buf.read_float();
+        let num = buf.read_int();
+        let v2 = crate::vec2::new(&mut buf)?;
+        let v3 = crate::vec3::new(&mut buf)?;
+        let v4 = crate::vec4::new(&mut buf)?;
+        
+        Ok(TestScriptableObject { id, desc, rate, num, v2, v3, v4, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = -1896814350;
+}
+
+#[derive(Debug)]
+pub struct TestSet {
+    pub id: i32,
+    pub x0: String,
+    pub x1: Vec<i32>,
+    pub x2: Vec<i64>,
+    pub x3: Vec<String>,
+    pub x4: Vec<crate::test::DemoEnum>,
+}
+
+impl TestSet{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<TestSet, LubanError> {
+        let id = buf.read_int();
+        let x0 = buf.read_string();
+        let x1 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_int()); } _e0 };
+        let x2 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_long()); } _e0 };
+        let x3 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_string()); } _e0 };
+        let x4 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_int().into()); } _e0 };
+        
+        Ok(TestSet { id, x0, x1, x2, x3, x4, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = -543221516;
+}
+
+#[derive(Debug)]
+pub struct TestSize {
+    pub id: i32,
+    pub x1: Vec<i32>,
+    pub x2: Vec<i32>,
+    pub x3: std::collections::HashSet<i32>,
+    pub x4: std::collections::HashMap<i32, i32>,
+}
+
+impl TestSize{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<TestSize, LubanError> {
+        let id = buf.read_int();
+        let x1 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_int()); } _e0 };
+        let x2 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_int()); } _e0 };
+        let x3 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = std::collections::HashSet::default(); for i0 in 0..n0 { _e0.insert(buf.read_int()); } _e0 };
+        let x4 = {let n0 = std::cmp::min(buf.read_size(), buf.size()); let mut _e0 = std::collections::HashMap::with_capacity(n0 * 3 / 2);for i0 in 0..n0 { let _k0 = buf.read_int(); let _v0 = buf.read_int(); _e0.insert(_k0, _v0);} _e0 };
+        
+        Ok(TestSize { id, x1, x2, x3, x4, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = 340006319;
+}
+
+#[derive(Debug)]
+pub struct TestString {
+    pub id: String,
+    pub s1: String,
+    pub s2: String,
+    pub cs1: crate::test::CompactString,
+    pub cs2: crate::test::CompactString,
+}
+
+impl TestString{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<TestString, LubanError> {
+        let id = buf.read_string();
+        let s1 = buf.read_string();
+        let s2 = buf.read_string();
+        let cs1 = crate::test::CompactString::new(&mut buf)?;
+        let cs2 = crate::test::CompactString::new(&mut buf)?;
+        
+        Ok(TestString { id, s1, s2, cs1, cs2, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.cs1.resolve_ref(tables);
+        self.cs2.resolve_ref(tables);
+    }
+
+    pub const __ID__: i32 = 338485823;
 }
 
 #[derive(Debug)]
@@ -689,7 +2029,7 @@ pub struct TestUeType {
 }
 
 impl TestUeType{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<TestUeType, LubanError> {
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<TestUeType, LubanError> {
         let x1 = buf.read_bool();
         let x2 = buf.read_byte();
         let x3 = buf.read_short();
@@ -707,977 +2047,13 @@ impl TestUeType{
         let k9 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::test::DemoE2::new(&mut buf)?); } _e0 };
         
         Ok(TestUeType { x1, x2, x3, x4, x5, x6, x10, x12, x13, t1, k1, k2, k5, k8, k9, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.x12.resolve_ref(tables);
     }
 
     pub const __ID__: i32 = 381013016;
-}
-
-#[derive(Debug)]
-pub struct H1 {
-    pub y2: crate::test::H2,
-    pub y3: i32,
-}
-
-impl H1{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<H1, LubanError> {
-        let y2 = crate::test::H2::new(&mut buf)?;
-        let y3 = buf.read_int();
-        
-        Ok(H1 { y2, y3, })
-    }
-
-    pub const __ID__: i32 = -1422503995;
-}
-
-#[derive(Debug)]
-pub struct H2 {
-    pub z2: i32,
-    pub z3: i32,
-}
-
-impl H2{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<H2, LubanError> {
-        let z2 = buf.read_int();
-        let z3 = buf.read_int();
-        
-        Ok(H2 { z2, z3, })
-    }
-
-    pub const __ID__: i32 = -1422503994;
-}
-
-#[derive(Debug)]
-pub struct MultiRowTitle {
-    pub id: i32,
-    pub name: String,
-    pub x1: crate::test::H1,
-    pub x2_0: Option<crate::test::H2>,
-    pub x2: Vec<crate::test::H2>,
-    pub x3: Vec<crate::test::H2>,
-    pub x4: Vec<crate::test::H2>,
-}
-
-impl MultiRowTitle{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<MultiRowTitle, LubanError> {
-        let id = buf.read_int();
-        let name = buf.read_string();
-        let x1 = crate::test::H1::new(&mut buf)?;
-        let mut x2_0 = if buf.read_bool() { Some(crate::test::H2::new(&mut buf)?) } else { None };
-        let x2 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::test::H2::new(&mut buf)?); } _e0 };
-        let x3 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::test::H2::new(&mut buf)?); } _e0 };
-        let x4 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::test::H2::new(&mut buf)?); } _e0 };
-        
-        Ok(MultiRowTitle { id, name, x1, x2_0, x2, x3, x4, })
-    }
-
-    pub const __ID__: i32 = 540002427;
-}
-
-#[derive(Debug)]
-pub struct TestNull {
-    pub id: i32,
-    pub x1: Option<i32>,
-    pub x2: Option<crate::test::DemoEnum>,
-    pub x3: Option<crate::test::DemoType1>,
-    pub x4: Option<std::sync::Arc<AbstractBase>>,
-    pub s1: Option<String>,
-    pub s2: Option<String>,
-}
-
-impl TestNull{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<TestNull, LubanError> {
-        let id = buf.read_int();
-        let mut x1 = if buf.read_bool() { Some(buf.read_int()) } else { None };
-        let mut x2 = if buf.read_bool() { Some(buf.read_int().into()) } else { None };
-        let mut x3 = if buf.read_bool() { Some(crate::test::DemoType1::new(&mut buf)?) } else { None };
-        let mut x4 = if buf.read_bool() { Some(crate::test::DemoDynamic::new(&mut buf)?) } else { None };
-        let mut s1 = if buf.read_bool() { Some(buf.read_string()) } else { None };
-        let mut s2 = if buf.read_bool() { Some(buf.read_string()) } else { None };
-        
-        Ok(TestNull { id, x1, x2, x3, x4, s1, s2, })
-    }
-
-    pub const __ID__: i32 = 339868469;
-}
-
-#[derive(Debug)]
-pub struct DemoPrimitiveTypesTable {
-    pub x1: bool,
-    pub x2: u8,
-    pub x3: i16,
-    pub x4: i32,
-    pub x5: i64,
-    pub x6: f32,
-    pub x7: f64,
-    pub s1: String,
-    pub s2: String,
-    pub v2: crate::vec2,
-    pub v3: crate::vec3,
-    pub v4: crate::vec4,
-    pub t1: u64,
-}
-
-impl DemoPrimitiveTypesTable{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<DemoPrimitiveTypesTable, LubanError> {
-        let x1 = buf.read_bool();
-        let x2 = buf.read_byte();
-        let x3 = buf.read_short();
-        let x4 = buf.read_int();
-        let x5 = buf.read_long();
-        let x6 = buf.read_float();
-        let x7 = buf.read_double();
-        let s1 = buf.read_string();
-        let s2 = buf.read_string();
-        let v2 = crate::vec2::new(&mut buf)?;
-        let v3 = crate::vec3::new(&mut buf)?;
-        let v4 = crate::vec4::new(&mut buf)?;
-        let t1 = buf.read_ulong();
-        
-        Ok(DemoPrimitiveTypesTable { x1, x2, x3, x4, x5, x6, x7, s1, s2, v2, v3, v4, t1, })
-    }
-
-    pub const __ID__: i32 = -370934083;
-}
-
-#[derive(Debug)]
-pub struct CompactString {
-    pub id: i32,
-    pub s2: String,
-    pub s3: String,
-}
-
-impl CompactString{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<CompactString, LubanError> {
-        let id = buf.read_int();
-        let s2 = buf.read_string();
-        let s3 = buf.read_string();
-        
-        Ok(CompactString { id, s2, s3, })
-    }
-
-    pub const __ID__: i32 = 1968089240;
-}
-
-#[derive(Debug)]
-pub struct TestString {
-    pub id: String,
-    pub s1: String,
-    pub s2: String,
-    pub cs1: crate::test::CompactString,
-    pub cs2: crate::test::CompactString,
-}
-
-impl TestString{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<TestString, LubanError> {
-        let id = buf.read_string();
-        let s1 = buf.read_string();
-        let s2 = buf.read_string();
-        let cs1 = crate::test::CompactString::new(&mut buf)?;
-        let cs2 = crate::test::CompactString::new(&mut buf)?;
-        
-        Ok(TestString { id, s1, s2, cs1, cs2, })
-    }
-
-    pub const __ID__: i32 = 338485823;
-}
-
-#[derive(Debug)]
-pub struct InnerGroup {
-    pub y1: i32,
-    pub y2: i32,
-    pub y3: i32,
-    pub y4: i32,
-}
-
-impl InnerGroup{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<InnerGroup, LubanError> {
-        let y1 = buf.read_int();
-        let y2 = buf.read_int();
-        let y3 = buf.read_int();
-        let y4 = buf.read_int();
-        
-        Ok(InnerGroup { y1, y2, y3, y4, })
-    }
-
-    pub const __ID__: i32 = -587873083;
-}
-
-#[derive(Debug)]
-pub struct DemoGroup {
-    pub id: i32,
-    pub x1: i32,
-    pub x2: i32,
-    pub x3: i32,
-    pub x4: i32,
-    pub x5: crate::test::InnerGroup,
-}
-
-impl DemoGroup{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<DemoGroup, LubanError> {
-        let id = buf.read_int();
-        let x1 = buf.read_int();
-        let x2 = buf.read_int();
-        let x3 = buf.read_int();
-        let x4 = buf.read_int();
-        let x5 = crate::test::InnerGroup::new(&mut buf)?;
-        
-        Ok(DemoGroup { id, x1, x2, x3, x4, x5, })
-    }
-
-    pub const __ID__: i32 = -379263008;
-}
-
-#[derive(Debug)]
-pub struct TestGlobal {
-    pub unlock_equip: i32,
-    pub unlock_hero: i32,
-}
-
-impl TestGlobal{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<TestGlobal, LubanError> {
-        let unlock_equip = buf.read_int();
-        let unlock_hero = buf.read_int();
-        
-        Ok(TestGlobal { unlock_equip, unlock_hero, })
-    }
-
-    pub const __ID__: i32 = -12548655;
-}
-
-#[derive(Debug)]
-pub struct TestBeRef {
-    pub id: i32,
-    pub count: i32,
-}
-
-impl TestBeRef{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<TestBeRef, LubanError> {
-        let id = buf.read_int();
-        let count = buf.read_int();
-        
-        Ok(TestBeRef { id, count, })
-    }
-
-    pub const __ID__: i32 = 1934403938;
-}
-
-#[derive(Debug)]
-pub struct RefDynamicBase {
-    pub x: i32,
-}
-
-impl RefDynamicBase {
-    pub fn new(mut buf: &mut ByteBuf) -> Result<std::sync::Arc<AbstractBase>, LubanError> {
-        let type_id = buf.read_int();
-        match type_id {
-            crate::test::RefBean::__ID__ => Ok(std::sync::Arc::new(crate::test::RefBean::new(buf)?)),
-            _ => Err(LubanError::Bean(format!("Invalid type for RefDynamicBase:{}", type_id)))
-        }
-    }
-}
-
-pub trait TRefDynamicBase {
-    fn get_x(&self) -> &i32;
-}
-
-impl crate::test::TRefDynamicBase for crate::test::RefBean {
-    fn get_x(&self) -> &i32 {
-        &self.x
-    }
-}
-
-impl<'a> GetBase<'a, &'a dyn crate::test::TRefDynamicBase> for AbstractBase {
-    fn get_base(&'a self) -> Result<&'a dyn crate::test::TRefDynamicBase, LubanError> {
-        let base: Result<&crate::test::RefBean, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-
-        Err(LubanError::Polymorphic(format!("Invalid type for RefDynamicBase")))
-    }
-}
-
-#[derive(Debug)]
-#[derive(macros::TryIntoBase)]
-pub struct RefBean {
-    pub x: i32,
-    pub arr: Vec<i32>,
-}
-
-impl RefBean{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<RefBean, LubanError> {
-        let x = buf.read_int();
-        let arr = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_int()); } _e0 };
-        
-        Ok(RefBean { x, arr, })
-    }
-
-    pub const __ID__: i32 = 1963260263;
-}
-
-#[derive(Debug)]
-pub struct TestRef {
-    pub id: i32,
-    pub x1: i32,
-    pub x1_2: i32,
-    pub x2: i32,
-    pub x3: i32,
-    pub x4: i32,
-    pub a1: Vec<i32>,
-    pub a2: Vec<i32>,
-    pub b1: Vec<i32>,
-    pub b2: Vec<i32>,
-    pub c1: std::collections::HashSet<i32>,
-    pub c2: std::collections::HashSet<i32>,
-    pub d1: std::collections::HashMap<i32, i32>,
-    pub d2: std::collections::HashMap<i32, i32>,
-    pub e1: i32,
-    pub e2: i64,
-    pub e3: String,
-    pub f1: i32,
-    pub f2: i64,
-    pub f3: String,
-    pub s1: std::sync::Arc<AbstractBase>,
-}
-
-impl TestRef{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<TestRef, LubanError> {
-        let id = buf.read_int();
-        let x1 = buf.read_int();
-        let x1_2 = buf.read_int();
-        let x2 = buf.read_int();
-        let x3 = buf.read_int();
-        let x4 = buf.read_int();
-        let a1 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_int()); } _e0 };
-        let a2 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_int()); } _e0 };
-        let b1 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_int()); } _e0 };
-        let b2 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_int()); } _e0 };
-        let c1 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = std::collections::HashSet::default(); for i0 in 0..n0 { _e0.insert(buf.read_int()); } _e0 };
-        let c2 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = std::collections::HashSet::default(); for i0 in 0..n0 { _e0.insert(buf.read_int()); } _e0 };
-        let d1 = {let n0 = std::cmp::min(buf.read_size(), buf.size()); let mut _e0 = std::collections::HashMap::with_capacity(n0 * 3 / 2);for i0 in 0..n0 { let _k0 = buf.read_int(); let _v0 = buf.read_int(); _e0.insert(_k0, _v0);} _e0 };
-        let d2 = {let n0 = std::cmp::min(buf.read_size(), buf.size()); let mut _e0 = std::collections::HashMap::with_capacity(n0 * 3 / 2);for i0 in 0..n0 { let _k0 = buf.read_int(); let _v0 = buf.read_int(); _e0.insert(_k0, _v0);} _e0 };
-        let e1 = buf.read_int();
-        let e2 = buf.read_long();
-        let e3 = buf.read_string();
-        let f1 = buf.read_int();
-        let f2 = buf.read_long();
-        let f3 = buf.read_string();
-        let s1 = crate::test::RefDynamicBase::new(&mut buf)?;
-        
-        Ok(TestRef { id, x1, x1_2, x2, x3, x4, a1, a2, b1, b2, c1, c2, d1, d2, e1, e2, e3, f1, f2, f3, s1, })
-    }
-
-    pub const __ID__: i32 = -543222491;
-}
-
-#[derive(Debug)]
-pub struct TestSize {
-    pub id: i32,
-    pub x1: Vec<i32>,
-    pub x2: Vec<i32>,
-    pub x3: std::collections::HashSet<i32>,
-    pub x4: std::collections::HashMap<i32, i32>,
-}
-
-impl TestSize{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<TestSize, LubanError> {
-        let id = buf.read_int();
-        let x1 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_int()); } _e0 };
-        let x2 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_int()); } _e0 };
-        let x3 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = std::collections::HashSet::default(); for i0 in 0..n0 { _e0.insert(buf.read_int()); } _e0 };
-        let x4 = {let n0 = std::cmp::min(buf.read_size(), buf.size()); let mut _e0 = std::collections::HashMap::with_capacity(n0 * 3 / 2);for i0 in 0..n0 { let _k0 = buf.read_int(); let _v0 = buf.read_int(); _e0.insert(_k0, _v0);} _e0 };
-        
-        Ok(TestSize { id, x1, x2, x3, x4, })
-    }
-
-    pub const __ID__: i32 = 340006319;
-}
-
-#[derive(Debug)]
-pub struct TestSet {
-    pub id: i32,
-    pub x0: String,
-    pub x1: Vec<i32>,
-    pub x2: Vec<i64>,
-    pub x3: Vec<String>,
-    pub x4: Vec<crate::test::DemoEnum>,
-}
-
-impl TestSet{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<TestSet, LubanError> {
-        let id = buf.read_int();
-        let x0 = buf.read_string();
-        let x1 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_int()); } _e0 };
-        let x2 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_long()); } _e0 };
-        let x3 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_string()); } _e0 };
-        let x4 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_int().into()); } _e0 };
-        
-        Ok(TestSet { id, x0, x1, x2, x3, x4, })
-    }
-
-    pub const __ID__: i32 = -543221516;
-}
-
-#[derive(Debug)]
-pub struct DetectEncoding {
-    pub id: i32,
-    pub name: String,
-}
-
-impl DetectEncoding{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<DetectEncoding, LubanError> {
-        let id = buf.read_int();
-        let name = buf.read_string();
-        
-        Ok(DetectEncoding { id, name, })
-    }
-
-    pub const __ID__: i32 = -1154609646;
-}
-
-#[derive(Debug)]
-pub struct ItemBase {
-    pub id: i32,
-    pub name: String,
-    pub desc: String,
-}
-
-impl ItemBase {
-    pub fn new(mut buf: &mut ByteBuf) -> Result<std::sync::Arc<AbstractBase>, LubanError> {
-        let type_id = buf.read_int();
-        match type_id {
-            crate::test::Item::__ID__ => Ok(std::sync::Arc::new(crate::test::Item::new(buf)?)),
-            crate::test::Equipment::__ID__ => Ok(std::sync::Arc::new(crate::test::Equipment::new(buf)?)),
-            crate::test::Decorator::__ID__ => Ok(std::sync::Arc::new(crate::test::Decorator::new(buf)?)),
-            _ => Err(LubanError::Bean(format!("Invalid type for ItemBase:{}", type_id)))
-        }
-    }
-}
-
-pub trait TItemBase {
-    fn get_id(&self) -> &i32;
-    fn get_name(&self) -> &String;
-    fn get_desc(&self) -> &String;
-}
-
-impl crate::test::TItemBase for crate::test::Item {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_name(&self) -> &String {
-        &self.name
-    }
-    fn get_desc(&self) -> &String {
-        &self.desc
-    }
-}
-
-impl crate::test::TItemBase for crate::test::Equipment {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_name(&self) -> &String {
-        &self.name
-    }
-    fn get_desc(&self) -> &String {
-        &self.desc
-    }
-}
-
-impl crate::test::TItemBase for crate::test::Decorator {
-    fn get_id(&self) -> &i32 {
-        &self.id
-    }
-    fn get_name(&self) -> &String {
-        &self.name
-    }
-    fn get_desc(&self) -> &String {
-        &self.desc
-    }
-}
-
-impl<'a> GetBase<'a, &'a dyn crate::test::TItemBase> for AbstractBase {
-    fn get_base(&'a self) -> Result<&'a dyn crate::test::TItemBase, LubanError> {
-        let base: Result<&crate::test::Item, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::test::Equipment, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::test::Decorator, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-
-        Err(LubanError::Polymorphic(format!("Invalid type for ItemBase")))
-    }
-}
-
-#[derive(Debug)]
-#[derive(macros::TryIntoBase)]
-pub struct Item {
-    pub id: i32,
-    pub name: String,
-    pub desc: String,
-    pub num: i32,
-    pub price: i32,
-}
-
-impl Item{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<Item, LubanError> {
-        let id = buf.read_int();
-        let name = buf.read_string();
-        let desc = buf.read_string();
-        let num = buf.read_int();
-        let price = buf.read_int();
-        
-        Ok(Item { id, name, desc, num, price, })
-    }
-
-    pub const __ID__: i32 = -1226641649;
-}
-
-#[derive(Debug)]
-#[derive(macros::TryIntoBase)]
-pub struct Equipment {
-    pub id: i32,
-    pub name: String,
-    pub desc: String,
-    pub attr: crate::test::DemoEnum,
-    pub value: i32,
-}
-
-impl Equipment{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<Equipment, LubanError> {
-        let id = buf.read_int();
-        let name = buf.read_string();
-        let desc = buf.read_string();
-        let attr = buf.read_int().into();
-        let value = buf.read_int();
-        
-        Ok(Equipment { id, name, desc, attr, value, })
-    }
-
-    pub const __ID__: i32 = -76837102;
-}
-
-#[derive(Debug)]
-#[derive(macros::TryIntoBase)]
-pub struct Decorator {
-    pub id: i32,
-    pub name: String,
-    pub desc: String,
-    pub duration: i32,
-}
-
-impl Decorator{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<Decorator, LubanError> {
-        let id = buf.read_int();
-        let name = buf.read_string();
-        let desc = buf.read_string();
-        let duration = buf.read_int();
-        
-        Ok(Decorator { id, name, desc, duration, })
-    }
-
-    pub const __ID__: i32 = -625155649;
-}
-
-#[derive(Debug)]
-pub struct TestIndex {
-    pub id: i32,
-    pub eles: Vec<crate::test::DemoType1>,
-}
-
-impl TestIndex{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<TestIndex, LubanError> {
-        let id = buf.read_int();
-        let eles = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::test::DemoType1::new(&mut buf)?); } _e0 };
-        
-        Ok(TestIndex { id, eles, })
-    }
-
-    pub const __ID__: i32 = 1941154020;
-}
-
-#[derive(Debug)]
-pub struct TestMap {
-    pub id: i32,
-    pub x1: std::collections::HashMap<i32, i32>,
-    pub x2: std::collections::HashMap<i64, i32>,
-    pub x3: std::collections::HashMap<String, i32>,
-    pub x4: std::collections::HashMap<crate::test::DemoEnum, i32>,
-}
-
-impl TestMap{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<TestMap, LubanError> {
-        let id = buf.read_int();
-        let x1 = {let n0 = std::cmp::min(buf.read_size(), buf.size()); let mut _e0 = std::collections::HashMap::with_capacity(n0 * 3 / 2);for i0 in 0..n0 { let _k0 = buf.read_int(); let _v0 = buf.read_int(); _e0.insert(_k0, _v0);} _e0 };
-        let x2 = {let n0 = std::cmp::min(buf.read_size(), buf.size()); let mut _e0 = std::collections::HashMap::with_capacity(n0 * 3 / 2);for i0 in 0..n0 { let _k0 = buf.read_long(); let _v0 = buf.read_int(); _e0.insert(_k0, _v0);} _e0 };
-        let x3 = {let n0 = std::cmp::min(buf.read_size(), buf.size()); let mut _e0 = std::collections::HashMap::with_capacity(n0 * 3 / 2);for i0 in 0..n0 { let _k0 = buf.read_string(); let _v0 = buf.read_int(); _e0.insert(_k0, _v0);} _e0 };
-        let x4 = {let n0 = std::cmp::min(buf.read_size(), buf.size()); let mut _e0 = std::collections::HashMap::with_capacity(n0 * 3 / 2);for i0 in 0..n0 { let _k0 = buf.read_int().into(); let _v0 = buf.read_int(); _e0.insert(_k0, _v0);} _e0 };
-        
-        Ok(TestMap { id, x1, x2, x3, x4, })
-    }
-
-    pub const __ID__: i32 = -543227410;
-}
-
-#[derive(Debug)]
-pub struct ExcelFromJson {
-    pub x4: i32,
-    pub x1: bool,
-    pub x5: i64,
-    pub x6: f32,
-    pub s1: String,
-    pub s2: String,
-    pub t1: u64,
-    pub x12: crate::test::DemoType1,
-    pub x13: crate::test::DemoEnum,
-    pub x14: std::sync::Arc<AbstractBase>,
-    pub k1: Vec<i32>,
-    pub k8: std::collections::HashMap<i32, i32>,
-    pub k9: Vec<crate::test::DemoE2>,
-    pub k15: Vec<std::sync::Arc<AbstractBase>>,
-}
-
-impl ExcelFromJson{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<ExcelFromJson, LubanError> {
-        let x4 = buf.read_int();
-        let x1 = buf.read_bool();
-        let x5 = buf.read_long();
-        let x6 = buf.read_float();
-        let s1 = buf.read_string();
-        let s2 = buf.read_string();
-        let t1 = buf.read_ulong();
-        let x12 = crate::test::DemoType1::new(&mut buf)?;
-        let x13 = buf.read_int().into();
-        let x14 = crate::test::DemoDynamic::new(&mut buf)?;
-        let k1 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_int()); } _e0 };
-        let k8 = {let n0 = std::cmp::min(buf.read_size(), buf.size()); let mut _e0 = std::collections::HashMap::with_capacity(n0 * 3 / 2);for i0 in 0..n0 { let _k0 = buf.read_int(); let _v0 = buf.read_int(); _e0.insert(_k0, _v0);} _e0 };
-        let k9 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::test::DemoE2::new(&mut buf)?); } _e0 };
-        let k15 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::test::DemoDynamic::new(&mut buf)?); } _e0 };
-        
-        Ok(ExcelFromJson { x4, x1, x5, x6, s1, s2, t1, x12, x13, x14, k1, k8, k9, k15, })
-    }
-
-    pub const __ID__: i32 = -1485706483;
-}
-
-#[derive(Debug)]
-pub struct CompositeJsonTable1 {
-    pub id: i32,
-    pub x: String,
-}
-
-impl CompositeJsonTable1{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<CompositeJsonTable1, LubanError> {
-        let id = buf.read_int();
-        let x = buf.read_string();
-        
-        Ok(CompositeJsonTable1 { id, x, })
-    }
-
-    pub const __ID__: i32 = 1566207894;
-}
-
-#[derive(Debug)]
-pub struct CompositeJsonTable2 {
-    pub id: i32,
-    pub y: i32,
-}
-
-impl CompositeJsonTable2{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<CompositeJsonTable2, LubanError> {
-        let id = buf.read_int();
-        let y = buf.read_int();
-        
-        Ok(CompositeJsonTable2 { id, y, })
-    }
-
-    pub const __ID__: i32 = 1566207895;
-}
-
-#[derive(Debug)]
-pub struct CompositeJsonTable3 {
-    pub a: i32,
-    pub b: i32,
-}
-
-impl CompositeJsonTable3{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<CompositeJsonTable3, LubanError> {
-        let a = buf.read_int();
-        let b = buf.read_int();
-        
-        Ok(CompositeJsonTable3 { a, b, })
-    }
-
-    pub const __ID__: i32 = 1566207896;
-}
-
-#[derive(Debug)]
-pub struct Test3 {
-    pub x: i32,
-    pub y: i32,
-}
-
-impl Test3{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<Test3, LubanError> {
-        let x = buf.read_int();
-        let y = buf.read_int();
-        
-        Ok(Test3 { x, y, })
-    }
-
-    pub const __ID__: i32 = 638540133;
-}
-
-#[derive(Debug)]
-pub struct TestRow {
-    pub x: i32,
-    pub y: bool,
-    pub z: String,
-    pub a: crate::test::Test3,
-    pub b: Vec<i32>,
-}
-
-impl TestRow{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<TestRow, LubanError> {
-        let x = buf.read_int();
-        let y = buf.read_bool();
-        let z = buf.read_string();
-        let a = crate::test::Test3::new(&mut buf)?;
-        let b = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_int()); } _e0 };
-        
-        Ok(TestRow { x, y, z, a, b, })
-    }
-
-    pub const __ID__: i32 = -543222164;
-}
-
-#[derive(Debug)]
-pub struct ExcelFromJsonMultiRow {
-    pub id: i32,
-    pub x: i32,
-    pub items: Vec<crate::test::TestRow>,
-}
-
-impl ExcelFromJsonMultiRow{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<ExcelFromJsonMultiRow, LubanError> {
-        let id = buf.read_int();
-        let x = buf.read_int();
-        let items = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::test::TestRow::new(&mut buf)?); } _e0 };
-        
-        Ok(ExcelFromJsonMultiRow { id, x, items, })
-    }
-
-    pub const __ID__: i32 = 715335694;
-}
-
-#[derive(Debug)]
-pub struct SepVector {
-    pub x: i32,
-    pub y: i32,
-    pub z: i32,
-}
-
-impl SepVector{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<SepVector, LubanError> {
-        let x = buf.read_int();
-        let y = buf.read_int();
-        let z = buf.read_int();
-        
-        Ok(SepVector { x, y, z, })
-    }
-
-    pub const __ID__: i32 = 252769477;
-}
-
-#[derive(Debug)]
-pub struct SepBean1 {
-    pub a: i32,
-    pub b: i32,
-    pub c: String,
-}
-
-impl SepBean1{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<SepBean1, LubanError> {
-        let a = buf.read_int();
-        let b = buf.read_int();
-        let c = buf.read_string();
-        
-        Ok(SepBean1 { a, b, c, })
-    }
-
-    pub const __ID__: i32 = -1534339393;
-}
-
-#[derive(Debug)]
-pub struct TestScriptableObject {
-    pub id: i32,
-    pub desc: String,
-    pub rate: f32,
-    pub num: i32,
-    pub v2: crate::vec2,
-    pub v3: crate::vec3,
-    pub v4: crate::vec4,
-}
-
-impl TestScriptableObject{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<TestScriptableObject, LubanError> {
-        let id = buf.read_int();
-        let desc = buf.read_string();
-        let rate = buf.read_float();
-        let num = buf.read_int();
-        let v2 = crate::vec2::new(&mut buf)?;
-        let v3 = crate::vec3::new(&mut buf)?;
-        let v4 = crate::vec4::new(&mut buf)?;
-        
-        Ok(TestScriptableObject { id, desc, rate, num, v2, v3, v4, })
-    }
-
-    pub const __ID__: i32 = -1896814350;
-}
-
-#[derive(Debug)]
-pub struct Path {
-    pub id: i32,
-    pub res: String,
-}
-
-impl Path{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<Path, LubanError> {
-        let id = buf.read_int();
-        let res = buf.read_string();
-        
-        Ok(Path { id, res, })
-    }
-
-    pub const __ID__: i32 = -1226450911;
-}
-
-#[derive(Debug)]
-pub struct TestMapper {
-    pub id: i32,
-    pub audio_type: crate::AudioType,
-    pub v2: crate::vec2,
-}
-
-impl TestMapper{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<TestMapper, LubanError> {
-        let id = buf.read_int();
-        let audio_type = buf.read_int().into();
-        let v2 = crate::vec2::new(&mut buf)?;
-        
-        Ok(TestMapper { id, audio_type, v2, })
-    }
-
-    pub const __ID__: i32 = 149110895;
-}
-
-#[derive(Debug)]
-pub struct TestExcelBean1 {
-    /// 最高品质
-    pub x1: i32,
-    /// 黑色的
-    pub x2: String,
-    /// 蓝色的
-    pub x3: i32,
-    /// 最差品质
-    pub x4: f32,
-}
-
-impl TestExcelBean1{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<TestExcelBean1, LubanError> {
-        let x1 = buf.read_int();
-        let x2 = buf.read_string();
-        let x3 = buf.read_int();
-        let x4 = buf.read_float();
-        
-        Ok(TestExcelBean1 { x1, x2, x3, x4, })
-    }
-
-    pub const __ID__: i32 = -1738345160;
-}
-
-#[derive(Debug)]
-pub struct TestExcelBean2 {
-    /// 最高品质
-    pub y1: i32,
-    /// 黑色的
-    pub y2: String,
-    /// 蓝色的
-    pub y3: f32,
-}
-
-impl TestExcelBean2{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<TestExcelBean2, LubanError> {
-        let y1 = buf.read_int();
-        let y2 = buf.read_string();
-        let y3 = buf.read_float();
-        
-        Ok(TestExcelBean2 { y1, y2, y3, })
-    }
-
-    pub const __ID__: i32 = -1738345159;
-}
-
-#[derive(Debug)]
-pub struct Shape {
-}
-
-impl Shape {
-    pub fn new(mut buf: &mut ByteBuf) -> Result<std::sync::Arc<AbstractBase>, LubanError> {
-        let type_id = buf.read_int();
-        match type_id {
-            crate::test::Circle::__ID__ => Ok(std::sync::Arc::new(crate::test::Circle::new(buf)?)),
-            crate::test2::Rectangle::__ID__ => Ok(std::sync::Arc::new(crate::test2::Rectangle::new(buf)?)),
-            _ => Err(LubanError::Bean(format!("Invalid type for Shape:{}", type_id)))
-        }
-    }
-}
-
-pub trait TShape {
-}
-
-impl crate::test::TShape for crate::test::Circle {
-}
-
-impl crate::test::TShape for crate::test2::Rectangle {
-}
-
-impl<'a> GetBase<'a, &'a dyn crate::test::TShape> for AbstractBase {
-    fn get_base(&'a self) -> Result<&'a dyn crate::test::TShape, LubanError> {
-        let base: Result<&crate::test::Circle, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-        let base: Result<&crate::test2::Rectangle, _> = self.try_into();
-        if let Ok(r) = base {
-            return Ok(r);
-        }
-
-        Err(LubanError::Polymorphic(format!("Invalid type for Shape")))
-    }
-}
-
-#[derive(Debug)]
-#[derive(macros::TryIntoBase)]
-pub struct Circle {
-    /// 半径
-    pub radius: f32,
-}
-
-impl Circle{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<Circle, LubanError> {
-        let radius = buf.read_float();
-        
-        Ok(Circle { radius, })
-    }
-
-    pub const __ID__: i32 = 2131829196;
 }
 
 
@@ -1688,7 +2064,7 @@ pub struct TbFullTypes {
 }
 
 impl TbFullTypes {
-    pub fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbFullTypes>, LubanError> {
+    pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbFullTypes>, LubanError> {
         let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::DemoType2>> = Default::default();
         let mut data_list: Vec<std::sync::Arc<crate::test::DemoType2>> = vec![];
 
@@ -1703,6 +2079,12 @@ impl TbFullTypes {
 
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::DemoType2>> {
         self.data_map.get(key).map(|x| x.clone())
+    }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data_list.iter_mut().for_each(|mut x| {
+           let mut b = Box::from_raw(x.as_ref() as *const crate::test::DemoType2 as *mut crate::test::DemoType2); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+        });
     }
 }
 
@@ -1721,11 +2103,15 @@ pub struct TbSingleton {
 }
 
 impl TbSingleton {
-    pub fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbSingleton>, LubanError> {
+    pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbSingleton>, LubanError> {
         let n = buf.read_size();
         if n != 1 { return Err(LubanError::Table(format!("table mode=one, but size != 1"))); }
         let data = crate::test::DemoSingletonType::new(&mut buf)?;
         Ok(std::sync::Arc::new(TbSingleton { data }))
+    }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data.resolve_ref(tables);
     }
 }
 
@@ -1736,7 +2122,7 @@ pub struct TbNotIndexList {
 }
 
 impl TbNotIndexList {
-    pub fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbNotIndexList>, LubanError> {
+    pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbNotIndexList>, LubanError> {
         let mut data_list: Vec<std::sync::Arc<crate::test::NotIndexList>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
@@ -1748,7 +2134,12 @@ impl TbNotIndexList {
             data_list,
         }))
     }
-
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data_list.iter_mut().for_each(|mut x| {
+           let mut b = Box::from_raw(x.as_ref() as *const crate::test::NotIndexList as *mut crate::test::NotIndexList); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+        });
+    }
 }
 
 
@@ -1759,7 +2150,7 @@ pub struct TbMultiUnionIndexList {
 }
 
 impl TbMultiUnionIndexList {
-    pub fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbMultiUnionIndexList>, LubanError> {
+    pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbMultiUnionIndexList>, LubanError> {
         let mut data_list: Vec<std::sync::Arc<crate::test::MultiUnionIndexList>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
@@ -1776,9 +2167,15 @@ impl TbMultiUnionIndexList {
             data_map_union,
         }))
     }
-
+    
     pub fn get(&self, key: &(i32, i64, String)) -> Option<std::sync::Arc<crate::test::MultiUnionIndexList>> {
         self.data_map_union.get(key).map(|x| x.clone())
+    }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data_list.iter_mut().for_each(|mut x| {
+           let mut b = Box::from_raw(x.as_ref() as *const crate::test::MultiUnionIndexList as *mut crate::test::MultiUnionIndexList); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+        });
     }
 }
 
@@ -1792,7 +2189,7 @@ pub struct TbMultiIndexList {
 }
 
 impl TbMultiIndexList {
-    pub fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbMultiIndexList>, LubanError> {
+    pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbMultiIndexList>, LubanError> {
         let mut data_list: Vec<std::sync::Arc<crate::test::MultiIndexList>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
@@ -1815,7 +2212,6 @@ impl TbMultiIndexList {
             data_map_id3,
         }))
     }
-
     pub fn get_by_id1(&self, key: &i32) -> Option<std::sync::Arc<crate::test::MultiIndexList>> {
         self.data_map_id1.get(key).map(|x| x.clone())
     }
@@ -1824,6 +2220,12 @@ impl TbMultiIndexList {
     }
     pub fn get_by_id3(&self, key: &String) -> Option<std::sync::Arc<crate::test::MultiIndexList>> {
         self.data_map_id3.get(key).map(|x| x.clone())
+    }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data_list.iter_mut().for_each(|mut x| {
+           let mut b = Box::from_raw(x.as_ref() as *const crate::test::MultiIndexList as *mut crate::test::MultiIndexList); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+        });
     }
 }
 
@@ -1835,7 +2237,7 @@ pub struct TbDataFromMisc {
 }
 
 impl TbDataFromMisc {
-    pub fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbDataFromMisc>, LubanError> {
+    pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbDataFromMisc>, LubanError> {
         let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::DemoType2>> = Default::default();
         let mut data_list: Vec<std::sync::Arc<crate::test::DemoType2>> = vec![];
 
@@ -1850,6 +2252,12 @@ impl TbDataFromMisc {
 
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::DemoType2>> {
         self.data_map.get(key).map(|x| x.clone())
+    }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data_list.iter_mut().for_each(|mut x| {
+           let mut b = Box::from_raw(x.as_ref() as *const crate::test::DemoType2 as *mut crate::test::DemoType2); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+        });
     }
 }
 
@@ -1869,7 +2277,7 @@ pub struct TbMultiRowRecord {
 }
 
 impl TbMultiRowRecord {
-    pub fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbMultiRowRecord>, LubanError> {
+    pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbMultiRowRecord>, LubanError> {
         let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::MultiRowRecord>> = Default::default();
         let mut data_list: Vec<std::sync::Arc<crate::test::MultiRowRecord>> = vec![];
 
@@ -1884,6 +2292,12 @@ impl TbMultiRowRecord {
 
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::MultiRowRecord>> {
         self.data_map.get(key).map(|x| x.clone())
+    }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data_list.iter_mut().for_each(|mut x| {
+           let mut b = Box::from_raw(x.as_ref() as *const crate::test::MultiRowRecord as *mut crate::test::MultiRowRecord); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+        });
     }
 }
 
@@ -1903,7 +2317,7 @@ pub struct TbTestMultiColumn {
 }
 
 impl TbTestMultiColumn {
-    pub fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestMultiColumn>, LubanError> {
+    pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestMultiColumn>, LubanError> {
         let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestMultiColumn>> = Default::default();
         let mut data_list: Vec<std::sync::Arc<crate::test::TestMultiColumn>> = vec![];
 
@@ -1918,6 +2332,12 @@ impl TbTestMultiColumn {
 
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestMultiColumn>> {
         self.data_map.get(key).map(|x| x.clone())
+    }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data_list.iter_mut().for_each(|mut x| {
+           let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestMultiColumn as *mut crate::test::TestMultiColumn); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+        });
     }
 }
 
@@ -1937,7 +2357,7 @@ pub struct TbMultiRowTitle {
 }
 
 impl TbMultiRowTitle {
-    pub fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbMultiRowTitle>, LubanError> {
+    pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbMultiRowTitle>, LubanError> {
         let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::MultiRowTitle>> = Default::default();
         let mut data_list: Vec<std::sync::Arc<crate::test::MultiRowTitle>> = vec![];
 
@@ -1952,6 +2372,12 @@ impl TbMultiRowTitle {
 
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::MultiRowTitle>> {
         self.data_map.get(key).map(|x| x.clone())
+    }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data_list.iter_mut().for_each(|mut x| {
+           let mut b = Box::from_raw(x.as_ref() as *const crate::test::MultiRowTitle as *mut crate::test::MultiRowTitle); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+        });
     }
 }
 
@@ -1971,7 +2397,7 @@ pub struct TbTestNull {
 }
 
 impl TbTestNull {
-    pub fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestNull>, LubanError> {
+    pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestNull>, LubanError> {
         let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestNull>> = Default::default();
         let mut data_list: Vec<std::sync::Arc<crate::test::TestNull>> = vec![];
 
@@ -1986,6 +2412,12 @@ impl TbTestNull {
 
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestNull>> {
         self.data_map.get(key).map(|x| x.clone())
+    }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data_list.iter_mut().for_each(|mut x| {
+           let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestNull as *mut crate::test::TestNull); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+        });
     }
 }
 
@@ -2005,7 +2437,7 @@ pub struct TbDemoPrimitive {
 }
 
 impl TbDemoPrimitive {
-    pub fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbDemoPrimitive>, LubanError> {
+    pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbDemoPrimitive>, LubanError> {
         let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::DemoPrimitiveTypesTable>> = Default::default();
         let mut data_list: Vec<std::sync::Arc<crate::test::DemoPrimitiveTypesTable>> = vec![];
 
@@ -2020,6 +2452,12 @@ impl TbDemoPrimitive {
 
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::DemoPrimitiveTypesTable>> {
         self.data_map.get(key).map(|x| x.clone())
+    }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data_list.iter_mut().for_each(|mut x| {
+           let mut b = Box::from_raw(x.as_ref() as *const crate::test::DemoPrimitiveTypesTable as *mut crate::test::DemoPrimitiveTypesTable); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+        });
     }
 }
 
@@ -2039,7 +2477,7 @@ pub struct TbTestString {
 }
 
 impl TbTestString {
-    pub fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestString>, LubanError> {
+    pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestString>, LubanError> {
         let mut data_map: std::collections::HashMap<String, std::sync::Arc<crate::test::TestString>> = Default::default();
         let mut data_list: Vec<std::sync::Arc<crate::test::TestString>> = vec![];
 
@@ -2054,6 +2492,12 @@ impl TbTestString {
 
     pub fn get(&self, key: &String) -> Option<std::sync::Arc<crate::test::TestString>> {
         self.data_map.get(key).map(|x| x.clone())
+    }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data_list.iter_mut().for_each(|mut x| {
+           let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestString as *mut crate::test::TestString); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+        });
     }
 }
 
@@ -2073,7 +2517,7 @@ pub struct TbDemoGroup {
 }
 
 impl TbDemoGroup {
-    pub fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbDemoGroup>, LubanError> {
+    pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbDemoGroup>, LubanError> {
         let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::DemoGroup>> = Default::default();
         let mut data_list: Vec<std::sync::Arc<crate::test::DemoGroup>> = vec![];
 
@@ -2088,6 +2532,12 @@ impl TbDemoGroup {
 
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::DemoGroup>> {
         self.data_map.get(key).map(|x| x.clone())
+    }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data_list.iter_mut().for_each(|mut x| {
+           let mut b = Box::from_raw(x.as_ref() as *const crate::test::DemoGroup as *mut crate::test::DemoGroup); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+        });
     }
 }
 
@@ -2107,7 +2557,7 @@ pub struct TbDemoGroup_C {
 }
 
 impl TbDemoGroup_C {
-    pub fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbDemoGroup_C>, LubanError> {
+    pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbDemoGroup_C>, LubanError> {
         let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::DemoGroup>> = Default::default();
         let mut data_list: Vec<std::sync::Arc<crate::test::DemoGroup>> = vec![];
 
@@ -2122,6 +2572,12 @@ impl TbDemoGroup_C {
 
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::DemoGroup>> {
         self.data_map.get(key).map(|x| x.clone())
+    }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data_list.iter_mut().for_each(|mut x| {
+           let mut b = Box::from_raw(x.as_ref() as *const crate::test::DemoGroup as *mut crate::test::DemoGroup); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+        });
     }
 }
 
@@ -2141,7 +2597,7 @@ pub struct TbDemoGroup_S {
 }
 
 impl TbDemoGroup_S {
-    pub fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbDemoGroup_S>, LubanError> {
+    pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbDemoGroup_S>, LubanError> {
         let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::DemoGroup>> = Default::default();
         let mut data_list: Vec<std::sync::Arc<crate::test::DemoGroup>> = vec![];
 
@@ -2156,6 +2612,12 @@ impl TbDemoGroup_S {
 
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::DemoGroup>> {
         self.data_map.get(key).map(|x| x.clone())
+    }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data_list.iter_mut().for_each(|mut x| {
+           let mut b = Box::from_raw(x.as_ref() as *const crate::test::DemoGroup as *mut crate::test::DemoGroup); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+        });
     }
 }
 
@@ -2175,7 +2637,7 @@ pub struct TbDemoGroup_E {
 }
 
 impl TbDemoGroup_E {
-    pub fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbDemoGroup_E>, LubanError> {
+    pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbDemoGroup_E>, LubanError> {
         let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::DemoGroup>> = Default::default();
         let mut data_list: Vec<std::sync::Arc<crate::test::DemoGroup>> = vec![];
 
@@ -2190,6 +2652,12 @@ impl TbDemoGroup_E {
 
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::DemoGroup>> {
         self.data_map.get(key).map(|x| x.clone())
+    }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data_list.iter_mut().for_each(|mut x| {
+           let mut b = Box::from_raw(x.as_ref() as *const crate::test::DemoGroup as *mut crate::test::DemoGroup); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+        });
     }
 }
 
@@ -2208,11 +2676,15 @@ pub struct TbTestGlobal {
 }
 
 impl TbTestGlobal {
-    pub fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestGlobal>, LubanError> {
+    pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestGlobal>, LubanError> {
         let n = buf.read_size();
         if n != 1 { return Err(LubanError::Table(format!("table mode=one, but size != 1"))); }
         let data = crate::test::TestGlobal::new(&mut buf)?;
         Ok(std::sync::Arc::new(TbTestGlobal { data }))
+    }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data.resolve_ref(tables);
     }
 }
 
@@ -2224,7 +2696,7 @@ pub struct TbTestBeRef {
 }
 
 impl TbTestBeRef {
-    pub fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestBeRef>, LubanError> {
+    pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestBeRef>, LubanError> {
         let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestBeRef>> = Default::default();
         let mut data_list: Vec<std::sync::Arc<crate::test::TestBeRef>> = vec![];
 
@@ -2239,6 +2711,12 @@ impl TbTestBeRef {
 
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestBeRef>> {
         self.data_map.get(key).map(|x| x.clone())
+    }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data_list.iter_mut().for_each(|mut x| {
+           let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestBeRef as *mut crate::test::TestBeRef); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+        });
     }
 }
 
@@ -2258,7 +2736,7 @@ pub struct TbTestBeRef2 {
 }
 
 impl TbTestBeRef2 {
-    pub fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestBeRef2>, LubanError> {
+    pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestBeRef2>, LubanError> {
         let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestBeRef>> = Default::default();
         let mut data_list: Vec<std::sync::Arc<crate::test::TestBeRef>> = vec![];
 
@@ -2273,6 +2751,12 @@ impl TbTestBeRef2 {
 
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestBeRef>> {
         self.data_map.get(key).map(|x| x.clone())
+    }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data_list.iter_mut().for_each(|mut x| {
+           let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestBeRef as *mut crate::test::TestBeRef); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+        });
     }
 }
 
@@ -2292,7 +2776,7 @@ pub struct TbTestRef {
 }
 
 impl TbTestRef {
-    pub fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestRef>, LubanError> {
+    pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestRef>, LubanError> {
         let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestRef>> = Default::default();
         let mut data_list: Vec<std::sync::Arc<crate::test::TestRef>> = vec![];
 
@@ -2307,6 +2791,12 @@ impl TbTestRef {
 
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestRef>> {
         self.data_map.get(key).map(|x| x.clone())
+    }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data_list.iter_mut().for_each(|mut x| {
+           let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestRef as *mut crate::test::TestRef); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+        });
     }
 }
 
@@ -2326,7 +2816,7 @@ pub struct TbTestSize {
 }
 
 impl TbTestSize {
-    pub fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestSize>, LubanError> {
+    pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestSize>, LubanError> {
         let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestSize>> = Default::default();
         let mut data_list: Vec<std::sync::Arc<crate::test::TestSize>> = vec![];
 
@@ -2341,6 +2831,12 @@ impl TbTestSize {
 
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestSize>> {
         self.data_map.get(key).map(|x| x.clone())
+    }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data_list.iter_mut().for_each(|mut x| {
+           let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestSize as *mut crate::test::TestSize); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+        });
     }
 }
 
@@ -2360,7 +2856,7 @@ pub struct TbTestSet {
 }
 
 impl TbTestSet {
-    pub fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestSet>, LubanError> {
+    pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestSet>, LubanError> {
         let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestSet>> = Default::default();
         let mut data_list: Vec<std::sync::Arc<crate::test::TestSet>> = vec![];
 
@@ -2376,10 +2872,56 @@ impl TbTestSet {
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestSet>> {
         self.data_map.get(key).map(|x| x.clone())
     }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data_list.iter_mut().for_each(|mut x| {
+           let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestSet as *mut crate::test::TestSet); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+        });
+    }
 }
 
 impl std::ops::Index<i32> for TbTestSet {
     type Output = std::sync::Arc<crate::test::TestSet>;
+
+    fn index(&self, index: i32) -> &Self::Output {
+        &self.data_map.get(&index).unwrap()
+    }
+}
+
+
+#[derive(Debug)]
+pub struct TbTestRange {
+    pub data_list: Vec<std::sync::Arc<crate::test::TestRange>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestRange>>,
+}
+
+impl TbTestRange {
+    pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestRange>, LubanError> {
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestRange>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<crate::test::TestRange>> = vec![];
+
+        for x in (0..buf.read_size()).rev() {
+            let row = std::sync::Arc::new(crate::test::TestRange::new(&mut buf)?);
+            data_list.push(row.clone());
+            data_map.insert(row.id.clone(), row.clone());
+        }
+
+        Ok(std::sync::Arc::new(TbTestRange { data_map, data_list }))
+    }
+
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestRange>> {
+        self.data_map.get(key).map(|x| x.clone())
+    }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data_list.iter_mut().for_each(|mut x| {
+           let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestRange as *mut crate::test::TestRange); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+        });
+    }
+}
+
+impl std::ops::Index<i32> for TbTestRange {
+    type Output = std::sync::Arc<crate::test::TestRange>;
 
     fn index(&self, index: i32) -> &Self::Output {
         &self.data_map.get(&index).unwrap()
@@ -2394,7 +2936,7 @@ pub struct TbDetectCsvEncoding {
 }
 
 impl TbDetectCsvEncoding {
-    pub fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbDetectCsvEncoding>, LubanError> {
+    pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbDetectCsvEncoding>, LubanError> {
         let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::DetectEncoding>> = Default::default();
         let mut data_list: Vec<std::sync::Arc<crate::test::DetectEncoding>> = vec![];
 
@@ -2410,6 +2952,12 @@ impl TbDetectCsvEncoding {
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::DetectEncoding>> {
         self.data_map.get(key).map(|x| x.clone())
     }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data_list.iter_mut().for_each(|mut x| {
+           let mut b = Box::from_raw(x.as_ref() as *const crate::test::DetectEncoding as *mut crate::test::DetectEncoding); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+        });
+    }
 }
 
 impl std::ops::Index<i32> for TbDetectCsvEncoding {
@@ -2423,32 +2971,37 @@ impl std::ops::Index<i32> for TbDetectCsvEncoding {
 
 #[derive(Debug)]
 pub struct TbItem2 {
-    pub data_list: Vec<std::sync::Arc<AbstractBase>>,
-    pub data_map: std::collections::HashMap<i32, std::sync::Arc<AbstractBase>>,
+    pub data_list: Vec<std::sync::Arc<crate::test::ItemBase>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::ItemBase>>,
 }
 
 impl TbItem2 {
-    pub fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbItem2>, LubanError> {
-        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<AbstractBase>> = Default::default();
-        let mut data_list: Vec<std::sync::Arc<AbstractBase>> = vec![];
+    pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbItem2>, LubanError> {
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::ItemBase>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<crate::test::ItemBase>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
-            let row = crate::test::ItemBase::new(&mut buf)?;
+            let row = std::sync::Arc::new(crate::test::ItemBase::new(&mut buf)?);
             data_list.push(row.clone());
-            let key = <AbstractBase as GetBase<&dyn crate::test::TItemBase>>::get_base(std::ops::Deref::deref(&row))?;
-            data_map.insert(key.get_id().clone(), row.clone());
+            data_map.insert(row.get_id().clone(), row.clone());
         }
 
         Ok(std::sync::Arc::new(TbItem2 { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<AbstractBase>> {
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::ItemBase>> {
         self.data_map.get(key).map(|x| x.clone())
+    }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data_list.iter_mut().for_each(|mut x| {
+           let mut b = Box::from_raw(x.as_ref() as *const crate::test::ItemBase as *mut crate::test::ItemBase); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+        });
     }
 }
 
 impl std::ops::Index<i32> for TbItem2 {
-    type Output = std::sync::Arc<AbstractBase>;
+    type Output = std::sync::Arc<crate::test::ItemBase>;
 
     fn index(&self, index: i32) -> &Self::Output {
         &self.data_map.get(&index).unwrap()
@@ -2463,7 +3016,7 @@ pub struct TbTestIndex {
 }
 
 impl TbTestIndex {
-    pub fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestIndex>, LubanError> {
+    pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestIndex>, LubanError> {
         let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestIndex>> = Default::default();
         let mut data_list: Vec<std::sync::Arc<crate::test::TestIndex>> = vec![];
 
@@ -2478,6 +3031,12 @@ impl TbTestIndex {
 
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestIndex>> {
         self.data_map.get(key).map(|x| x.clone())
+    }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data_list.iter_mut().for_each(|mut x| {
+           let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestIndex as *mut crate::test::TestIndex); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+        });
     }
 }
 
@@ -2497,7 +3056,7 @@ pub struct TbTestMap {
 }
 
 impl TbTestMap {
-    pub fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestMap>, LubanError> {
+    pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestMap>, LubanError> {
         let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestMap>> = Default::default();
         let mut data_list: Vec<std::sync::Arc<crate::test::TestMap>> = vec![];
 
@@ -2512,6 +3071,12 @@ impl TbTestMap {
 
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestMap>> {
         self.data_map.get(key).map(|x| x.clone())
+    }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data_list.iter_mut().for_each(|mut x| {
+           let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestMap as *mut crate::test::TestMap); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+        });
     }
 }
 
@@ -2531,7 +3096,7 @@ pub struct TbExcelFromJson {
 }
 
 impl TbExcelFromJson {
-    pub fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbExcelFromJson>, LubanError> {
+    pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbExcelFromJson>, LubanError> {
         let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::ExcelFromJson>> = Default::default();
         let mut data_list: Vec<std::sync::Arc<crate::test::ExcelFromJson>> = vec![];
 
@@ -2546,6 +3111,12 @@ impl TbExcelFromJson {
 
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::ExcelFromJson>> {
         self.data_map.get(key).map(|x| x.clone())
+    }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data_list.iter_mut().for_each(|mut x| {
+           let mut b = Box::from_raw(x.as_ref() as *const crate::test::ExcelFromJson as *mut crate::test::ExcelFromJson); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+        });
     }
 }
 
@@ -2565,7 +3136,7 @@ pub struct TbCompositeJsonTable1 {
 }
 
 impl TbCompositeJsonTable1 {
-    pub fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbCompositeJsonTable1>, LubanError> {
+    pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbCompositeJsonTable1>, LubanError> {
         let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::CompositeJsonTable1>> = Default::default();
         let mut data_list: Vec<std::sync::Arc<crate::test::CompositeJsonTable1>> = vec![];
 
@@ -2580,6 +3151,12 @@ impl TbCompositeJsonTable1 {
 
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::CompositeJsonTable1>> {
         self.data_map.get(key).map(|x| x.clone())
+    }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data_list.iter_mut().for_each(|mut x| {
+           let mut b = Box::from_raw(x.as_ref() as *const crate::test::CompositeJsonTable1 as *mut crate::test::CompositeJsonTable1); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+        });
     }
 }
 
@@ -2599,7 +3176,7 @@ pub struct TbCompositeJsonTable2 {
 }
 
 impl TbCompositeJsonTable2 {
-    pub fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbCompositeJsonTable2>, LubanError> {
+    pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbCompositeJsonTable2>, LubanError> {
         let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::CompositeJsonTable2>> = Default::default();
         let mut data_list: Vec<std::sync::Arc<crate::test::CompositeJsonTable2>> = vec![];
 
@@ -2614,6 +3191,12 @@ impl TbCompositeJsonTable2 {
 
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::CompositeJsonTable2>> {
         self.data_map.get(key).map(|x| x.clone())
+    }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data_list.iter_mut().for_each(|mut x| {
+           let mut b = Box::from_raw(x.as_ref() as *const crate::test::CompositeJsonTable2 as *mut crate::test::CompositeJsonTable2); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+        });
     }
 }
 
@@ -2632,11 +3215,15 @@ pub struct TbCompositeJsonTable3 {
 }
 
 impl TbCompositeJsonTable3 {
-    pub fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbCompositeJsonTable3>, LubanError> {
+    pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbCompositeJsonTable3>, LubanError> {
         let n = buf.read_size();
         if n != 1 { return Err(LubanError::Table(format!("table mode=one, but size != 1"))); }
         let data = crate::test::CompositeJsonTable3::new(&mut buf)?;
         Ok(std::sync::Arc::new(TbCompositeJsonTable3 { data }))
+    }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data.resolve_ref(tables);
     }
 }
 
@@ -2648,7 +3235,7 @@ pub struct TbExcelFromJsonMultiRow {
 }
 
 impl TbExcelFromJsonMultiRow {
-    pub fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbExcelFromJsonMultiRow>, LubanError> {
+    pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbExcelFromJsonMultiRow>, LubanError> {
         let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::ExcelFromJsonMultiRow>> = Default::default();
         let mut data_list: Vec<std::sync::Arc<crate::test::ExcelFromJsonMultiRow>> = vec![];
 
@@ -2663,6 +3250,12 @@ impl TbExcelFromJsonMultiRow {
 
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::ExcelFromJsonMultiRow>> {
         self.data_map.get(key).map(|x| x.clone())
+    }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data_list.iter_mut().for_each(|mut x| {
+           let mut b = Box::from_raw(x.as_ref() as *const crate::test::ExcelFromJsonMultiRow as *mut crate::test::ExcelFromJsonMultiRow); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+        });
     }
 }
 
@@ -2682,7 +3275,7 @@ pub struct TbTestScriptableObject {
 }
 
 impl TbTestScriptableObject {
-    pub fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestScriptableObject>, LubanError> {
+    pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestScriptableObject>, LubanError> {
         let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestScriptableObject>> = Default::default();
         let mut data_list: Vec<std::sync::Arc<crate::test::TestScriptableObject>> = vec![];
 
@@ -2697,6 +3290,12 @@ impl TbTestScriptableObject {
 
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestScriptableObject>> {
         self.data_map.get(key).map(|x| x.clone())
+    }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data_list.iter_mut().for_each(|mut x| {
+           let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestScriptableObject as *mut crate::test::TestScriptableObject); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+        });
     }
 }
 
@@ -2716,7 +3315,7 @@ pub struct TbPath {
 }
 
 impl TbPath {
-    pub fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbPath>, LubanError> {
+    pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbPath>, LubanError> {
         let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::Path>> = Default::default();
         let mut data_list: Vec<std::sync::Arc<crate::test::Path>> = vec![];
 
@@ -2732,10 +3331,136 @@ impl TbPath {
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::Path>> {
         self.data_map.get(key).map(|x| x.clone())
     }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data_list.iter_mut().for_each(|mut x| {
+           let mut b = Box::from_raw(x.as_ref() as *const crate::test::Path as *mut crate::test::Path); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+        });
+    }
 }
 
 impl std::ops::Index<i32> for TbPath {
     type Output = std::sync::Arc<crate::test::Path>;
+
+    fn index(&self, index: i32) -> &Self::Output {
+        &self.data_map.get(&index).unwrap()
+    }
+}
+
+
+#[derive(Debug)]
+pub struct TbTestFieldAlias {
+    pub data_list: Vec<std::sync::Arc<crate::test::TestFieldAlias>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestFieldAlias>>,
+}
+
+impl TbTestFieldAlias {
+    pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestFieldAlias>, LubanError> {
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestFieldAlias>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<crate::test::TestFieldAlias>> = vec![];
+
+        for x in (0..buf.read_size()).rev() {
+            let row = std::sync::Arc::new(crate::test::TestFieldAlias::new(&mut buf)?);
+            data_list.push(row.clone());
+            data_map.insert(row.id.clone(), row.clone());
+        }
+
+        Ok(std::sync::Arc::new(TbTestFieldAlias { data_map, data_list }))
+    }
+
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestFieldAlias>> {
+        self.data_map.get(key).map(|x| x.clone())
+    }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data_list.iter_mut().for_each(|mut x| {
+           let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestFieldAlias as *mut crate::test::TestFieldAlias); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+        });
+    }
+}
+
+impl std::ops::Index<i32> for TbTestFieldAlias {
+    type Output = std::sync::Arc<crate::test::TestFieldAlias>;
+
+    fn index(&self, index: i32) -> &Self::Output {
+        &self.data_map.get(&index).unwrap()
+    }
+}
+
+
+#[derive(Debug)]
+pub struct TbTestFieldVariant {
+    pub data_list: Vec<std::sync::Arc<crate::test::TestFieldVariant>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestFieldVariant>>,
+}
+
+impl TbTestFieldVariant {
+    pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestFieldVariant>, LubanError> {
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestFieldVariant>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<crate::test::TestFieldVariant>> = vec![];
+
+        for x in (0..buf.read_size()).rev() {
+            let row = std::sync::Arc::new(crate::test::TestFieldVariant::new(&mut buf)?);
+            data_list.push(row.clone());
+            data_map.insert(row.id.clone(), row.clone());
+        }
+
+        Ok(std::sync::Arc::new(TbTestFieldVariant { data_map, data_list }))
+    }
+
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestFieldVariant>> {
+        self.data_map.get(key).map(|x| x.clone())
+    }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data_list.iter_mut().for_each(|mut x| {
+           let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestFieldVariant as *mut crate::test::TestFieldVariant); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+        });
+    }
+}
+
+impl std::ops::Index<i32> for TbTestFieldVariant {
+    type Output = std::sync::Arc<crate::test::TestFieldVariant>;
+
+    fn index(&self, index: i32) -> &Self::Output {
+        &self.data_map.get(&index).unwrap()
+    }
+}
+
+
+#[derive(Debug)]
+pub struct TbTestFieldVariant2 {
+    pub data_list: Vec<std::sync::Arc<crate::test::TestFieldVariant2>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestFieldVariant2>>,
+}
+
+impl TbTestFieldVariant2 {
+    pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestFieldVariant2>, LubanError> {
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestFieldVariant2>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<crate::test::TestFieldVariant2>> = vec![];
+
+        for x in (0..buf.read_size()).rev() {
+            let row = std::sync::Arc::new(crate::test::TestFieldVariant2::new(&mut buf)?);
+            data_list.push(row.clone());
+            data_map.insert(row.id.clone(), row.clone());
+        }
+
+        Ok(std::sync::Arc::new(TbTestFieldVariant2 { data_map, data_list }))
+    }
+
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestFieldVariant2>> {
+        self.data_map.get(key).map(|x| x.clone())
+    }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data_list.iter_mut().for_each(|mut x| {
+           let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestFieldVariant2 as *mut crate::test::TestFieldVariant2); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+        });
+    }
+}
+
+impl std::ops::Index<i32> for TbTestFieldVariant2 {
+    type Output = std::sync::Arc<crate::test::TestFieldVariant2>;
 
     fn index(&self, index: i32) -> &Self::Output {
         &self.data_map.get(&index).unwrap()
@@ -2750,7 +3475,7 @@ pub struct TbTestMapper {
 }
 
 impl TbTestMapper {
-    pub fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestMapper>, LubanError> {
+    pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestMapper>, LubanError> {
         let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestMapper>> = Default::default();
         let mut data_list: Vec<std::sync::Arc<crate::test::TestMapper>> = vec![];
 
@@ -2766,6 +3491,12 @@ impl TbTestMapper {
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestMapper>> {
         self.data_map.get(key).map(|x| x.clone())
     }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data_list.iter_mut().for_each(|mut x| {
+           let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestMapper as *mut crate::test::TestMapper); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+        });
+    }
 }
 
 impl std::ops::Index<i32> for TbTestMapper {
@@ -2779,17 +3510,17 @@ impl std::ops::Index<i32> for TbTestMapper {
 
 #[derive(Debug)]
 pub struct TbDefineFromExcel2 {
-    pub data_list: Vec<std::sync::Arc<crate::DefineFromExcel2>>,
-    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::DefineFromExcel2>>,
+    pub data_list: Vec<std::sync::Arc<crate::test::DefineFromExcel2>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::DefineFromExcel2>>,
 }
 
 impl TbDefineFromExcel2 {
-    pub fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbDefineFromExcel2>, LubanError> {
-        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::DefineFromExcel2>> = Default::default();
-        let mut data_list: Vec<std::sync::Arc<crate::DefineFromExcel2>> = vec![];
+    pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbDefineFromExcel2>, LubanError> {
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::DefineFromExcel2>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<crate::test::DefineFromExcel2>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
-            let row = std::sync::Arc::new(crate::DefineFromExcel2::new(&mut buf)?);
+            let row = std::sync::Arc::new(crate::test::DefineFromExcel2::new(&mut buf)?);
             data_list.push(row.clone());
             data_map.insert(row.id.clone(), row.clone());
         }
@@ -2797,13 +3528,19 @@ impl TbDefineFromExcel2 {
         Ok(std::sync::Arc::new(TbDefineFromExcel2 { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::DefineFromExcel2>> {
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::DefineFromExcel2>> {
         self.data_map.get(key).map(|x| x.clone())
+    }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data_list.iter_mut().for_each(|mut x| {
+           let mut b = Box::from_raw(x.as_ref() as *const crate::test::DefineFromExcel2 as *mut crate::test::DefineFromExcel2); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+        });
     }
 }
 
 impl std::ops::Index<i32> for TbDefineFromExcel2 {
-    type Output = std::sync::Arc<crate::DefineFromExcel2>;
+    type Output = std::sync::Arc<crate::test::DefineFromExcel2>;
 
     fn index(&self, index: i32) -> &Self::Output {
         &self.data_map.get(&index).unwrap()
@@ -2811,3 +3548,41 @@ impl std::ops::Index<i32> for TbDefineFromExcel2 {
 }
 
 
+#[derive(Debug)]
+pub struct TbAutoImport2 {
+    pub data_list: Vec<std::sync::Arc<crate::test::AutoImport2>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::AutoImport2>>,
+}
+
+impl TbAutoImport2 {
+    pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbAutoImport2>, LubanError> {
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::AutoImport2>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<crate::test::AutoImport2>> = vec![];
+
+        for x in (0..buf.read_size()).rev() {
+            let row = std::sync::Arc::new(crate::test::AutoImport2::new(&mut buf)?);
+            data_list.push(row.clone());
+            data_map.insert(row.id.clone(), row.clone());
+        }
+
+        Ok(std::sync::Arc::new(TbAutoImport2 { data_map, data_list }))
+    }
+
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::AutoImport2>> {
+        self.data_map.get(key).map(|x| x.clone())
+    }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data_list.iter_mut().for_each(|mut x| {
+           let mut b = Box::from_raw(x.as_ref() as *const crate::test::AutoImport2 as *mut crate::test::AutoImport2); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+        });
+    }
+}
+
+impl std::ops::Index<i32> for TbAutoImport2 {
+    type Output = std::sync::Arc<crate::test::AutoImport2>;
+
+    fn index(&self, index: i32) -> &Self::Output {
+        &self.data_map.get(&index).unwrap()
+    }
+}

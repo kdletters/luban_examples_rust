@@ -7,7 +7,7 @@
 </auto-generated>
 */
 
-pub mod prelude{
+pub mod prelude {
     pub use crate::*;
     pub use crate::ai::*;
     pub use crate::common::*;
@@ -17,12 +17,6 @@ pub mod prelude{
     pub use crate::test::*;
     pub use crate::test::login::*;
     pub use crate::test2::*;
-}
-
-type AbstractBase = dyn std::any::Any + Sync + Send;
-
-pub trait GetBase<'a, T> {
-    fn get_base(&'a self) -> Result<T, LubanError>;
 }
 
 #[derive(Debug)]
@@ -76,6 +70,7 @@ pub struct Tables{
     pub TbTestRef: std::sync::Arc<crate::test::TbTestRef>,
     pub TbTestSize: std::sync::Arc<crate::test::TbTestSize>,
     pub TbTestSet: std::sync::Arc<crate::test::TbTestSet>,
+    pub TbTestRange: std::sync::Arc<crate::test::TbTestRange>,
     pub TbDetectCsvEncoding: std::sync::Arc<crate::test::TbDetectCsvEncoding>,
     pub TbItem2: std::sync::Arc<crate::test::TbItem2>,
     pub TbTestIndex: std::sync::Arc<crate::test::TbTestIndex>,
@@ -87,13 +82,18 @@ pub struct Tables{
     pub TbExcelFromJsonMultiRow: std::sync::Arc<crate::test::TbExcelFromJsonMultiRow>,
     pub TbTestScriptableObject: std::sync::Arc<crate::test::TbTestScriptableObject>,
     pub TbPath: std::sync::Arc<crate::test::TbPath>,
+    pub TbTestFieldAlias: std::sync::Arc<crate::test::TbTestFieldAlias>,
+    pub TbTestFieldVariant: std::sync::Arc<crate::test::TbTestFieldVariant>,
+    pub TbTestFieldVariant2: std::sync::Arc<crate::test::TbTestFieldVariant2>,
     pub TbTestMapper: std::sync::Arc<crate::test::TbTestMapper>,
     pub TbDefineFromExcel2: std::sync::Arc<crate::test::TbDefineFromExcel2>,
+    pub TbAutoImport1: std::sync::Arc<crate::TbAutoImport1>,
+    pub TbAutoImport2: std::sync::Arc<crate::test::TbAutoImport2>,
 }
 
 impl Tables {
     pub fn new<T: Fn(&str) -> Result<ByteBuf, LubanError>>(loader: T) -> Result<Tables, LubanError> {
-        Ok(Tables {
+        let mut tables =Tables{
             TbBlackboard: crate::ai::TbBlackboard::new(loader("ai_tbblackboard")?)?,
             TbBehaviorTree: crate::ai::TbBehaviorTree::new(loader("ai_tbbehaviortree")?)?,
             TbGlobalConfig: crate::common::TbGlobalConfig::new(loader("common_tbglobalconfig")?)?,
@@ -123,6 +123,7 @@ impl Tables {
             TbTestRef: crate::test::TbTestRef::new(loader("test_tbtestref")?)?,
             TbTestSize: crate::test::TbTestSize::new(loader("test_tbtestsize")?)?,
             TbTestSet: crate::test::TbTestSet::new(loader("test_tbtestset")?)?,
+            TbTestRange: crate::test::TbTestRange::new(loader("test_tbtestrange")?)?,
             TbDetectCsvEncoding: crate::test::TbDetectCsvEncoding::new(loader("test_tbdetectcsvencoding")?)?,
             TbItem2: crate::test::TbItem2::new(loader("test_tbitem2")?)?,
             TbTestIndex: crate::test::TbTestIndex::new(loader("test_tbtestindex")?)?,
@@ -134,9 +135,67 @@ impl Tables {
             TbExcelFromJsonMultiRow: crate::test::TbExcelFromJsonMultiRow::new(loader("test_tbexcelfromjsonmultirow")?)?,
             TbTestScriptableObject: crate::test::TbTestScriptableObject::new(loader("test_tbtestscriptableobject")?)?,
             TbPath: crate::test::TbPath::new(loader("test_tbpath")?)?,
+            TbTestFieldAlias: crate::test::TbTestFieldAlias::new(loader("test_tbtestfieldalias")?)?,
+            TbTestFieldVariant: crate::test::TbTestFieldVariant::new(loader("test_tbtestfieldvariant")?)?,
+            TbTestFieldVariant2: crate::test::TbTestFieldVariant2::new(loader("test_tbtestfieldvariant2")?)?,
             TbTestMapper: crate::test::TbTestMapper::new(loader("test_tbtestmapper")?)?,
             TbDefineFromExcel2: crate::test::TbDefineFromExcel2::new(loader("test_tbdefinefromexcel2")?)?,
-        })
+            TbAutoImport1: crate::TbAutoImport1::new(loader("tbautoimport1")?)?,
+            TbAutoImport2: crate::test::TbAutoImport2::new(loader("test_tbautoimport2")?)?,
+        };
+        unsafe { tables.resolve_ref(); }
+        Ok(tables)
+    }
+
+    unsafe fn resolve_ref(&mut self) {
+        let mut b = Box::from_raw(self.TbBlackboard.as_ref() as *const crate::ai::TbBlackboard as *mut crate::ai::TbBlackboard); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbBehaviorTree.as_ref() as *const crate::ai::TbBehaviorTree as *mut crate::ai::TbBehaviorTree); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbGlobalConfig.as_ref() as *const crate::common::TbGlobalConfig as *mut crate::common::TbGlobalConfig); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbItem.as_ref() as *const crate::item::TbItem as *mut crate::item::TbItem); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbL10NDemo.as_ref() as *const crate::l10n::TbL10NDemo as *mut crate::l10n::TbL10NDemo); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbPatchDemo.as_ref() as *const crate::l10n::TbPatchDemo as *mut crate::l10n::TbPatchDemo); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbTestTag.as_ref() as *const crate::tag::TbTestTag as *mut crate::tag::TbTestTag); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbFullTypes.as_ref() as *const crate::test::TbFullTypes as *mut crate::test::TbFullTypes); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbSingleton.as_ref() as *const crate::test::TbSingleton as *mut crate::test::TbSingleton); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbNotIndexList.as_ref() as *const crate::test::TbNotIndexList as *mut crate::test::TbNotIndexList); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbMultiUnionIndexList.as_ref() as *const crate::test::TbMultiUnionIndexList as *mut crate::test::TbMultiUnionIndexList); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbMultiIndexList.as_ref() as *const crate::test::TbMultiIndexList as *mut crate::test::TbMultiIndexList); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbDataFromMisc.as_ref() as *const crate::test::TbDataFromMisc as *mut crate::test::TbDataFromMisc); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbMultiRowRecord.as_ref() as *const crate::test::TbMultiRowRecord as *mut crate::test::TbMultiRowRecord); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbTestMultiColumn.as_ref() as *const crate::test::TbTestMultiColumn as *mut crate::test::TbTestMultiColumn); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbMultiRowTitle.as_ref() as *const crate::test::TbMultiRowTitle as *mut crate::test::TbMultiRowTitle); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbTestNull.as_ref() as *const crate::test::TbTestNull as *mut crate::test::TbTestNull); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbDemoPrimitive.as_ref() as *const crate::test::TbDemoPrimitive as *mut crate::test::TbDemoPrimitive); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbTestString.as_ref() as *const crate::test::TbTestString as *mut crate::test::TbTestString); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbDemoGroup.as_ref() as *const crate::test::TbDemoGroup as *mut crate::test::TbDemoGroup); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbDemoGroup_C.as_ref() as *const crate::test::TbDemoGroup_C as *mut crate::test::TbDemoGroup_C); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbDemoGroup_S.as_ref() as *const crate::test::TbDemoGroup_S as *mut crate::test::TbDemoGroup_S); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbDemoGroup_E.as_ref() as *const crate::test::TbDemoGroup_E as *mut crate::test::TbDemoGroup_E); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbTestGlobal.as_ref() as *const crate::test::TbTestGlobal as *mut crate::test::TbTestGlobal); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbTestBeRef.as_ref() as *const crate::test::TbTestBeRef as *mut crate::test::TbTestBeRef); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbTestBeRef2.as_ref() as *const crate::test::TbTestBeRef2 as *mut crate::test::TbTestBeRef2); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbTestRef.as_ref() as *const crate::test::TbTestRef as *mut crate::test::TbTestRef); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbTestSize.as_ref() as *const crate::test::TbTestSize as *mut crate::test::TbTestSize); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbTestSet.as_ref() as *const crate::test::TbTestSet as *mut crate::test::TbTestSet); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbTestRange.as_ref() as *const crate::test::TbTestRange as *mut crate::test::TbTestRange); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbDetectCsvEncoding.as_ref() as *const crate::test::TbDetectCsvEncoding as *mut crate::test::TbDetectCsvEncoding); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbItem2.as_ref() as *const crate::test::TbItem2 as *mut crate::test::TbItem2); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbTestIndex.as_ref() as *const crate::test::TbTestIndex as *mut crate::test::TbTestIndex); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbTestMap.as_ref() as *const crate::test::TbTestMap as *mut crate::test::TbTestMap); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbExcelFromJson.as_ref() as *const crate::test::TbExcelFromJson as *mut crate::test::TbExcelFromJson); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbCompositeJsonTable1.as_ref() as *const crate::test::TbCompositeJsonTable1 as *mut crate::test::TbCompositeJsonTable1); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbCompositeJsonTable2.as_ref() as *const crate::test::TbCompositeJsonTable2 as *mut crate::test::TbCompositeJsonTable2); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbCompositeJsonTable3.as_ref() as *const crate::test::TbCompositeJsonTable3 as *mut crate::test::TbCompositeJsonTable3); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbExcelFromJsonMultiRow.as_ref() as *const crate::test::TbExcelFromJsonMultiRow as *mut crate::test::TbExcelFromJsonMultiRow); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbTestScriptableObject.as_ref() as *const crate::test::TbTestScriptableObject as *mut crate::test::TbTestScriptableObject); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbPath.as_ref() as *const crate::test::TbPath as *mut crate::test::TbPath); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbTestFieldAlias.as_ref() as *const crate::test::TbTestFieldAlias as *mut crate::test::TbTestFieldAlias); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbTestFieldVariant.as_ref() as *const crate::test::TbTestFieldVariant as *mut crate::test::TbTestFieldVariant); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbTestFieldVariant2.as_ref() as *const crate::test::TbTestFieldVariant2 as *mut crate::test::TbTestFieldVariant2); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbTestMapper.as_ref() as *const crate::test::TbTestMapper as *mut crate::test::TbTestMapper); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbDefineFromExcel2.as_ref() as *const crate::test::TbDefineFromExcel2 as *mut crate::test::TbDefineFromExcel2); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbAutoImport1.as_ref() as *const crate::TbAutoImport1 as *mut crate::TbAutoImport1); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbAutoImport2.as_ref() as *const crate::test::TbAutoImport2 as *mut crate::test::TbAutoImport2); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
     }
 }
 pub mod ai;
@@ -158,7 +217,7 @@ pub enum AudioType {
 
 impl From<i32> for AudioType {
     fn from(value: i32) -> Self {
-        match value { 
+        match value {
             0 => AudioType::UNKNOWN,
             1 => AudioType::ACC,
             2 => AudioType::AIFF,
@@ -168,64 +227,7 @@ impl From<i32> for AudioType {
 }
 
 #[derive(Debug)]
-pub struct vec2 {
-    pub x: f32,
-    pub y: f32,
-}
-
-impl vec2{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<vec2, LubanError> {
-        let x = buf.read_float();
-        let y = buf.read_float();
-        
-        Ok(vec2 { x, y, })
-    }
-
-    pub const __ID__: i32 = 3615518;
-}
-
-#[derive(Debug)]
-pub struct vec3 {
-    pub x: f32,
-    pub y: f32,
-    pub z: f32,
-}
-
-impl vec3{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<vec3, LubanError> {
-        let x = buf.read_float();
-        let y = buf.read_float();
-        let z = buf.read_float();
-        
-        Ok(vec3 { x, y, z, })
-    }
-
-    pub const __ID__: i32 = 3615519;
-}
-
-#[derive(Debug)]
-pub struct vec4 {
-    pub x: f32,
-    pub y: f32,
-    pub z: f32,
-    pub w: f32,
-}
-
-impl vec4{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<vec4, LubanError> {
-        let x = buf.read_float();
-        let y = buf.read_float();
-        let z = buf.read_float();
-        let w = buf.read_float();
-        
-        Ok(vec4 { x, y, z, w, })
-    }
-
-    pub const __ID__: i32 = 3615520;
-}
-
-#[derive(Debug)]
-pub struct DefineFromExcel2 {
+pub struct AutoImport1 {
     /// 这是id
     pub id: i32,
     /// 字段x1
@@ -236,8 +238,8 @@ pub struct DefineFromExcel2 {
     pub x10: String,
     pub x13: crate::test::DemoEnum,
     pub x13_2: crate::test::DemoFlag,
-    pub x14: std::sync::Arc<AbstractBase>,
-    pub x15: std::sync::Arc<AbstractBase>,
+    pub x14: crate::test::DemoDynamic,
+    pub x15: crate::test::Shape,
     pub v2: crate::vec2,
     pub t1: u64,
     pub k1: Vec<i32>,
@@ -249,8 +251,8 @@ pub struct DefineFromExcel2 {
     pub v11: Option<crate::vec3>,
 }
 
-impl DefineFromExcel2{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<DefineFromExcel2, LubanError> {
+impl AutoImport1{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<AutoImport1, LubanError> {
         let id = buf.read_int();
         let x1 = buf.read_bool();
         let x5 = buf.read_long();
@@ -271,10 +273,121 @@ impl DefineFromExcel2{
         let k11 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::vec4::new(&mut buf)?); } _e0 };
         let mut v11 = if buf.read_bool() { Some(crate::vec3::new(&mut buf)?) } else { None };
         
-        Ok(DefineFromExcel2 { id, x1, x5, x6, x8, x10, x13, x13_2, x14, x15, v2, t1, k1, k2, k8, k9, k10, k11, v11, })
+        Ok(AutoImport1 { id, x1, x5, x6, x8, x10, x13, x13_2, x14, x15, v2, t1, k1, k2, k8, k9, k10, k11, v11, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.x14.resolve_ref(tables);
+        self.x15.resolve_ref(tables);
     }
 
-    pub const __ID__: i32 = 482045152;
+    pub const __ID__: i32 = -2092142499;
+}
+
+#[derive(Debug)]
+pub struct vec2 {
+    pub x: f32,
+    pub y: f32,
+}
+
+impl vec2{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<vec2, LubanError> {
+        let x = buf.read_float();
+        let y = buf.read_float();
+        
+        Ok(vec2 { x, y, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = 3615518;
+}
+
+#[derive(Debug)]
+pub struct vec3 {
+    pub x: f32,
+    pub y: f32,
+    pub z: f32,
+}
+
+impl vec3{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<vec3, LubanError> {
+        let x = buf.read_float();
+        let y = buf.read_float();
+        let z = buf.read_float();
+        
+        Ok(vec3 { x, y, z, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = 3615519;
+}
+
+#[derive(Debug)]
+pub struct vec4 {
+    pub x: f32,
+    pub y: f32,
+    pub z: f32,
+    pub w: f32,
+}
+
+impl vec4{
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<vec4, LubanError> {
+        let x = buf.read_float();
+        let y = buf.read_float();
+        let z = buf.read_float();
+        let w = buf.read_float();
+        
+        Ok(vec4 { x, y, z, w, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+
+    pub const __ID__: i32 = 3615520;
+}
+
+
+#[derive(Debug)]
+pub struct TbAutoImport1 {
+    pub data_list: Vec<std::sync::Arc<crate::AutoImport1>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::AutoImport1>>,
+}
+
+impl TbAutoImport1 {
+    pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbAutoImport1>, LubanError> {
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::AutoImport1>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<crate::AutoImport1>> = vec![];
+
+        for x in (0..buf.read_size()).rev() {
+            let row = std::sync::Arc::new(crate::AutoImport1::new(&mut buf)?);
+            data_list.push(row.clone());
+            data_map.insert(row.id.clone(), row.clone());
+        }
+
+        Ok(std::sync::Arc::new(TbAutoImport1 { data_map, data_list }))
+    }
+
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::AutoImport1>> {
+        self.data_map.get(key).map(|x| x.clone())
+    }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data_list.iter_mut().for_each(|mut x| {
+           let mut b = Box::from_raw(x.as_ref() as *const crate::AutoImport1 as *mut crate::AutoImport1); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+        });
+    }
+}
+
+impl std::ops::Index<i32> for TbAutoImport1 {
+    type Output = std::sync::Arc<crate::AutoImport1>;
+
+    fn index(&self, index: i32) -> &Self::Output {
+        &self.data_map.get(&index).unwrap()
+    }
 }
 
 

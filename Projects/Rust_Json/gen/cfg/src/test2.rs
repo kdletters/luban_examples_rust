@@ -12,7 +12,6 @@ use super::*;
 use serde::Deserialize;
 
 #[derive(Debug)]
-#[derive(macros::TryIntoBase)]
 pub struct Rectangle {
     /// 宽度
     pub width: f32,
@@ -21,11 +20,14 @@ pub struct Rectangle {
 }
 
 impl Rectangle{
-    pub fn new(json: &serde_json::Value) -> Result<Rectangle, LubanError> {
+    pub(crate) fn new(json: &serde_json::Value) -> Result<Rectangle, LubanError> {
         let width = (json["width"].as_f64().unwrap() as f32);
         let height = (json["height"].as_f64().unwrap() as f32);
         
         Ok(Rectangle { width, height, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
     }
 }
 

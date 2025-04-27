@@ -12,7 +12,6 @@ use super::*;
 use luban_lib::*;
 
 #[derive(Debug)]
-#[derive(macros::TryIntoBase)]
 pub struct Rectangle {
     /// 宽度
     pub width: f32,
@@ -21,11 +20,14 @@ pub struct Rectangle {
 }
 
 impl Rectangle{
-    pub fn new(mut buf: &mut ByteBuf) -> Result<Rectangle, LubanError> {
+    pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<Rectangle, LubanError> {
         let width = buf.read_float();
         let height = buf.read_float();
         
         Ok(Rectangle { width, height, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
     }
 
     pub const __ID__: i32 = 694982337;
