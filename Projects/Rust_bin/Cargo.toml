@@ -1,4 +1,4 @@
-workspace = { members = ["luban_lib", "gen/cfg"] }
+workspace = { members = ["gen/luban_lib", "gen/cfg", "rust_mapper"] }
 [package]
 name = "Rust_bin"
 version = "0.1.0"
@@ -9,4 +9,4 @@ edition = "2021"
 [dependencies]
 lazy_static = "1.4.0"
 cfg = { path = "gen/cfg"}
-luban_lib = { path = "luban_lib"}
+luban_lib = { path = "gen/luban_lib"}

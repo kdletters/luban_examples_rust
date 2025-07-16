@@ -309,6 +309,7 @@ pub struct DefineFromExcel2 {
     pub x10: String,
     pub x13: crate::test::DemoEnum,
     pub x13_2: crate::test::DemoFlag,
+    pub x13_3: crate::test::DemoFlag,
     pub x14: crate::test::DemoDynamic,
     pub x15: crate::test::Shape,
     pub v2: crate::vec2,
@@ -332,6 +333,7 @@ impl DefineFromExcel2{
         let x10 = json["x10"].as_str().unwrap().to_string();
         let x13 = json["x13"].as_i64().unwrap().into();
         let x13_2 = crate::test::DemoFlag::from_bits_truncate(<u32 as std::str::FromStr>::from_str(&json["x13_2"].to_string()).unwrap());
+        let x13_3 = crate::test::DemoFlag::from_bits_truncate(<u32 as std::str::FromStr>::from_str(&json["x13_3"].to_string()).unwrap());
         let x14 = crate::test::DemoDynamic::new(&json["x14"])?;
         let x15 = crate::test::Shape::new(&json["x15"])?;
         let v2 = crate::vec2::new(&json["v2"])?;
@@ -344,7 +346,7 @@ impl DefineFromExcel2{
         let k11 = json["k11"].as_array().unwrap().iter().map(|field| crate::vec4::new(&field).unwrap()).collect();
         let mut v11 = None; if let Some(value) = json.get("v11") { v11 = Some(crate::vec3::new(&json["v11"])?); }
         
-        Ok(DefineFromExcel2 { id, x1, x5, x6, x8, x10, x13, x13_2, x14, x15, v2, t1, k1, k2, k8, k9, k10, k11, v11, })
+        Ok(DefineFromExcel2 { id, x1, x5, x6, x8, x10, x13, x13_2, x13_3, x14, x15, v2, t1, k1, k2, k8, k9, k10, k11, v11, })
     }    
 
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
@@ -1489,6 +1491,70 @@ impl TestFieldVariant2{
 }
 
 #[derive(Debug)]
+pub struct TestFormat {
+    pub id: i32,
+    pub a1: Vec<i32>,
+    pub a2: Vec<i32>,
+    pub a3: Vec<i32>,
+    pub a4: Vec<i32>,
+    pub b1: Vec<i32>,
+    pub b2: Vec<i32>,
+    pub b3: Vec<i32>,
+    pub b4: Vec<i32>,
+    pub c1: std::collections::HashSet<i32>,
+    pub c2: std::collections::HashSet<i32>,
+    pub c3: std::collections::HashSet<i32>,
+    pub c4: std::collections::HashSet<i32>,
+    pub m1: std::collections::HashMap<i32, i32>,
+    pub m2: std::collections::HashMap<i32, i32>,
+    pub m3: std::collections::HashMap<i32, i32>,
+    pub m4: std::collections::HashMap<i32, i32>,
+    pub v31: crate::vec3,
+    pub v32: crate::vec3,
+    pub v33: crate::vec3,
+    pub v34: crate::vec3,
+    pub v41: Vec<crate::vec3>,
+    pub v42: Vec<crate::vec3>,
+    pub v43: Vec<crate::vec3>,
+    pub v44: Vec<crate::vec3>,
+}
+
+impl TestFormat{
+    pub(crate) fn new(json: &serde_json::Value) -> Result<TestFormat, LubanError> {
+        let id = (json["id"].as_i64().unwrap() as i32);
+        let a1 = json["a1"].as_array().unwrap().iter().map(|field| (field.as_i64().unwrap() as i32)).collect();
+        let a2 = json["a2"].as_array().unwrap().iter().map(|field| (field.as_i64().unwrap() as i32)).collect();
+        let a3 = json["a3"].as_array().unwrap().iter().map(|field| (field.as_i64().unwrap() as i32)).collect();
+        let a4 = json["a4"].as_array().unwrap().iter().map(|field| (field.as_i64().unwrap() as i32)).collect();
+        let b1 = json["b1"].as_array().unwrap().iter().map(|field| (field.as_i64().unwrap() as i32)).collect();
+        let b2 = json["b2"].as_array().unwrap().iter().map(|field| (field.as_i64().unwrap() as i32)).collect();
+        let b3 = json["b3"].as_array().unwrap().iter().map(|field| (field.as_i64().unwrap() as i32)).collect();
+        let b4 = json["b4"].as_array().unwrap().iter().map(|field| (field.as_i64().unwrap() as i32)).collect();
+        let c1 = json["c1"].as_array().unwrap().iter().map(|field| (field.as_i64().unwrap() as i32)).collect();
+        let c2 = json["c2"].as_array().unwrap().iter().map(|field| (field.as_i64().unwrap() as i32)).collect();
+        let c3 = json["c3"].as_array().unwrap().iter().map(|field| (field.as_i64().unwrap() as i32)).collect();
+        let c4 = json["c4"].as_array().unwrap().iter().map(|field| (field.as_i64().unwrap() as i32)).collect();
+        let m1 = std::collections::HashMap::from_iter(json["m1"].as_array().unwrap().iter().map(|x| {let array = x.as_array().unwrap();((array[0].as_i64().unwrap() as i32), (array[1].as_i64().unwrap() as i32))}).collect::<Vec<(i32, i32)>>());
+        let m2 = std::collections::HashMap::from_iter(json["m2"].as_array().unwrap().iter().map(|x| {let array = x.as_array().unwrap();((array[0].as_i64().unwrap() as i32), (array[1].as_i64().unwrap() as i32))}).collect::<Vec<(i32, i32)>>());
+        let m3 = std::collections::HashMap::from_iter(json["m3"].as_array().unwrap().iter().map(|x| {let array = x.as_array().unwrap();((array[0].as_i64().unwrap() as i32), (array[1].as_i64().unwrap() as i32))}).collect::<Vec<(i32, i32)>>());
+        let m4 = std::collections::HashMap::from_iter(json["m4"].as_array().unwrap().iter().map(|x| {let array = x.as_array().unwrap();((array[0].as_i64().unwrap() as i32), (array[1].as_i64().unwrap() as i32))}).collect::<Vec<(i32, i32)>>());
+        let v31 = crate::vec3::new(&json["v31"])?;
+        let v32 = crate::vec3::new(&json["v32"])?;
+        let v33 = crate::vec3::new(&json["v33"])?;
+        let v34 = crate::vec3::new(&json["v34"])?;
+        let v41 = json["v41"].as_array().unwrap().iter().map(|field| crate::vec3::new(&field).unwrap()).collect();
+        let v42 = json["v42"].as_array().unwrap().iter().map(|field| crate::vec3::new(&field).unwrap()).collect();
+        let v43 = json["v43"].as_array().unwrap().iter().map(|field| crate::vec3::new(&field).unwrap()).collect();
+        let v44 = json["v44"].as_array().unwrap().iter().map(|field| crate::vec3::new(&field).unwrap()).collect();
+        
+        Ok(TestFormat { id, a1, a2, a3, a4, b1, b2, b3, b4, c1, c2, c3, c4, m1, m2, m3, m4, v31, v32, v33, v34, v41, v42, v43, v44, })
+    }    
+
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+    }
+}
+
+#[derive(Debug)]
 pub struct TestGlobal {
     pub unlock_equip: i32,
     pub unlock_hero: i32,
@@ -1869,6 +1935,8 @@ pub struct TestString {
     pub s2: String,
     pub cs1: crate::test::CompactString,
     pub cs2: crate::test::CompactString,
+    pub css: Vec<String>,
+    pub css2: Vec<String>,
 }
 
 impl TestString{
@@ -1878,8 +1946,10 @@ impl TestString{
         let s2 = json["s2"].as_str().unwrap().to_string();
         let cs1 = crate::test::CompactString::new(&json["cs1"])?;
         let cs2 = crate::test::CompactString::new(&json["cs2"])?;
+        let css = json["css"].as_array().unwrap().iter().map(|field| field.as_str().unwrap().to_string()).collect();
+        let css2 = json["css2"].as_array().unwrap().iter().map(|field| field.as_str().unwrap().to_string()).collect();
         
-        Ok(TestString { id, s1, s2, cs1, cs2, })
+        Ok(TestString { id, s1, s2, cs1, cs2, css, css2, })
     }    
 
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
@@ -2046,7 +2116,7 @@ impl TbMultiUnionIndexList {
         }))
     }
     
-    pub fn get(&self, key: &(i32, i64, String)) -> Option<std::sync::Arc<crate::test::MultiUnionIndexList>> {
+    pub fn get(&self, key: &(i32, i64, str)) -> Option<std::sync::Arc<crate::test::MultiUnionIndexList>> {
         self.data_map_union.get(key).map(|x| x.clone())
     }
     
@@ -2096,7 +2166,7 @@ impl TbMultiIndexList {
     pub fn get_by_id2(&self, key: &i64) -> Option<std::sync::Arc<crate::test::MultiIndexList>> {
         self.data_map_id2.get(key).map(|x| x.clone())
     }
-    pub fn get_by_id3(&self, key: &String) -> Option<std::sync::Arc<crate::test::MultiIndexList>> {
+    pub fn get_by_id3(&self, key: &str) -> Option<std::sync::Arc<crate::test::MultiIndexList>> {
         self.data_map_id3.get(key).map(|x| x.clone())
     }
     
@@ -2368,7 +2438,7 @@ impl TbTestString {
         Ok(std::sync::Arc::new(TbTestString { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &String) -> Option<std::sync::Arc<crate::test::TestString>> {
+    pub fn get(&self, key: &str) -> Option<std::sync::Arc<crate::test::TestString>> {
         self.data_map.get(key).map(|x| x.clone())
     }
     
@@ -3461,6 +3531,46 @@ impl TbAutoImport2 {
 
 impl std::ops::Index<i32> for TbAutoImport2 {
     type Output = std::sync::Arc<crate::test::AutoImport2>;
+
+    fn index(&self, index: i32) -> &Self::Output {
+        &self.data_map.get(&index).unwrap()
+    }
+}
+
+
+#[derive(Debug)]
+pub struct TbTestFormat {
+    pub data_list: Vec<std::sync::Arc<crate::test::TestFormat>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestFormat>>,
+}
+
+impl TbTestFormat {
+    pub(crate) fn new(json: &serde_json::Value) -> Result<std::sync::Arc<TbTestFormat>, LubanError> {
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestFormat>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<crate::test::TestFormat>> = vec![];
+
+        for x in json.as_array().unwrap() {
+            let row = std::sync::Arc::new(crate::test::TestFormat::new(&x)?);
+            data_list.push(row.clone());
+            data_map.insert(row.id.clone(), row.clone());
+        }
+
+        Ok(std::sync::Arc::new(TbTestFormat { data_map, data_list }))
+    }
+
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestFormat>> {
+        self.data_map.get(key).map(|x| x.clone())
+    }
+    
+    pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
+        self.data_list.iter_mut().for_each(|mut x| {
+           let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestFormat as *mut crate::test::TestFormat); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+        });
+    }
+}
+
+impl std::ops::Index<i32> for TbTestFormat {
+    type Output = std::sync::Arc<crate::test::TestFormat>;
 
     fn index(&self, index: i32) -> &Self::Output {
         &self.data_map.get(&index).unwrap()

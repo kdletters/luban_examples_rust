@@ -7,6 +7,8 @@
 </auto-generated>
 */
 
+#![allow(warnings)]
+#![allow(clippy::all)]
 pub mod prelude {
     pub use crate::*;
     pub use crate::ai::*;
@@ -89,6 +91,7 @@ pub struct Tables{
     pub TbDefineFromExcel2: std::sync::Arc<crate::test::TbDefineFromExcel2>,
     pub TbAutoImport1: std::sync::Arc<crate::TbAutoImport1>,
     pub TbAutoImport2: std::sync::Arc<crate::test::TbAutoImport2>,
+    pub TbTestFormat: std::sync::Arc<crate::test::TbTestFormat>,
 }
 
 impl Tables {
@@ -142,6 +145,7 @@ impl Tables {
             TbDefineFromExcel2: crate::test::TbDefineFromExcel2::new(&loader("test_tbdefinefromexcel2")?)?,
             TbAutoImport1: crate::TbAutoImport1::new(&loader("tbautoimport1")?)?,
             TbAutoImport2: crate::test::TbAutoImport2::new(&loader("test_tbautoimport2")?)?,
+            TbTestFormat: crate::test::TbTestFormat::new(&loader("test_tbtestformat")?)?,
         };
         unsafe { tables.resolve_ref(); }
         Ok(tables)
@@ -196,6 +200,7 @@ impl Tables {
         let mut b = Box::from_raw(self.TbDefineFromExcel2.as_ref() as *const crate::test::TbDefineFromExcel2 as *mut crate::test::TbDefineFromExcel2); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
         let mut b = Box::from_raw(self.TbAutoImport1.as_ref() as *const crate::TbAutoImport1 as *mut crate::TbAutoImport1); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
         let mut b = Box::from_raw(self.TbAutoImport2.as_ref() as *const crate::test::TbAutoImport2 as *mut crate::test::TbAutoImport2); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
+        let mut b = Box::from_raw(self.TbTestFormat.as_ref() as *const crate::test::TbTestFormat as *mut crate::test::TbTestFormat); b.as_mut().resolve_ref(self); let _ = Box::into_raw(b);
     }
 }
 pub mod ai;
