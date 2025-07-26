@@ -2151,7 +2151,7 @@ impl TbFullTypes {
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::DemoType2>> {
         self.data_map.get(key).map(|x| x.clone())
     }
-
+    
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
            let mut b = Box::from_raw(x.as_ref() as *const crate::test::DemoType2 as *mut crate::test::DemoType2); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
@@ -2201,7 +2201,7 @@ impl TbNotIndexList {
             data_list.push(row.clone());
         }
 
-    Ok(std::sync::Arc::new(TbNotIndexList {
+    Ok(std::sync::Arc::new(TbNotIndexList { 
             data_list,
         }))
     }
@@ -2233,13 +2233,13 @@ impl TbMultiUnionIndexList {
             data_map_union.insert((x.id1, x.id2, x.id3.clone()), x.clone());
         }
 
-    Ok(std::sync::Arc::new(TbMultiUnionIndexList {
+    Ok(std::sync::Arc::new(TbMultiUnionIndexList { 
             data_list,
             data_map_union,
         }))
     }
-
-    pub fn get(&self, key: &(i32, i64, str)) -> Option<std::sync::Arc<crate::test::MultiUnionIndexList>> {
+    
+    pub fn get(&self, key: &(i32, i64, String)) -> Option<std::sync::Arc<crate::test::MultiUnionIndexList>> {
         self.data_map_union.get(key).map(|x| x.clone())
     }
     
@@ -2276,7 +2276,7 @@ impl TbMultiIndexList {
             data_map_id3.insert(x.id3.clone(), x.clone());
         }
 
-    Ok(std::sync::Arc::new(TbMultiIndexList {
+    Ok(std::sync::Arc::new(TbMultiIndexList { 
             data_list,
             data_map_id1,
             data_map_id2,
@@ -2324,7 +2324,7 @@ impl TbDataFromMisc {
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::DemoType2>> {
         self.data_map.get(key).map(|x| x.clone())
     }
-
+    
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
            let mut b = Box::from_raw(x.as_ref() as *const crate::test::DemoType2 as *mut crate::test::DemoType2); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
@@ -2364,7 +2364,7 @@ impl TbMultiRowRecord {
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::MultiRowRecord>> {
         self.data_map.get(key).map(|x| x.clone())
     }
-
+    
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
            let mut b = Box::from_raw(x.as_ref() as *const crate::test::MultiRowRecord as *mut crate::test::MultiRowRecord); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
@@ -2404,7 +2404,7 @@ impl TbTestMultiColumn {
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestMultiColumn>> {
         self.data_map.get(key).map(|x| x.clone())
     }
-
+    
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
            let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestMultiColumn as *mut crate::test::TestMultiColumn); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
@@ -2444,7 +2444,7 @@ impl TbMultiRowTitle {
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::MultiRowTitle>> {
         self.data_map.get(key).map(|x| x.clone())
     }
-
+    
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
            let mut b = Box::from_raw(x.as_ref() as *const crate::test::MultiRowTitle as *mut crate::test::MultiRowTitle); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
@@ -2484,7 +2484,7 @@ impl TbTestNull {
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestNull>> {
         self.data_map.get(key).map(|x| x.clone())
     }
-
+    
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
            let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestNull as *mut crate::test::TestNull); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
@@ -2524,7 +2524,7 @@ impl TbDemoPrimitive {
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::DemoPrimitiveTypesTable>> {
         self.data_map.get(key).map(|x| x.clone())
     }
-
+    
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
            let mut b = Box::from_raw(x.as_ref() as *const crate::test::DemoPrimitiveTypesTable as *mut crate::test::DemoPrimitiveTypesTable); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
@@ -2561,10 +2561,10 @@ impl TbTestString {
         Ok(std::sync::Arc::new(TbTestString { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &str) -> Option<std::sync::Arc<crate::test::TestString>> {
+    pub fn get(&self, key: &String) -> Option<std::sync::Arc<crate::test::TestString>> {
         self.data_map.get(key).map(|x| x.clone())
     }
-
+    
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
            let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestString as *mut crate::test::TestString); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
@@ -2604,7 +2604,7 @@ impl TbDemoGroup {
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::DemoGroup>> {
         self.data_map.get(key).map(|x| x.clone())
     }
-
+    
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
            let mut b = Box::from_raw(x.as_ref() as *const crate::test::DemoGroup as *mut crate::test::DemoGroup); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
@@ -2644,7 +2644,7 @@ impl TbDemoGroup_C {
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::DemoGroup>> {
         self.data_map.get(key).map(|x| x.clone())
     }
-
+    
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
            let mut b = Box::from_raw(x.as_ref() as *const crate::test::DemoGroup as *mut crate::test::DemoGroup); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
@@ -2684,7 +2684,7 @@ impl TbDemoGroup_S {
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::DemoGroup>> {
         self.data_map.get(key).map(|x| x.clone())
     }
-
+    
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
            let mut b = Box::from_raw(x.as_ref() as *const crate::test::DemoGroup as *mut crate::test::DemoGroup); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
@@ -2724,7 +2724,7 @@ impl TbDemoGroup_E {
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::DemoGroup>> {
         self.data_map.get(key).map(|x| x.clone())
     }
-
+    
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
            let mut b = Box::from_raw(x.as_ref() as *const crate::test::DemoGroup as *mut crate::test::DemoGroup); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
@@ -2783,7 +2783,7 @@ impl TbTestBeRef {
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestBeRef>> {
         self.data_map.get(key).map(|x| x.clone())
     }
-
+    
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
            let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestBeRef as *mut crate::test::TestBeRef); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
@@ -2823,7 +2823,7 @@ impl TbTestBeRef2 {
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestBeRef>> {
         self.data_map.get(key).map(|x| x.clone())
     }
-
+    
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
            let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestBeRef as *mut crate::test::TestBeRef); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
@@ -2863,7 +2863,7 @@ impl TbTestRef {
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestRef>> {
         self.data_map.get(key).map(|x| x.clone())
     }
-
+    
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
            let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestRef as *mut crate::test::TestRef); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
@@ -2903,7 +2903,7 @@ impl TbTestSize {
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestSize>> {
         self.data_map.get(key).map(|x| x.clone())
     }
-
+    
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
            let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestSize as *mut crate::test::TestSize); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
@@ -2943,7 +2943,7 @@ impl TbTestSet {
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestSet>> {
         self.data_map.get(key).map(|x| x.clone())
     }
-
+    
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
            let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestSet as *mut crate::test::TestSet); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
@@ -2983,7 +2983,7 @@ impl TbTestRange {
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestRange>> {
         self.data_map.get(key).map(|x| x.clone())
     }
-
+    
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
            let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestRange as *mut crate::test::TestRange); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
@@ -3023,7 +3023,7 @@ impl TbDetectCsvEncoding {
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::DetectEncoding>> {
         self.data_map.get(key).map(|x| x.clone())
     }
-
+    
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
            let mut b = Box::from_raw(x.as_ref() as *const crate::test::DetectEncoding as *mut crate::test::DetectEncoding); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
@@ -3063,7 +3063,7 @@ impl TbItem2 {
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::ItemBase>> {
         self.data_map.get(key).map(|x| x.clone())
     }
-
+    
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
            let mut b = Box::from_raw(x.as_ref() as *const crate::test::ItemBase as *mut crate::test::ItemBase); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
@@ -3103,7 +3103,7 @@ impl TbTestIndex {
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestIndex>> {
         self.data_map.get(key).map(|x| x.clone())
     }
-
+    
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
            let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestIndex as *mut crate::test::TestIndex); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
@@ -3143,7 +3143,7 @@ impl TbTestMap {
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestMap>> {
         self.data_map.get(key).map(|x| x.clone())
     }
-
+    
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
            let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestMap as *mut crate::test::TestMap); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
@@ -3183,7 +3183,7 @@ impl TbExcelFromJson {
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::ExcelFromJson>> {
         self.data_map.get(key).map(|x| x.clone())
     }
-
+    
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
            let mut b = Box::from_raw(x.as_ref() as *const crate::test::ExcelFromJson as *mut crate::test::ExcelFromJson); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
@@ -3223,7 +3223,7 @@ impl TbCompositeJsonTable1 {
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::CompositeJsonTable1>> {
         self.data_map.get(key).map(|x| x.clone())
     }
-
+    
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
            let mut b = Box::from_raw(x.as_ref() as *const crate::test::CompositeJsonTable1 as *mut crate::test::CompositeJsonTable1); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
@@ -3263,7 +3263,7 @@ impl TbCompositeJsonTable2 {
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::CompositeJsonTable2>> {
         self.data_map.get(key).map(|x| x.clone())
     }
-
+    
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
            let mut b = Box::from_raw(x.as_ref() as *const crate::test::CompositeJsonTable2 as *mut crate::test::CompositeJsonTable2); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
@@ -3322,7 +3322,7 @@ impl TbExcelFromJsonMultiRow {
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::ExcelFromJsonMultiRow>> {
         self.data_map.get(key).map(|x| x.clone())
     }
-
+    
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
            let mut b = Box::from_raw(x.as_ref() as *const crate::test::ExcelFromJsonMultiRow as *mut crate::test::ExcelFromJsonMultiRow); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
@@ -3362,7 +3362,7 @@ impl TbTestScriptableObject {
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestScriptableObject>> {
         self.data_map.get(key).map(|x| x.clone())
     }
-
+    
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
            let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestScriptableObject as *mut crate::test::TestScriptableObject); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
@@ -3402,7 +3402,7 @@ impl TbPath {
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::Path>> {
         self.data_map.get(key).map(|x| x.clone())
     }
-
+    
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
            let mut b = Box::from_raw(x.as_ref() as *const crate::test::Path as *mut crate::test::Path); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
@@ -3442,7 +3442,7 @@ impl TbTestFieldAlias {
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestFieldAlias>> {
         self.data_map.get(key).map(|x| x.clone())
     }
-
+    
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
            let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestFieldAlias as *mut crate::test::TestFieldAlias); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
@@ -3482,7 +3482,7 @@ impl TbTestFieldVariant {
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestFieldVariant>> {
         self.data_map.get(key).map(|x| x.clone())
     }
-
+    
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
            let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestFieldVariant as *mut crate::test::TestFieldVariant); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
@@ -3522,7 +3522,7 @@ impl TbTestFieldVariant2 {
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestFieldVariant2>> {
         self.data_map.get(key).map(|x| x.clone())
     }
-
+    
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
            let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestFieldVariant2 as *mut crate::test::TestFieldVariant2); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
@@ -3562,7 +3562,7 @@ impl TbTestMapper {
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestMapper>> {
         self.data_map.get(key).map(|x| x.clone())
     }
-
+    
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
            let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestMapper as *mut crate::test::TestMapper); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
@@ -3602,7 +3602,7 @@ impl TbDefineFromExcel2 {
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::DefineFromExcel2>> {
         self.data_map.get(key).map(|x| x.clone())
     }
-
+    
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
            let mut b = Box::from_raw(x.as_ref() as *const crate::test::DefineFromExcel2 as *mut crate::test::DefineFromExcel2); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
@@ -3642,7 +3642,7 @@ impl TbAutoImport2 {
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::AutoImport2>> {
         self.data_map.get(key).map(|x| x.clone())
     }
-
+    
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
            let mut b = Box::from_raw(x.as_ref() as *const crate::test::AutoImport2 as *mut crate::test::AutoImport2); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
@@ -3682,7 +3682,7 @@ impl TbTestFormat {
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestFormat>> {
         self.data_map.get(key).map(|x| x.clone())
     }
-
+    
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
            let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestFormat as *mut crate::test::TestFormat); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);

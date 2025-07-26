@@ -490,7 +490,7 @@ impl TbItem {
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::item::Item>> {
         self.data_map.get(key).map(|x| x.clone())
     }
-
+    
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
            let mut b = Box::from_raw(x.as_ref() as *const crate::item::Item as *mut crate::item::Item); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);

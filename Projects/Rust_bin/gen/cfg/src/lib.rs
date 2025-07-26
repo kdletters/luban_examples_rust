@@ -379,7 +379,7 @@ impl TbAutoImport1 {
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::AutoImport1>> {
         self.data_map.get(key).map(|x| x.clone())
     }
-
+    
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
            let mut b = Box::from_raw(x.as_ref() as *const crate::AutoImport1 as *mut crate::AutoImport1); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);

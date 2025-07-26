@@ -2116,7 +2116,7 @@ impl TbMultiUnionIndexList {
         }))
     }
     
-    pub fn get(&self, key: &(i32, i64, str)) -> Option<std::sync::Arc<crate::test::MultiUnionIndexList>> {
+    pub fn get(&self, key: &(i32, i64, String)) -> Option<std::sync::Arc<crate::test::MultiUnionIndexList>> {
         self.data_map_union.get(key).map(|x| x.clone())
     }
     
@@ -2166,7 +2166,7 @@ impl TbMultiIndexList {
     pub fn get_by_id2(&self, key: &i64) -> Option<std::sync::Arc<crate::test::MultiIndexList>> {
         self.data_map_id2.get(key).map(|x| x.clone())
     }
-    pub fn get_by_id3(&self, key: &str) -> Option<std::sync::Arc<crate::test::MultiIndexList>> {
+    pub fn get_by_id3(&self, key: &String) -> Option<std::sync::Arc<crate::test::MultiIndexList>> {
         self.data_map_id3.get(key).map(|x| x.clone())
     }
     
@@ -2438,7 +2438,7 @@ impl TbTestString {
         Ok(std::sync::Arc::new(TbTestString { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &str) -> Option<std::sync::Arc<crate::test::TestString>> {
+    pub fn get(&self, key: &String) -> Option<std::sync::Arc<crate::test::TestString>> {
         self.data_map.get(key).map(|x| x.clone())
     }
     

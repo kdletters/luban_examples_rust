@@ -1617,10 +1617,10 @@ impl TbBlackboard {
         Ok(std::sync::Arc::new(TbBlackboard { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &str) -> Option<std::sync::Arc<crate::ai::Blackboard>> {
+    pub fn get(&self, key: &String) -> Option<std::sync::Arc<crate::ai::Blackboard>> {
         self.data_map.get(key).map(|x| x.clone())
     }
-
+    
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
            let mut b = Box::from_raw(x.as_ref() as *const crate::ai::Blackboard as *mut crate::ai::Blackboard); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
@@ -1660,7 +1660,7 @@ impl TbBehaviorTree {
     pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::ai::BehaviorTree>> {
         self.data_map.get(key).map(|x| x.clone())
     }
-
+    
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
            let mut b = Box::from_raw(x.as_ref() as *const crate::ai::BehaviorTree as *mut crate::ai::BehaviorTree); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);

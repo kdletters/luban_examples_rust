@@ -1,4 +1,4 @@
-workspace = { members = ["gen/luban_lib", "gen/cfg", "rust_mapper"] }
+workspace = { members = ["gen/luban_lib", "gen/cfg"] }
 [package]
 name = "Rust_bin"
 version = "0.1.0"

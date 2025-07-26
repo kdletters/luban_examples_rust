@@ -1551,7 +1551,7 @@ impl TbBlackboard {
         Ok(std::sync::Arc::new(TbBlackboard { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &str) -> Option<std::sync::Arc<crate::ai::Blackboard>> {
+    pub fn get(&self, key: &String) -> Option<std::sync::Arc<crate::ai::Blackboard>> {
         self.data_map.get(key).map(|x| x.clone())
     }
     
