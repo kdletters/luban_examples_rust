@@ -83,7 +83,7 @@ bitflags::bitflags! {
     }
 }
 {{~else~}}
-#[derive(Debug, Hash, Eq, PartialEq, macros::EnumFromNum)]
+#[derive(Debug, Hash, Eq, PartialEq, luban_macros::EnumFromNum)]
 pub enum {{enum.name}} {
     {{~ for item in enum.items ~}}
 {{~if item.comment_or_alias != '' ~}}
@@ -125,7 +125,7 @@ impl {{bean.name}} {
         let type_id = buf.read_int();
         match type_id {
             {{~for child in bean.hierarchy_not_abstract_children~}}
-            {{full_name child}}::__ID__ => Ok(Self::{{child.name}}(std::sync::Arc::new({{full_name child}}::new(buf)?))),
+            {{full_name child}}::__ID__ => Ok(Self::{{child.name}}(std::sync::Arc::new({{full_name child}}::new(buf)?{{~if child.has_type_mapper~}}.into(){{~end~}}))),
             {{~end~}}
             _ => Err(LubanError::Bean(format!("Invalid type for {{bean.name}}:{}", type_id)))
         }

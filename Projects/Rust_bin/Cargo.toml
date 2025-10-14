@@ -1,4 +1,3 @@
-workspace = { members = ["gen/luban_lib", "gen/cfg"] }
 [package]
 name = "Rust_bin"
 version = "0.1.0"
@@ -8,5 +7,6 @@ edition = "2021"
 
 [dependencies]
 lazy_static = "1.4.0"
-cfg = { path = "gen/cfg"}
-luban_lib = { path = "gen/luban_lib"}
+bitflags = { version = "2.*", features = ["serde"] }
+luban_lib = "0.1.0"
+luban_macros = "0.1.1"

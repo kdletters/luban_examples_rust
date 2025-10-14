@@ -34,17 +34,17 @@ impl TestTag{
 
 #[derive(Debug)]
 pub struct TbTestTag {
-    pub data_list: Vec<std::sync::Arc<crate::tag::TestTag>>,
-    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::tag::TestTag>>,
+    pub data_list: Vec<std::sync::Arc<tag::TestTag>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<tag::TestTag>>,
 }
 
 impl TbTestTag {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestTag>, LubanError> {
-        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::tag::TestTag>> = Default::default();
-        let mut data_list: Vec<std::sync::Arc<crate::tag::TestTag>> = vec![];
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<tag::TestTag>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<tag::TestTag>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
-            let row = std::sync::Arc::new(crate::tag::TestTag::new(&mut buf)?);
+            let row = std::sync::Arc::new(tag::TestTag::new(&mut buf)?);
             data_list.push(row.clone());
             data_map.insert(row.id.clone(), row.clone());
         }
@@ -52,19 +52,19 @@ impl TbTestTag {
         Ok(std::sync::Arc::new(TbTestTag { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::tag::TestTag>> {
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<tag::TestTag>> {
         self.data_map.get(key).map(|x| x.clone())
     }
     
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
-           let mut b = Box::from_raw(x.as_ref() as *const crate::tag::TestTag as *mut crate::tag::TestTag); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+           let mut b = Box::from_raw(x.as_ref() as *const tag::TestTag as *mut tag::TestTag); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
         });
     }
 }
 
 impl std::ops::Index<i32> for TbTestTag {
-    type Output = std::sync::Arc<crate::tag::TestTag>;
+    type Output = std::sync::Arc<tag::TestTag>;
 
     fn index(&self, index: i32) -> &Self::Output {
         &self.data_map.get(&index).unwrap()

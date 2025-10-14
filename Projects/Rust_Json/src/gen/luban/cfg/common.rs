@@ -11,7 +11,7 @@
 use super::*;
 use serde::Deserialize;
 
-#[derive(Deserialize, Debug, Hash, Eq, PartialEq, macros::EnumFromNum)]
+#[derive(Deserialize, Debug, Hash, Eq, PartialEq, luban_macros::EnumFromNum)]
 pub enum EBoolOperator {
     AND = 0,
     OR = 1,
@@ -112,14 +112,14 @@ impl IntRange{
 
 #[derive(Debug)]
 pub struct OneDayTimeRange {
-    pub start_time: crate::common::TimeOfDay,
-    pub end_time: crate::common::TimeOfDay,
+    pub start_time: common::TimeOfDay,
+    pub end_time: common::TimeOfDay,
 }
 
 impl OneDayTimeRange{
     pub(crate) fn new(json: &serde_json::Value) -> Result<OneDayTimeRange, LubanError> {
-        let start_time = crate::common::TimeOfDay::new(&json["start_time"])?;
-        let end_time = crate::common::TimeOfDay::new(&json["end_time"])?;
+        let start_time = common::TimeOfDay::new(&json["start_time"])?;
+        let end_time = common::TimeOfDay::new(&json["end_time"])?;
         
         Ok(OneDayTimeRange { start_time, end_time, })
     }    
@@ -153,7 +153,7 @@ impl TimeOfDay{
 
 #[derive(Debug)]
 pub struct TbGlobalConfig {
-    pub data: crate::common::GlobalConfig,
+    pub data: common::GlobalConfig,
 }
 
 impl TbGlobalConfig {
@@ -161,7 +161,7 @@ impl TbGlobalConfig {
         let json = json.as_array().unwrap();
         let n = json.len();
         if n != 1 { return Err(LubanError::Table(format!("table mode=one, but size != 1"))); }
-        let data = crate::common::GlobalConfig::new(&json[0])?;
+        let data = common::GlobalConfig::new(&json[0])?;
         Ok(std::sync::Arc::new(TbGlobalConfig { data }))
     }
     

@@ -22,7 +22,7 @@ bitflags::bitflags! {
         const READ_WRITE = 3;
     }
 }
-#[derive(Debug, Hash, Eq, PartialEq, macros::EnumFromNum)]
+#[derive(Debug, Hash, Eq, PartialEq, luban_macros::EnumFromNum)]
 pub enum AudioType2 {
     UNKNOWN = 0,
     ACC = 1,
@@ -40,7 +40,7 @@ impl From<i32> for AudioType2 {
     }
 }
 
-#[derive(Debug, Hash, Eq, PartialEq, macros::EnumFromNum)]
+#[derive(Debug, Hash, Eq, PartialEq, luban_macros::EnumFromNum)]
 pub enum DemoEnum {
     NONE = 0,
     ///aa
@@ -77,7 +77,7 @@ bitflags::bitflags! {
         const D = 8;
     }
 }
-#[derive(Debug, Hash, Eq, PartialEq, macros::EnumFromNum)]
+#[derive(Debug, Hash, Eq, PartialEq, luban_macros::EnumFromNum)]
 pub enum ETestEmptyEnum {
     None
 }
@@ -90,7 +90,7 @@ impl From<i32> for ETestEmptyEnum {
     }
 }
 
-#[derive(Debug, Hash, Eq, PartialEq, macros::EnumFromNum)]
+#[derive(Debug, Hash, Eq, PartialEq, luban_macros::EnumFromNum)]
 pub enum ETestEmptyEnum2 {
     SMALL_THAN_256 = 255,
     X_256 = 256,
@@ -108,7 +108,7 @@ impl From<i32> for ETestEmptyEnum2 {
     }
 }
 
-#[derive(Debug, Hash, Eq, PartialEq, macros::EnumFromNum)]
+#[derive(Debug, Hash, Eq, PartialEq, luban_macros::EnumFromNum)]
 pub enum ETestQuality {
     ///最高品质
     A = 1,
@@ -132,7 +132,7 @@ impl From<i32> for ETestQuality {
     }
 }
 
-#[derive(Debug, Hash, Eq, PartialEq, macros::EnumFromNum)]
+#[derive(Debug, Hash, Eq, PartialEq, luban_macros::EnumFromNum)]
 pub enum ETestUeType {
     ///白
     WHITE = 0,
@@ -159,19 +159,19 @@ pub struct AutoImport2 {
     pub x6: f32,
     pub x8: i32,
     pub x10: String,
-    pub x13: crate::test::DemoEnum,
-    pub x13_2: crate::test::DemoFlag,
-    pub x14: crate::test::DemoDynamic,
-    pub x15: crate::test::Shape,
-    pub v2: crate::vec2,
+    pub x13: test::DemoEnum,
+    pub x13_2: test::DemoFlag,
+    pub x14: test::DemoDynamic,
+    pub x15: test::Shape,
+    pub v2: crate::Vec2,
     pub t1: u64,
     pub k1: Vec<i32>,
     pub k2: Vec<i32>,
     pub k8: std::collections::HashMap<i32, i32>,
-    pub k9: Vec<crate::test::DemoE2>,
-    pub k10: Vec<crate::vec3>,
-    pub k11: Vec<crate::vec4>,
-    pub v11: Option<crate::vec3>,
+    pub k9: Vec<test::DemoE2>,
+    pub k10: Vec<crate::Vec3>,
+    pub k11: Vec<crate::Vec4>,
+    pub v11: Option<crate::Vec3>,
 }
 
 impl AutoImport2{
@@ -183,18 +183,18 @@ impl AutoImport2{
         let x8 = buf.read_int();
         let x10 = buf.read_string();
         let x13 = buf.read_int().into();
-        let x13_2 = crate::test::DemoFlag::from_bits_truncate(buf.read_uint());
-        let x14 = crate::test::DemoDynamic::new(&mut buf)?;
-        let x15 = crate::test::Shape::new(&mut buf)?;
-        let v2 = crate::vec2::new(&mut buf)?;
+        let x13_2 = test::DemoFlag::from_bits_truncate(buf.read_uint());
+        let x14 = test::DemoDynamic::new(&mut buf)?;
+        let x15 = test::Shape::new(&mut buf)?;
+        let v2 = vec2::new(&mut buf)?.into();
         let t1 = buf.read_ulong();
         let k1 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_int()); } _e0 };
         let k2 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_int()); } _e0 };
         let k8 = {let n0 = std::cmp::min(buf.read_size(), buf.size()); let mut _e0 = std::collections::HashMap::with_capacity(n0 * 3 / 2);for i0 in 0..n0 { let _k0 = buf.read_int(); let _v0 = buf.read_int(); _e0.insert(_k0, _v0);} _e0 };
-        let k9 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::test::DemoE2::new(&mut buf)?); } _e0 };
-        let k10 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::vec3::new(&mut buf)?); } _e0 };
-        let k11 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::vec4::new(&mut buf)?); } _e0 };
-        let mut v11 = if buf.read_bool() { Some(crate::vec3::new(&mut buf)?) } else { None };
+        let k9 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(test::DemoE2::new(&mut buf)?); } _e0 };
+        let k10 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(vec3::new(&mut buf)?.into()); } _e0 };
+        let k11 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(vec4::new(&mut buf)?.into()); } _e0 };
+        let mut v11 = if buf.read_bool() { Some(vec3::new(&mut buf)?.into()) } else { None };
         
         Ok(AutoImport2 { id, x1, x5, x6, x8, x10, x13, x13_2, x14, x15, v2, t1, k1, k2, k8, k9, k10, k11, v11, })
     }    
@@ -319,20 +319,20 @@ pub struct DefineFromExcel2 {
     pub x6: f32,
     pub x8: i32,
     pub x10: String,
-    pub x13: crate::test::DemoEnum,
-    pub x13_2: crate::test::DemoFlag,
-    pub x13_3: crate::test::DemoFlag,
-    pub x14: crate::test::DemoDynamic,
-    pub x15: crate::test::Shape,
-    pub v2: crate::vec2,
+    pub x13: test::DemoEnum,
+    pub x13_2: test::DemoFlag,
+    pub x13_3: test::DemoFlag,
+    pub x14: test::DemoDynamic,
+    pub x15: test::Shape,
+    pub v2: crate::Vec2,
     pub t1: u64,
     pub k1: Vec<i32>,
     pub k2: Vec<i32>,
     pub k8: std::collections::HashMap<i32, i32>,
-    pub k9: Vec<crate::test::DemoE2>,
-    pub k10: Vec<crate::vec3>,
-    pub k11: Vec<crate::vec4>,
-    pub v11: Option<crate::vec3>,
+    pub k9: Vec<test::DemoE2>,
+    pub k10: Vec<crate::Vec3>,
+    pub k11: Vec<crate::Vec4>,
+    pub v11: Option<crate::Vec3>,
 }
 
 impl DefineFromExcel2{
@@ -344,19 +344,19 @@ impl DefineFromExcel2{
         let x8 = buf.read_int();
         let x10 = buf.read_string();
         let x13 = buf.read_int().into();
-        let x13_2 = crate::test::DemoFlag::from_bits_truncate(buf.read_uint());
-        let x13_3 = crate::test::DemoFlag::from_bits_truncate(buf.read_uint());
-        let x14 = crate::test::DemoDynamic::new(&mut buf)?;
-        let x15 = crate::test::Shape::new(&mut buf)?;
-        let v2 = crate::vec2::new(&mut buf)?;
+        let x13_2 = test::DemoFlag::from_bits_truncate(buf.read_uint());
+        let x13_3 = test::DemoFlag::from_bits_truncate(buf.read_uint());
+        let x14 = test::DemoDynamic::new(&mut buf)?;
+        let x15 = test::Shape::new(&mut buf)?;
+        let v2 = vec2::new(&mut buf)?.into();
         let t1 = buf.read_ulong();
         let k1 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_int()); } _e0 };
         let k2 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_int()); } _e0 };
         let k8 = {let n0 = std::cmp::min(buf.read_size(), buf.size()); let mut _e0 = std::collections::HashMap::with_capacity(n0 * 3 / 2);for i0 in 0..n0 { let _k0 = buf.read_int(); let _v0 = buf.read_int(); _e0.insert(_k0, _v0);} _e0 };
-        let k9 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::test::DemoE2::new(&mut buf)?); } _e0 };
-        let k10 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::vec3::new(&mut buf)?); } _e0 };
-        let k11 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::vec4::new(&mut buf)?); } _e0 };
-        let mut v11 = if buf.read_bool() { Some(crate::vec3::new(&mut buf)?) } else { None };
+        let k9 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(test::DemoE2::new(&mut buf)?); } _e0 };
+        let k10 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(vec3::new(&mut buf)?.into()); } _e0 };
+        let k11 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(vec4::new(&mut buf)?.into()); } _e0 };
+        let mut v11 = if buf.read_bool() { Some(vec3::new(&mut buf)?.into()) } else { None };
         
         Ok(DefineFromExcel2 { id, x1, x5, x6, x8, x10, x13, x13_2, x13_3, x14, x15, v2, t1, k1, k2, k8, k9, k10, k11, v11, })
     }    
@@ -371,20 +371,20 @@ impl DefineFromExcel2{
 
 #[derive(Debug)]
 pub enum DemoDynamic {
-    DemoD2(std::sync::Arc<crate::test::DemoD2>),
-    DemoE1(std::sync::Arc<crate::test::DemoE1>),
-    RoleInfo(std::sync::Arc<crate::test::login::RoleInfo>),
-    DemoD5(std::sync::Arc<crate::test::DemoD5>),
+    DemoD2(std::sync::Arc<test::DemoD2>),
+    DemoE1(std::sync::Arc<test::DemoE1>),
+    RoleInfo(std::sync::Arc<test::login::RoleInfo>),
+    DemoD5(std::sync::Arc<test::DemoD5>),
 }
 
 impl DemoDynamic {
     pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<Self, LubanError> {
         let type_id = buf.read_int();
         match type_id {
-            crate::test::DemoD2::__ID__ => Ok(Self::DemoD2(std::sync::Arc::new(crate::test::DemoD2::new(buf)?))),
-            crate::test::DemoE1::__ID__ => Ok(Self::DemoE1(std::sync::Arc::new(crate::test::DemoE1::new(buf)?))),
-            crate::test::login::RoleInfo::__ID__ => Ok(Self::RoleInfo(std::sync::Arc::new(crate::test::login::RoleInfo::new(buf)?))),
-            crate::test::DemoD5::__ID__ => Ok(Self::DemoD5(std::sync::Arc::new(crate::test::DemoD5::new(buf)?))),
+            test::DemoD2::__ID__ => Ok(Self::DemoD2(std::sync::Arc::new(test::DemoD2::new(buf)?))),
+            test::DemoE1::__ID__ => Ok(Self::DemoE1(std::sync::Arc::new(test::DemoE1::new(buf)?))),
+            test::login::RoleInfo::__ID__ => Ok(Self::RoleInfo(std::sync::Arc::new(test::login::RoleInfo::new(buf)?))),
+            test::DemoD5::__ID__ => Ok(Self::DemoD5(std::sync::Arc::new(test::DemoD5::new(buf)?))),
             _ => Err(LubanError::Bean(format!("Invalid type for DemoDynamic:{}", type_id)))
         }
     }
@@ -400,10 +400,10 @@ impl DemoDynamic {
 
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         match self {
-            Self::DemoD2(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::test::DemoD2 as *mut crate::test::DemoD2); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::DemoE1(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::test::DemoE1 as *mut crate::test::DemoE1); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::RoleInfo(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::test::login::RoleInfo as *mut crate::test::login::RoleInfo); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::DemoD5(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::test::DemoD5 as *mut crate::test::DemoD5); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::DemoD2(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const test::DemoD2 as *mut test::DemoD2); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::DemoE1(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const test::DemoE1 as *mut test::DemoE1); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::RoleInfo(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const test::login::RoleInfo as *mut test::login::RoleInfo); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::DemoD5(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const test::DemoD5 as *mut test::DemoD5); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
         }
     }
 }
@@ -431,16 +431,16 @@ impl DemoD2{
 
 #[derive(Debug)]
 pub enum DemoD3 {
-    DemoE1(std::sync::Arc<crate::test::DemoE1>),
-    RoleInfo(std::sync::Arc<crate::test::login::RoleInfo>),
+    DemoE1(std::sync::Arc<test::DemoE1>),
+    RoleInfo(std::sync::Arc<test::login::RoleInfo>),
 }
 
 impl DemoD3 {
     pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<Self, LubanError> {
         let type_id = buf.read_int();
         match type_id {
-            crate::test::DemoE1::__ID__ => Ok(Self::DemoE1(std::sync::Arc::new(crate::test::DemoE1::new(buf)?))),
-            crate::test::login::RoleInfo::__ID__ => Ok(Self::RoleInfo(std::sync::Arc::new(crate::test::login::RoleInfo::new(buf)?))),
+            test::DemoE1::__ID__ => Ok(Self::DemoE1(std::sync::Arc::new(test::DemoE1::new(buf)?))),
+            test::login::RoleInfo::__ID__ => Ok(Self::RoleInfo(std::sync::Arc::new(test::login::RoleInfo::new(buf)?))),
             _ => Err(LubanError::Bean(format!("Invalid type for DemoD3:{}", type_id)))
         }
     }
@@ -461,8 +461,8 @@ impl DemoD3 {
 
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         match self {
-            Self::DemoE1(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::test::DemoE1 as *mut crate::test::DemoE1); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::RoleInfo(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::test::login::RoleInfo as *mut crate::test::login::RoleInfo); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::DemoE1(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const test::DemoE1 as *mut test::DemoE1); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::RoleInfo(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const test::login::RoleInfo as *mut test::login::RoleInfo); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
         }
     }
 }
@@ -493,13 +493,13 @@ impl DemoE1{
 #[derive(Debug)]
 pub struct DemoD5 {
     pub x1: i32,
-    pub time: crate::test::DateTimeRange,
+    pub time: test::DateTimeRange,
 }
 
 impl DemoD5{
     pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<DemoD5, LubanError> {
         let x1 = buf.read_int();
-        let time = crate::test::DateTimeRange::new(&mut buf)?;
+        let time = test::DateTimeRange::new(&mut buf)?;
         
         Ok(DemoD5 { x1, time, })
     }    
@@ -565,13 +565,13 @@ impl DemoExplicitType{
 pub struct DemoGroup {
     pub id: i32,
     pub x1: i32,
-    pub x1_ref: Option<std::sync::Arc<crate::test::DemoGroup>>,
+    pub x1_ref: Option<std::sync::Arc<test::DemoGroup>>,
     pub x2: i32,
-    pub x2_ref: Option<std::sync::Arc<crate::test::DemoGroup>>,
+    pub x2_ref: Option<std::sync::Arc<test::DemoGroup>>,
     pub x3: i32,
-    pub x3_ref: Option<std::sync::Arc<crate::test::DemoGroup>>,
+    pub x3_ref: Option<std::sync::Arc<test::DemoGroup>>,
     pub x4: i32,
-    pub x5: crate::test::InnerGroup,
+    pub x5: test::InnerGroup,
 }
 
 impl DemoGroup{
@@ -584,7 +584,7 @@ impl DemoGroup{
         let x3 = buf.read_int();
         let x3_ref = None;
         let x4 = buf.read_int();
-        let x5 = crate::test::InnerGroup::new(&mut buf)?;
+        let x5 = test::InnerGroup::new(&mut buf)?;
         
         Ok(DemoGroup { id, x1, x1_ref, x2, x2_ref, x3, x3_ref, x4, x5, })
     }    
@@ -610,9 +610,9 @@ pub struct DemoPrimitiveTypesTable {
     pub x7: f64,
     pub s1: String,
     pub s2: String,
-    pub v2: crate::vec2,
-    pub v3: crate::vec3,
-    pub v4: crate::vec4,
+    pub v2: crate::Vec2,
+    pub v3: crate::Vec3,
+    pub v4: crate::Vec4,
     pub t1: u64,
 }
 
@@ -627,9 +627,9 @@ impl DemoPrimitiveTypesTable{
         let x7 = buf.read_double();
         let s1 = buf.read_string();
         let s2 = buf.read_string();
-        let v2 = crate::vec2::new(&mut buf)?;
-        let v3 = crate::vec3::new(&mut buf)?;
-        let v4 = crate::vec4::new(&mut buf)?;
+        let v2 = vec2::new(&mut buf)?.into();
+        let v3 = vec3::new(&mut buf)?.into();
+        let v4 = vec4::new(&mut buf)?.into();
         let t1 = buf.read_ulong();
         
         Ok(DemoPrimitiveTypesTable { x1, x2, x3, x4, x5, x6, x7, s1, s2, v2, v3, v4, t1, })
@@ -645,14 +645,14 @@ impl DemoPrimitiveTypesTable{
 pub struct DemoSingletonType {
     pub id: i32,
     pub name: String,
-    pub date: crate::test::DemoDynamic,
+    pub date: test::DemoDynamic,
 }
 
 impl DemoSingletonType{
     pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<DemoSingletonType, LubanError> {
         let id = buf.read_int();
         let name = buf.read_string();
-        let date = crate::test::DemoDynamic::new(&mut buf)?;
+        let date = test::DemoDynamic::new(&mut buf)?;
         
         Ok(DemoSingletonType { id, name, date, })
     }    
@@ -695,18 +695,18 @@ pub struct DemoType2 {
     pub x8: i32,
     pub x9: i64,
     pub x10: String,
-    pub x12: crate::test::DemoType1,
-    pub x13: crate::test::DemoEnum,
-    pub x14: crate::test::DemoDynamic,
+    pub x12: test::DemoType1,
+    pub x13: test::DemoEnum,
+    pub x14: test::DemoDynamic,
     pub s1: String,
     pub t1: u64,
     pub k1: Vec<i32>,
     pub k2: Vec<i32>,
     pub k5: std::collections::HashSet<i32>,
     pub k8: std::collections::HashMap<i32, i32>,
-    pub k8_ref: Option<std::sync::Arc<std::collections::HashMap<i32, Option<std::sync::Arc<crate::test::DemoType2>>>>>,
-    pub k9: Vec<crate::test::DemoE2>,
-    pub k15: Vec<crate::test::DemoDynamic>,
+    pub k8_ref: Option<std::sync::Arc<std::collections::HashMap<i32, Option<std::sync::Arc<test::DemoType2>>>>>,
+    pub k9: Vec<test::DemoE2>,
+    pub k15: Vec<test::DemoDynamic>,
 }
 
 impl DemoType2{
@@ -722,9 +722,9 @@ impl DemoType2{
         let x8 = buf.read_int();
         let x9 = buf.read_long();
         let x10 = buf.read_string();
-        let x12 = crate::test::DemoType1::new(&mut buf)?;
+        let x12 = test::DemoType1::new(&mut buf)?;
         let x13 = buf.read_int().into();
-        let x14 = crate::test::DemoDynamic::new(&mut buf)?;
+        let x14 = test::DemoDynamic::new(&mut buf)?;
         let s1 = buf.read_string();
         let t1 = buf.read_ulong();
         let k1 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_int()); } _e0 };
@@ -732,8 +732,8 @@ impl DemoType2{
         let k5 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = std::collections::HashSet::default(); for i0 in 0..n0 { _e0.insert(buf.read_int()); } _e0 };
         let k8 = {let n0 = std::cmp::min(buf.read_size(), buf.size()); let mut _e0 = std::collections::HashMap::with_capacity(n0 * 3 / 2);for i0 in 0..n0 { let _k0 = buf.read_int(); let _v0 = buf.read_int(); _e0.insert(_k0, _v0);} _e0 };
         let k8_ref = None;
-        let k9 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::test::DemoE2::new(&mut buf)?); } _e0 };
-        let k15 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::test::DemoDynamic::new(&mut buf)?); } _e0 };
+        let k9 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(test::DemoE2::new(&mut buf)?); } _e0 };
+        let k15 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(test::DemoDynamic::new(&mut buf)?); } _e0 };
         
         Ok(DemoType2 { x4, x1, x2, x3, x5, x6, x7, x8_0, x8, x9, x10, x12, x13, x14, s1, t1, k1, k2, k5, k8, k8_ref, k9, k15, })
     }    
@@ -777,13 +777,13 @@ pub struct ExcelFromJson {
     pub s1: String,
     pub s2: String,
     pub t1: u64,
-    pub x12: crate::test::DemoType1,
-    pub x13: crate::test::DemoEnum,
-    pub x14: crate::test::DemoDynamic,
+    pub x12: test::DemoType1,
+    pub x13: test::DemoEnum,
+    pub x14: test::DemoDynamic,
     pub k1: Vec<i32>,
     pub k8: std::collections::HashMap<i32, i32>,
-    pub k9: Vec<crate::test::DemoE2>,
-    pub k15: Vec<crate::test::DemoDynamic>,
+    pub k9: Vec<test::DemoE2>,
+    pub k15: Vec<test::DemoDynamic>,
 }
 
 impl ExcelFromJson{
@@ -795,13 +795,13 @@ impl ExcelFromJson{
         let s1 = buf.read_string();
         let s2 = buf.read_string();
         let t1 = buf.read_ulong();
-        let x12 = crate::test::DemoType1::new(&mut buf)?;
+        let x12 = test::DemoType1::new(&mut buf)?;
         let x13 = buf.read_int().into();
-        let x14 = crate::test::DemoDynamic::new(&mut buf)?;
+        let x14 = test::DemoDynamic::new(&mut buf)?;
         let k1 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_int()); } _e0 };
         let k8 = {let n0 = std::cmp::min(buf.read_size(), buf.size()); let mut _e0 = std::collections::HashMap::with_capacity(n0 * 3 / 2);for i0 in 0..n0 { let _k0 = buf.read_int(); let _v0 = buf.read_int(); _e0.insert(_k0, _v0);} _e0 };
-        let k9 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::test::DemoE2::new(&mut buf)?); } _e0 };
-        let k15 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::test::DemoDynamic::new(&mut buf)?); } _e0 };
+        let k9 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(test::DemoE2::new(&mut buf)?); } _e0 };
+        let k15 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(test::DemoDynamic::new(&mut buf)?); } _e0 };
         
         Ok(ExcelFromJson { x4, x1, x5, x6, s1, s2, t1, x12, x13, x14, k1, k8, k9, k15, })
     }    
@@ -819,14 +819,14 @@ impl ExcelFromJson{
 pub struct ExcelFromJsonMultiRow {
     pub id: i32,
     pub x: i32,
-    pub items: Vec<crate::test::TestRow>,
+    pub items: Vec<test::TestRow>,
 }
 
 impl ExcelFromJsonMultiRow{
     pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<ExcelFromJsonMultiRow, LubanError> {
         let id = buf.read_int();
         let x = buf.read_int();
-        let items = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::test::TestRow::new(&mut buf)?); } _e0 };
+        let items = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(test::TestRow::new(&mut buf)?); } _e0 };
         
         Ok(ExcelFromJsonMultiRow { id, x, items, })
     }    
@@ -862,13 +862,13 @@ impl Foo{
 
 #[derive(Debug)]
 pub struct H1 {
-    pub y2: crate::test::H2,
+    pub y2: test::H2,
     pub y3: i32,
 }
 
 impl H1{
     pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<H1, LubanError> {
-        let y2 = crate::test::H2::new(&mut buf)?;
+        let y2 = test::H2::new(&mut buf)?;
         let y3 = buf.read_int();
         
         Ok(H1 { y2, y3, })
@@ -927,18 +927,18 @@ impl InnerGroup{
 
 #[derive(Debug)]
 pub enum ItemBase {
-    Item(std::sync::Arc<crate::test::Item>),
-    Equipment(std::sync::Arc<crate::test::Equipment>),
-    Decorator(std::sync::Arc<crate::test::Decorator>),
+    Item(std::sync::Arc<test::Item>),
+    Equipment(std::sync::Arc<test::Equipment>),
+    Decorator(std::sync::Arc<test::Decorator>),
 }
 
 impl ItemBase {
     pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<Self, LubanError> {
         let type_id = buf.read_int();
         match type_id {
-            crate::test::Item::__ID__ => Ok(Self::Item(std::sync::Arc::new(crate::test::Item::new(buf)?))),
-            crate::test::Equipment::__ID__ => Ok(Self::Equipment(std::sync::Arc::new(crate::test::Equipment::new(buf)?))),
-            crate::test::Decorator::__ID__ => Ok(Self::Decorator(std::sync::Arc::new(crate::test::Decorator::new(buf)?))),
+            test::Item::__ID__ => Ok(Self::Item(std::sync::Arc::new(test::Item::new(buf)?))),
+            test::Equipment::__ID__ => Ok(Self::Equipment(std::sync::Arc::new(test::Equipment::new(buf)?))),
+            test::Decorator::__ID__ => Ok(Self::Decorator(std::sync::Arc::new(test::Decorator::new(buf)?))),
             _ => Err(LubanError::Bean(format!("Invalid type for ItemBase:{}", type_id)))
         }
     }
@@ -969,9 +969,9 @@ impl ItemBase {
 
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         match self {
-            Self::Item(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::test::Item as *mut crate::test::Item); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::Equipment(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::test::Equipment as *mut crate::test::Equipment); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::Decorator(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::test::Decorator as *mut crate::test::Decorator); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::Item(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const test::Item as *mut test::Item); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::Equipment(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const test::Equipment as *mut test::Equipment); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::Decorator(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const test::Decorator as *mut test::Decorator); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
         }
     }
 }
@@ -1006,7 +1006,7 @@ pub struct Equipment {
     pub id: i32,
     pub name: String,
     pub desc: String,
-    pub attr: crate::test::DemoEnum,
+    pub attr: test::DemoEnum,
     pub value: i32,
 }
 
@@ -1083,12 +1083,12 @@ impl MultiIndexList{
 pub struct MultiRowRecord {
     pub id: i32,
     pub name: String,
-    pub one_rows: Vec<crate::test::MultiRowType1>,
-    pub multi_rows1: Vec<crate::test::MultiRowType1>,
-    pub multi_rows2: Vec<crate::test::MultiRowType1>,
-    pub multi_rows4: std::collections::HashMap<i32, crate::test::MultiRowType2>,
-    pub multi_rows5: Vec<crate::test::MultiRowType3>,
-    pub multi_rows6: std::collections::HashMap<i32, crate::test::MultiRowType2>,
+    pub one_rows: Vec<test::MultiRowType1>,
+    pub multi_rows1: Vec<test::MultiRowType1>,
+    pub multi_rows2: Vec<test::MultiRowType1>,
+    pub multi_rows4: std::collections::HashMap<i32, test::MultiRowType2>,
+    pub multi_rows5: Vec<test::MultiRowType3>,
+    pub multi_rows6: std::collections::HashMap<i32, test::MultiRowType2>,
     pub multi_rows7: std::collections::HashMap<i32, i32>,
 }
 
@@ -1096,12 +1096,12 @@ impl MultiRowRecord{
     pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<MultiRowRecord, LubanError> {
         let id = buf.read_int();
         let name = buf.read_string();
-        let one_rows = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::test::MultiRowType1::new(&mut buf)?); } _e0 };
-        let multi_rows1 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::test::MultiRowType1::new(&mut buf)?); } _e0 };
-        let multi_rows2 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::test::MultiRowType1::new(&mut buf)?); } _e0 };
-        let multi_rows4 = {let n0 = std::cmp::min(buf.read_size(), buf.size()); let mut _e0 = std::collections::HashMap::with_capacity(n0 * 3 / 2);for i0 in 0..n0 { let _k0 = buf.read_int(); let _v0 = crate::test::MultiRowType2::new(&mut buf)?; _e0.insert(_k0, _v0);} _e0 };
-        let multi_rows5 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::test::MultiRowType3::new(&mut buf)?); } _e0 };
-        let multi_rows6 = {let n0 = std::cmp::min(buf.read_size(), buf.size()); let mut _e0 = std::collections::HashMap::with_capacity(n0 * 3 / 2);for i0 in 0..n0 { let _k0 = buf.read_int(); let _v0 = crate::test::MultiRowType2::new(&mut buf)?; _e0.insert(_k0, _v0);} _e0 };
+        let one_rows = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(test::MultiRowType1::new(&mut buf)?); } _e0 };
+        let multi_rows1 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(test::MultiRowType1::new(&mut buf)?); } _e0 };
+        let multi_rows2 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(test::MultiRowType1::new(&mut buf)?); } _e0 };
+        let multi_rows4 = {let n0 = std::cmp::min(buf.read_size(), buf.size()); let mut _e0 = std::collections::HashMap::with_capacity(n0 * 3 / 2);for i0 in 0..n0 { let _k0 = buf.read_int(); let _v0 = test::MultiRowType2::new(&mut buf)?; _e0.insert(_k0, _v0);} _e0 };
+        let multi_rows5 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(test::MultiRowType3::new(&mut buf)?); } _e0 };
+        let multi_rows6 = {let n0 = std::cmp::min(buf.read_size(), buf.size()); let mut _e0 = std::collections::HashMap::with_capacity(n0 * 3 / 2);for i0 in 0..n0 { let _k0 = buf.read_int(); let _v0 = test::MultiRowType2::new(&mut buf)?; _e0.insert(_k0, _v0);} _e0 };
         let multi_rows7 = {let n0 = std::cmp::min(buf.read_size(), buf.size()); let mut _e0 = std::collections::HashMap::with_capacity(n0 * 3 / 2);for i0 in 0..n0 { let _k0 = buf.read_int(); let _v0 = buf.read_int(); _e0.insert(_k0, _v0);} _e0 };
         
         Ok(MultiRowRecord { id, name, one_rows, multi_rows1, multi_rows2, multi_rows4, multi_rows5, multi_rows6, multi_rows7, })
@@ -1123,22 +1123,22 @@ impl MultiRowRecord{
 pub struct MultiRowTitle {
     pub id: i32,
     pub name: String,
-    pub x1: crate::test::H1,
-    pub x2_0: Option<crate::test::H2>,
-    pub x2: Vec<crate::test::H2>,
-    pub x3: Vec<crate::test::H2>,
-    pub x4: Vec<crate::test::H2>,
+    pub x1: test::H1,
+    pub x2_0: Option<test::H2>,
+    pub x2: Vec<test::H2>,
+    pub x3: Vec<test::H2>,
+    pub x4: Vec<test::H2>,
 }
 
 impl MultiRowTitle{
     pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<MultiRowTitle, LubanError> {
         let id = buf.read_int();
         let name = buf.read_string();
-        let x1 = crate::test::H1::new(&mut buf)?;
-        let mut x2_0 = if buf.read_bool() { Some(crate::test::H2::new(&mut buf)?) } else { None };
-        let x2 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::test::H2::new(&mut buf)?); } _e0 };
-        let x3 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::test::H2::new(&mut buf)?); } _e0 };
-        let x4 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::test::H2::new(&mut buf)?); } _e0 };
+        let x1 = test::H1::new(&mut buf)?;
+        let mut x2_0 = if buf.read_bool() { Some(test::H2::new(&mut buf)?) } else { None };
+        let x2 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(test::H2::new(&mut buf)?); } _e0 };
+        let x3 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(test::H2::new(&mut buf)?); } _e0 };
+        let x4 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(test::H2::new(&mut buf)?); } _e0 };
         
         Ok(MultiRowTitle { id, name, x1, x2_0, x2, x3, x4, })
     }    
@@ -1199,13 +1199,13 @@ impl MultiRowType2{
 #[derive(Debug)]
 pub struct MultiRowType3 {
     pub id: i32,
-    pub items: Vec<crate::test::MultiRowType1>,
+    pub items: Vec<test::MultiRowType1>,
 }
 
 impl MultiRowType3{
     pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<MultiRowType3, LubanError> {
         let id = buf.read_int();
-        let items = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::test::MultiRowType1::new(&mut buf)?); } _e0 };
+        let items = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(test::MultiRowType1::new(&mut buf)?); } _e0 };
         
         Ok(MultiRowType3 { id, items, })
     }    
@@ -1285,14 +1285,14 @@ impl Path{
 
 #[derive(Debug)]
 pub enum RefDynamicBase {
-    RefBean(std::sync::Arc<crate::test::RefBean>),
+    RefBean(std::sync::Arc<test::RefBean>),
 }
 
 impl RefDynamicBase {
     pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<Self, LubanError> {
         let type_id = buf.read_int();
         match type_id {
-            crate::test::RefBean::__ID__ => Ok(Self::RefBean(std::sync::Arc::new(crate::test::RefBean::new(buf)?))),
+            test::RefBean::__ID__ => Ok(Self::RefBean(std::sync::Arc::new(test::RefBean::new(buf)?))),
             _ => Err(LubanError::Bean(format!("Invalid type for RefDynamicBase:{}", type_id)))
         }
     }
@@ -1303,7 +1303,7 @@ impl RefDynamicBase {
         }
     }    
         
-    pub fn get_x_ref(&self) -> &Option<std::sync::Arc<crate::test::TestBeRef>> {
+    pub fn get_x_ref(&self) -> &Option<std::sync::Arc<test::TestBeRef>> {
         match self {
             Self::RefBean(x) => { &x.x_ref }
         }        
@@ -1311,7 +1311,7 @@ impl RefDynamicBase {
 
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         match self {
-            Self::RefBean(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::test::RefBean as *mut crate::test::RefBean); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::RefBean(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const test::RefBean as *mut test::RefBean); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
         }
     }
 }
@@ -1320,9 +1320,9 @@ impl RefDynamicBase {
 #[derive(Debug)]
 pub struct RefBean {
     pub x: i32,
-    pub x_ref: Option<std::sync::Arc<crate::test::TestBeRef>>,
+    pub x_ref: Option<std::sync::Arc<test::TestBeRef>>,
     pub arr: Vec<i32>,
-    pub arr_ref: Option<std::sync::Arc<Vec<Option<std::sync::Arc<crate::test::TestBeRef>>>>>,
+    pub arr_ref: Option<std::sync::Arc<Vec<Option<std::sync::Arc<test::TestBeRef>>>>>,
 }
 
 impl RefBean{
@@ -1389,24 +1389,24 @@ impl SepVector{
 
 #[derive(Debug)]
 pub enum Shape {
-    Circle(std::sync::Arc<crate::test::Circle>),
-    Rectangle(std::sync::Arc<crate::test2::Rectangle>),
+    Circle(std::sync::Arc<test::Circle>),
+    Rectangle(std::sync::Arc<test2::Rectangle>),
 }
 
 impl Shape {
     pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<Self, LubanError> {
         let type_id = buf.read_int();
         match type_id {
-            crate::test::Circle::__ID__ => Ok(Self::Circle(std::sync::Arc::new(crate::test::Circle::new(buf)?))),
-            crate::test2::Rectangle::__ID__ => Ok(Self::Rectangle(std::sync::Arc::new(crate::test2::Rectangle::new(buf)?))),
+            test::Circle::__ID__ => Ok(Self::Circle(std::sync::Arc::new(test::Circle::new(buf)?))),
+            test2::Rectangle::__ID__ => Ok(Self::Rectangle(std::sync::Arc::new(test2::Rectangle::new(buf)?))),
             _ => Err(LubanError::Bean(format!("Invalid type for Shape:{}", type_id)))
         }
     }
 
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         match self {
-            Self::Circle(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::test::Circle as *mut crate::test::Circle); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::Rectangle(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::test2::Rectangle as *mut crate::test2::Rectangle); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::Circle(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const test::Circle as *mut test::Circle); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::Rectangle(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const test2::Rectangle as *mut test2::Rectangle); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
         }
     }
 }
@@ -1603,14 +1603,14 @@ pub struct TestFormat {
     pub m2: std::collections::HashMap<i32, i32>,
     pub m3: std::collections::HashMap<i32, i32>,
     pub m4: std::collections::HashMap<i32, i32>,
-    pub v31: crate::vec3,
-    pub v32: crate::vec3,
-    pub v33: crate::vec3,
-    pub v34: crate::vec3,
-    pub v41: Vec<crate::vec3>,
-    pub v42: Vec<crate::vec3>,
-    pub v43: Vec<crate::vec3>,
-    pub v44: Vec<crate::vec3>,
+    pub v31: crate::Vec3,
+    pub v32: crate::Vec3,
+    pub v33: crate::Vec3,
+    pub v34: crate::Vec3,
+    pub v41: Vec<crate::Vec3>,
+    pub v42: Vec<crate::Vec3>,
+    pub v43: Vec<crate::Vec3>,
+    pub v44: Vec<crate::Vec3>,
 }
 
 impl TestFormat{
@@ -1632,14 +1632,14 @@ impl TestFormat{
         let m2 = {let n0 = std::cmp::min(buf.read_size(), buf.size()); let mut _e0 = std::collections::HashMap::with_capacity(n0 * 3 / 2);for i0 in 0..n0 { let _k0 = buf.read_int(); let _v0 = buf.read_int(); _e0.insert(_k0, _v0);} _e0 };
         let m3 = {let n0 = std::cmp::min(buf.read_size(), buf.size()); let mut _e0 = std::collections::HashMap::with_capacity(n0 * 3 / 2);for i0 in 0..n0 { let _k0 = buf.read_int(); let _v0 = buf.read_int(); _e0.insert(_k0, _v0);} _e0 };
         let m4 = {let n0 = std::cmp::min(buf.read_size(), buf.size()); let mut _e0 = std::collections::HashMap::with_capacity(n0 * 3 / 2);for i0 in 0..n0 { let _k0 = buf.read_int(); let _v0 = buf.read_int(); _e0.insert(_k0, _v0);} _e0 };
-        let v31 = crate::vec3::new(&mut buf)?;
-        let v32 = crate::vec3::new(&mut buf)?;
-        let v33 = crate::vec3::new(&mut buf)?;
-        let v34 = crate::vec3::new(&mut buf)?;
-        let v41 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::vec3::new(&mut buf)?); } _e0 };
-        let v42 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::vec3::new(&mut buf)?); } _e0 };
-        let v43 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::vec3::new(&mut buf)?); } _e0 };
-        let v44 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::vec3::new(&mut buf)?); } _e0 };
+        let v31 = vec3::new(&mut buf)?.into();
+        let v32 = vec3::new(&mut buf)?.into();
+        let v33 = vec3::new(&mut buf)?.into();
+        let v34 = vec3::new(&mut buf)?.into();
+        let v41 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(vec3::new(&mut buf)?.into()); } _e0 };
+        let v42 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(vec3::new(&mut buf)?.into()); } _e0 };
+        let v43 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(vec3::new(&mut buf)?.into()); } _e0 };
+        let v44 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(vec3::new(&mut buf)?.into()); } _e0 };
         
         Ok(TestFormat { id, a1, a2, a3, a4, b1, b2, b3, b4, c1, c2, c3, c4, m1, m2, m3, m4, v31, v32, v33, v34, v41, v42, v43, v44, })
     }    
@@ -1673,13 +1673,13 @@ impl TestGlobal{
 #[derive(Debug)]
 pub struct TestIndex {
     pub id: i32,
-    pub eles: Vec<crate::test::DemoType1>,
+    pub eles: Vec<test::DemoType1>,
 }
 
 impl TestIndex{
     pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<TestIndex, LubanError> {
         let id = buf.read_int();
-        let eles = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::test::DemoType1::new(&mut buf)?); } _e0 };
+        let eles = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(test::DemoType1::new(&mut buf)?); } _e0 };
         
         Ok(TestIndex { id, eles, })
     }    
@@ -1694,11 +1694,11 @@ impl TestIndex{
 #[derive(Debug)]
 pub struct TestMap {
     pub id: i32,
-    pub id_ref: Option<std::sync::Arc<crate::test::TestIndex>>,
+    pub id_ref: Option<std::sync::Arc<test::TestIndex>>,
     pub x1: std::collections::HashMap<i32, i32>,
     pub x2: std::collections::HashMap<i64, i32>,
     pub x3: std::collections::HashMap<String, i32>,
-    pub x4: std::collections::HashMap<crate::test::DemoEnum, i32>,
+    pub x4: std::collections::HashMap<test::DemoEnum, i32>,
 }
 
 impl TestMap{
@@ -1723,15 +1723,15 @@ impl TestMap{
 #[derive(Debug)]
 pub struct TestMapper {
     pub id: i32,
-    pub audio_type: crate::AudioType,
-    pub v2: crate::vec2,
+    pub audio_type: crate::CustomAudioType,
+    pub v2: crate::Vec2,
 }
 
 impl TestMapper{
     pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<TestMapper, LubanError> {
         let id = buf.read_int();
         let audio_type = buf.read_int().into();
-        let v2 = crate::vec2::new(&mut buf)?;
+        let v2 = vec2::new(&mut buf)?.into();
         
         Ok(TestMapper { id, audio_type, v2, })
     }    
@@ -1745,17 +1745,17 @@ impl TestMapper{
 #[derive(Debug)]
 pub struct TestMultiColumn {
     pub id: i32,
-    pub a: crate::test::Foo,
-    pub b: crate::test::Foo,
-    pub c: crate::test::Foo,
+    pub a: test::Foo,
+    pub b: test::Foo,
+    pub c: test::Foo,
 }
 
 impl TestMultiColumn{
     pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<TestMultiColumn, LubanError> {
         let id = buf.read_int();
-        let a = crate::test::Foo::new(&mut buf)?;
-        let b = crate::test::Foo::new(&mut buf)?;
-        let c = crate::test::Foo::new(&mut buf)?;
+        let a = test::Foo::new(&mut buf)?;
+        let b = test::Foo::new(&mut buf)?;
+        let c = test::Foo::new(&mut buf)?;
         
         Ok(TestMultiColumn { id, a, b, c, })
     }    
@@ -1773,9 +1773,9 @@ impl TestMultiColumn{
 pub struct TestNull {
     pub id: i32,
     pub x1: Option<i32>,
-    pub x2: Option<crate::test::DemoEnum>,
-    pub x3: Option<crate::test::DemoType1>,
-    pub x4: Option<crate::test::DemoDynamic>,
+    pub x2: Option<test::DemoEnum>,
+    pub x3: Option<test::DemoType1>,
+    pub x4: Option<test::DemoDynamic>,
     pub s1: Option<String>,
     pub s2: Option<String>,
 }
@@ -1785,8 +1785,8 @@ impl TestNull{
         let id = buf.read_int();
         let mut x1 = if buf.read_bool() { Some(buf.read_int()) } else { None };
         let mut x2 = if buf.read_bool() { Some(buf.read_int().into()) } else { None };
-        let mut x3 = if buf.read_bool() { Some(crate::test::DemoType1::new(&mut buf)?) } else { None };
-        let mut x4 = if buf.read_bool() { Some(crate::test::DemoDynamic::new(&mut buf)?) } else { None };
+        let mut x3 = if buf.read_bool() { Some(test::DemoType1::new(&mut buf)?) } else { None };
+        let mut x4 = if buf.read_bool() { Some(test::DemoDynamic::new(&mut buf)?) } else { None };
         let mut s1 = if buf.read_bool() { Some(buf.read_string()) } else { None };
         let mut s2 = if buf.read_bool() { Some(buf.read_string()) } else { None };
         
@@ -1847,36 +1847,36 @@ impl TestRange{
 pub struct TestRef {
     pub id: i32,
     pub x1: i32,
-    pub x1_ref: Option<std::sync::Arc<crate::test::TestBeRef>>,
+    pub x1_ref: Option<std::sync::Arc<test::TestBeRef>>,
     pub x1_2: i32,
-    pub x1_2_ref: Option<std::sync::Arc<crate::test::TestBeRef>>,
+    pub x1_2_ref: Option<std::sync::Arc<test::TestBeRef>>,
     pub x2: i32,
     pub x3: i32,
     pub x4: i32,
-    pub x4_ref: Option<std::sync::Arc<crate::tag::TestTag>>,
+    pub x4_ref: Option<std::sync::Arc<tag::TestTag>>,
     pub a1: Vec<i32>,
-    pub a1_ref: Option<std::sync::Arc<Vec<Option<std::sync::Arc<crate::test::TestBeRef>>>>>,
+    pub a1_ref: Option<std::sync::Arc<Vec<Option<std::sync::Arc<test::TestBeRef>>>>>,
     pub a2: Vec<i32>,
-    pub a2_ref: Option<std::sync::Arc<Vec<Option<std::sync::Arc<crate::test::TestBeRef>>>>>,
+    pub a2_ref: Option<std::sync::Arc<Vec<Option<std::sync::Arc<test::TestBeRef>>>>>,
     pub b1: Vec<i32>,
-    pub b1_ref: Option<std::sync::Arc<Vec<Option<std::sync::Arc<crate::test::TestBeRef>>>>>,
+    pub b1_ref: Option<std::sync::Arc<Vec<Option<std::sync::Arc<test::TestBeRef>>>>>,
     pub b2: Vec<i32>,
-    pub b2_ref: Option<std::sync::Arc<Vec<Option<std::sync::Arc<crate::test::TestBeRef>>>>>,
+    pub b2_ref: Option<std::sync::Arc<Vec<Option<std::sync::Arc<test::TestBeRef>>>>>,
     pub c1: std::collections::HashSet<i32>,
-    pub c1_ref: Option<std::sync::Arc<Vec<Option<std::sync::Arc<crate::test::TestBeRef>>>>>,
+    pub c1_ref: Option<std::sync::Arc<Vec<Option<std::sync::Arc<test::TestBeRef>>>>>,
     pub c2: std::collections::HashSet<i32>,
-    pub c2_ref: Option<std::sync::Arc<Vec<Option<std::sync::Arc<crate::test::TestBeRef>>>>>,
+    pub c2_ref: Option<std::sync::Arc<Vec<Option<std::sync::Arc<test::TestBeRef>>>>>,
     pub d1: std::collections::HashMap<i32, i32>,
-    pub d1_ref: Option<std::sync::Arc<std::collections::HashMap<i32, Option<std::sync::Arc<crate::test::TestBeRef>>>>>,
+    pub d1_ref: Option<std::sync::Arc<std::collections::HashMap<i32, Option<std::sync::Arc<test::TestBeRef>>>>>,
     pub d2: std::collections::HashMap<i32, i32>,
-    pub d2_ref: Option<std::sync::Arc<std::collections::HashMap<i32, Option<std::sync::Arc<crate::test::TestBeRef>>>>>,
+    pub d2_ref: Option<std::sync::Arc<std::collections::HashMap<i32, Option<std::sync::Arc<test::TestBeRef>>>>>,
     pub e1: i32,
     pub e2: i64,
     pub e3: String,
     pub f1: i32,
     pub f2: i64,
     pub f3: String,
-    pub s1: crate::test::RefDynamicBase,
+    pub s1: test::RefDynamicBase,
 }
 
 impl TestRef{
@@ -1912,7 +1912,7 @@ impl TestRef{
         let f1 = buf.read_int();
         let f2 = buf.read_long();
         let f3 = buf.read_string();
-        let s1 = crate::test::RefDynamicBase::new(&mut buf)?;
+        let s1 = test::RefDynamicBase::new(&mut buf)?;
         
         Ok(TestRef { id, x1, x1_ref, x1_2, x1_2_ref, x2, x3, x4, x4_ref, a1, a1_ref, a2, a2_ref, b1, b1_ref, b2, b2_ref, c1, c1_ref, c2, c2_ref, d1, d1_ref, d2, d2_ref, e1, e2, e3, f1, f2, f3, s1, })
     }    
@@ -1942,7 +1942,7 @@ pub struct TestRow {
     pub x: i32,
     pub y: bool,
     pub z: String,
-    pub a: crate::test::Test3,
+    pub a: test::Test3,
     pub b: Vec<i32>,
 }
 
@@ -1951,7 +1951,7 @@ impl TestRow{
         let x = buf.read_int();
         let y = buf.read_bool();
         let z = buf.read_string();
-        let a = crate::test::Test3::new(&mut buf)?;
+        let a = test::Test3::new(&mut buf)?;
         let b = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_int()); } _e0 };
         
         Ok(TestRow { x, y, z, a, b, })
@@ -1970,9 +1970,9 @@ pub struct TestScriptableObject {
     pub desc: String,
     pub rate: f32,
     pub num: i32,
-    pub v2: crate::vec2,
-    pub v3: crate::vec3,
-    pub v4: crate::vec4,
+    pub v2: crate::Vec2,
+    pub v3: crate::Vec3,
+    pub v4: crate::Vec4,
 }
 
 impl TestScriptableObject{
@@ -1981,9 +1981,9 @@ impl TestScriptableObject{
         let desc = buf.read_string();
         let rate = buf.read_float();
         let num = buf.read_int();
-        let v2 = crate::vec2::new(&mut buf)?;
-        let v3 = crate::vec3::new(&mut buf)?;
-        let v4 = crate::vec4::new(&mut buf)?;
+        let v2 = vec2::new(&mut buf)?.into();
+        let v3 = vec3::new(&mut buf)?.into();
+        let v4 = vec4::new(&mut buf)?.into();
         
         Ok(TestScriptableObject { id, desc, rate, num, v2, v3, v4, })
     }    
@@ -2001,7 +2001,7 @@ pub struct TestSet {
     pub x1: Vec<i32>,
     pub x2: Vec<i64>,
     pub x3: Vec<String>,
-    pub x4: Vec<crate::test::DemoEnum>,
+    pub x4: Vec<test::DemoEnum>,
 }
 
 impl TestSet{
@@ -2053,8 +2053,8 @@ pub struct TestString {
     pub id: String,
     pub s1: String,
     pub s2: String,
-    pub cs1: crate::test::CompactString,
-    pub cs2: crate::test::CompactString,
+    pub cs1: test::CompactString,
+    pub cs2: test::CompactString,
     pub css: Vec<String>,
     pub css2: Vec<String>,
 }
@@ -2064,8 +2064,8 @@ impl TestString{
         let id = buf.read_string();
         let s1 = buf.read_string();
         let s2 = buf.read_string();
-        let cs1 = crate::test::CompactString::new(&mut buf)?;
-        let cs2 = crate::test::CompactString::new(&mut buf)?;
+        let cs1 = test::CompactString::new(&mut buf)?;
+        let cs2 = test::CompactString::new(&mut buf)?;
         let css = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_string()); } _e0 };
         let css2 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_string()); } _e0 };
         
@@ -2089,14 +2089,14 @@ pub struct TestUeType {
     pub x5: i64,
     pub x6: f32,
     pub x10: String,
-    pub x12: crate::test::DemoType1,
-    pub x13: crate::test::ETestUeType,
+    pub x12: test::DemoType1,
+    pub x13: test::ETestUeType,
     pub t1: u64,
     pub k1: Vec<i32>,
     pub k2: Vec<i32>,
     pub k5: std::collections::HashSet<i32>,
     pub k8: std::collections::HashMap<i32, i32>,
-    pub k9: Vec<crate::test::DemoE2>,
+    pub k9: Vec<test::DemoE2>,
 }
 
 impl TestUeType{
@@ -2108,14 +2108,14 @@ impl TestUeType{
         let x5 = buf.read_long();
         let x6 = buf.read_float();
         let x10 = buf.read_string();
-        let x12 = crate::test::DemoType1::new(&mut buf)?;
+        let x12 = test::DemoType1::new(&mut buf)?;
         let x13 = buf.read_int().into();
         let t1 = buf.read_ulong();
         let k1 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_int()); } _e0 };
         let k2 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_int()); } _e0 };
         let k5 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = std::collections::HashSet::default(); for i0 in 0..n0 { _e0.insert(buf.read_int()); } _e0 };
         let k8 = {let n0 = std::cmp::min(buf.read_size(), buf.size()); let mut _e0 = std::collections::HashMap::with_capacity(n0 * 3 / 2);for i0 in 0..n0 { let _k0 = buf.read_int(); let _v0 = buf.read_int(); _e0.insert(_k0, _v0);} _e0 };
-        let k9 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(crate::test::DemoE2::new(&mut buf)?); } _e0 };
+        let k9 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(test::DemoE2::new(&mut buf)?); } _e0 };
         
         Ok(TestUeType { x1, x2, x3, x4, x5, x6, x10, x12, x13, t1, k1, k2, k5, k8, k9, })
     }    
@@ -2130,17 +2130,17 @@ impl TestUeType{
 
 #[derive(Debug)]
 pub struct TbFullTypes {
-    pub data_list: Vec<std::sync::Arc<crate::test::DemoType2>>,
-    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::DemoType2>>,
+    pub data_list: Vec<std::sync::Arc<test::DemoType2>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<test::DemoType2>>,
 }
 
 impl TbFullTypes {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbFullTypes>, LubanError> {
-        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::DemoType2>> = Default::default();
-        let mut data_list: Vec<std::sync::Arc<crate::test::DemoType2>> = vec![];
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<test::DemoType2>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<test::DemoType2>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
-            let row = std::sync::Arc::new(crate::test::DemoType2::new(&mut buf)?);
+            let row = std::sync::Arc::new(test::DemoType2::new(&mut buf)?);
             data_list.push(row.clone());
             data_map.insert(row.x4.clone(), row.clone());
         }
@@ -2148,19 +2148,19 @@ impl TbFullTypes {
         Ok(std::sync::Arc::new(TbFullTypes { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::DemoType2>> {
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<test::DemoType2>> {
         self.data_map.get(key).map(|x| x.clone())
     }
     
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
-           let mut b = Box::from_raw(x.as_ref() as *const crate::test::DemoType2 as *mut crate::test::DemoType2); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+           let mut b = Box::from_raw(x.as_ref() as *const test::DemoType2 as *mut test::DemoType2); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
         });
     }
 }
 
 impl std::ops::Index<i32> for TbFullTypes {
-    type Output = std::sync::Arc<crate::test::DemoType2>;
+    type Output = std::sync::Arc<test::DemoType2>;
 
     fn index(&self, index: i32) -> &Self::Output {
         &self.data_map.get(&index).unwrap()
@@ -2170,14 +2170,14 @@ impl std::ops::Index<i32> for TbFullTypes {
 
 #[derive(Debug)]
 pub struct TbSingleton {
-    pub data: crate::test::DemoSingletonType,
+    pub data: test::DemoSingletonType,
 }
 
 impl TbSingleton {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbSingleton>, LubanError> {
         let n = buf.read_size();
         if n != 1 { return Err(LubanError::Table(format!("table mode=one, but size != 1"))); }
-        let data = crate::test::DemoSingletonType::new(&mut buf)?;
+        let data = test::DemoSingletonType::new(&mut buf)?;
         Ok(std::sync::Arc::new(TbSingleton { data }))
     }
     
@@ -2189,15 +2189,15 @@ impl TbSingleton {
 
 #[derive(Debug)]
 pub struct TbNotIndexList {
-    pub data_list: Vec<std::sync::Arc<crate::test::NotIndexList>>,
+    pub data_list: Vec<std::sync::Arc<test::NotIndexList>>,
 }
 
 impl TbNotIndexList {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbNotIndexList>, LubanError> {
-        let mut data_list: Vec<std::sync::Arc<crate::test::NotIndexList>> = vec![];
+        let mut data_list: Vec<std::sync::Arc<test::NotIndexList>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
-            let row = std::sync::Arc::new(crate::test::NotIndexList::new(&mut buf)?);
+            let row = std::sync::Arc::new(test::NotIndexList::new(&mut buf)?);
             data_list.push(row.clone());
         }
 
@@ -2208,7 +2208,7 @@ impl TbNotIndexList {
     
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
-           let mut b = Box::from_raw(x.as_ref() as *const crate::test::NotIndexList as *mut crate::test::NotIndexList); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+           let mut b = Box::from_raw(x.as_ref() as *const test::NotIndexList as *mut test::NotIndexList); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
         });
     }
 }
@@ -2216,19 +2216,19 @@ impl TbNotIndexList {
 
 #[derive(Debug)]
 pub struct TbMultiUnionIndexList {
-    pub data_list: Vec<std::sync::Arc<crate::test::MultiUnionIndexList>>,
-    pub data_map_union: std::collections::HashMap<(i32, i64, String), std::sync::Arc<crate::test::MultiUnionIndexList>>,
+    pub data_list: Vec<std::sync::Arc<test::MultiUnionIndexList>>,
+    pub data_map_union: std::collections::HashMap<(i32, i64, String), std::sync::Arc<test::MultiUnionIndexList>>,
 }
 
 impl TbMultiUnionIndexList {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbMultiUnionIndexList>, LubanError> {
-        let mut data_list: Vec<std::sync::Arc<crate::test::MultiUnionIndexList>> = vec![];
+        let mut data_list: Vec<std::sync::Arc<test::MultiUnionIndexList>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
-            let row = std::sync::Arc::new(crate::test::MultiUnionIndexList::new(&mut buf)?);
+            let row = std::sync::Arc::new(test::MultiUnionIndexList::new(&mut buf)?);
             data_list.push(row.clone());
         }
-        let mut data_map_union: std::collections::HashMap<(i32, i64, String), std::sync::Arc<crate::test::MultiUnionIndexList>> = Default::default();
+        let mut data_map_union: std::collections::HashMap<(i32, i64, String), std::sync::Arc<test::MultiUnionIndexList>> = Default::default();
         for x in &data_list {
             data_map_union.insert((x.id1, x.id2, x.id3.clone()), x.clone());
         }
@@ -2239,13 +2239,13 @@ impl TbMultiUnionIndexList {
         }))
     }
     
-    pub fn get(&self, key: &(i32, i64, String)) -> Option<std::sync::Arc<crate::test::MultiUnionIndexList>> {
+    pub fn get(&self, key: &(i32, i64, String)) -> Option<std::sync::Arc<test::MultiUnionIndexList>> {
         self.data_map_union.get(key).map(|x| x.clone())
     }
     
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
-           let mut b = Box::from_raw(x.as_ref() as *const crate::test::MultiUnionIndexList as *mut crate::test::MultiUnionIndexList); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+           let mut b = Box::from_raw(x.as_ref() as *const test::MultiUnionIndexList as *mut test::MultiUnionIndexList); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
         });
     }
 }
@@ -2253,23 +2253,23 @@ impl TbMultiUnionIndexList {
 
 #[derive(Debug)]
 pub struct TbMultiIndexList {
-    pub data_list: Vec<std::sync::Arc<crate::test::MultiIndexList>>,
-    pub data_map_id1: std::collections::HashMap<i32, std::sync::Arc<crate::test::MultiIndexList>>,
-    pub data_map_id2: std::collections::HashMap<i64, std::sync::Arc<crate::test::MultiIndexList>>,
-    pub data_map_id3: std::collections::HashMap<String, std::sync::Arc<crate::test::MultiIndexList>>,
+    pub data_list: Vec<std::sync::Arc<test::MultiIndexList>>,
+    pub data_map_id1: std::collections::HashMap<i32, std::sync::Arc<test::MultiIndexList>>,
+    pub data_map_id2: std::collections::HashMap<i64, std::sync::Arc<test::MultiIndexList>>,
+    pub data_map_id3: std::collections::HashMap<String, std::sync::Arc<test::MultiIndexList>>,
 }
 
 impl TbMultiIndexList {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbMultiIndexList>, LubanError> {
-        let mut data_list: Vec<std::sync::Arc<crate::test::MultiIndexList>> = vec![];
+        let mut data_list: Vec<std::sync::Arc<test::MultiIndexList>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
-            let row = std::sync::Arc::new(crate::test::MultiIndexList::new(&mut buf)?);
+            let row = std::sync::Arc::new(test::MultiIndexList::new(&mut buf)?);
             data_list.push(row.clone());
         }
-        let mut data_map_id1: std::collections::HashMap<i32, std::sync::Arc<crate::test::MultiIndexList>> = Default::default();
-        let mut data_map_id2: std::collections::HashMap<i64, std::sync::Arc<crate::test::MultiIndexList>> = Default::default();
-        let mut data_map_id3: std::collections::HashMap<String, std::sync::Arc<crate::test::MultiIndexList>> = Default::default();
+        let mut data_map_id1: std::collections::HashMap<i32, std::sync::Arc<test::MultiIndexList>> = Default::default();
+        let mut data_map_id2: std::collections::HashMap<i64, std::sync::Arc<test::MultiIndexList>> = Default::default();
+        let mut data_map_id3: std::collections::HashMap<String, std::sync::Arc<test::MultiIndexList>> = Default::default();
         for x in &data_list {
             data_map_id1.insert(x.id1.clone(), x.clone());
             data_map_id2.insert(x.id2.clone(), x.clone());
@@ -2283,19 +2283,19 @@ impl TbMultiIndexList {
             data_map_id3,
         }))
     }
-    pub fn get_by_id1(&self, key: &i32) -> Option<std::sync::Arc<crate::test::MultiIndexList>> {
+    pub fn get_by_id1(&self, key: &i32) -> Option<std::sync::Arc<test::MultiIndexList>> {
         self.data_map_id1.get(key).map(|x| x.clone())
     }
-    pub fn get_by_id2(&self, key: &i64) -> Option<std::sync::Arc<crate::test::MultiIndexList>> {
+    pub fn get_by_id2(&self, key: &i64) -> Option<std::sync::Arc<test::MultiIndexList>> {
         self.data_map_id2.get(key).map(|x| x.clone())
     }
-    pub fn get_by_id3(&self, key: &String) -> Option<std::sync::Arc<crate::test::MultiIndexList>> {
+    pub fn get_by_id3(&self, key: &String) -> Option<std::sync::Arc<test::MultiIndexList>> {
         self.data_map_id3.get(key).map(|x| x.clone())
     }
     
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
-           let mut b = Box::from_raw(x.as_ref() as *const crate::test::MultiIndexList as *mut crate::test::MultiIndexList); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+           let mut b = Box::from_raw(x.as_ref() as *const test::MultiIndexList as *mut test::MultiIndexList); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
         });
     }
 }
@@ -2303,17 +2303,17 @@ impl TbMultiIndexList {
 
 #[derive(Debug)]
 pub struct TbDataFromMisc {
-    pub data_list: Vec<std::sync::Arc<crate::test::DemoType2>>,
-    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::DemoType2>>,
+    pub data_list: Vec<std::sync::Arc<test::DemoType2>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<test::DemoType2>>,
 }
 
 impl TbDataFromMisc {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbDataFromMisc>, LubanError> {
-        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::DemoType2>> = Default::default();
-        let mut data_list: Vec<std::sync::Arc<crate::test::DemoType2>> = vec![];
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<test::DemoType2>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<test::DemoType2>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
-            let row = std::sync::Arc::new(crate::test::DemoType2::new(&mut buf)?);
+            let row = std::sync::Arc::new(test::DemoType2::new(&mut buf)?);
             data_list.push(row.clone());
             data_map.insert(row.x4.clone(), row.clone());
         }
@@ -2321,19 +2321,19 @@ impl TbDataFromMisc {
         Ok(std::sync::Arc::new(TbDataFromMisc { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::DemoType2>> {
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<test::DemoType2>> {
         self.data_map.get(key).map(|x| x.clone())
     }
     
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
-           let mut b = Box::from_raw(x.as_ref() as *const crate::test::DemoType2 as *mut crate::test::DemoType2); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+           let mut b = Box::from_raw(x.as_ref() as *const test::DemoType2 as *mut test::DemoType2); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
         });
     }
 }
 
 impl std::ops::Index<i32> for TbDataFromMisc {
-    type Output = std::sync::Arc<crate::test::DemoType2>;
+    type Output = std::sync::Arc<test::DemoType2>;
 
     fn index(&self, index: i32) -> &Self::Output {
         &self.data_map.get(&index).unwrap()
@@ -2343,17 +2343,17 @@ impl std::ops::Index<i32> for TbDataFromMisc {
 
 #[derive(Debug)]
 pub struct TbMultiRowRecord {
-    pub data_list: Vec<std::sync::Arc<crate::test::MultiRowRecord>>,
-    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::MultiRowRecord>>,
+    pub data_list: Vec<std::sync::Arc<test::MultiRowRecord>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<test::MultiRowRecord>>,
 }
 
 impl TbMultiRowRecord {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbMultiRowRecord>, LubanError> {
-        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::MultiRowRecord>> = Default::default();
-        let mut data_list: Vec<std::sync::Arc<crate::test::MultiRowRecord>> = vec![];
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<test::MultiRowRecord>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<test::MultiRowRecord>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
-            let row = std::sync::Arc::new(crate::test::MultiRowRecord::new(&mut buf)?);
+            let row = std::sync::Arc::new(test::MultiRowRecord::new(&mut buf)?);
             data_list.push(row.clone());
             data_map.insert(row.id.clone(), row.clone());
         }
@@ -2361,19 +2361,19 @@ impl TbMultiRowRecord {
         Ok(std::sync::Arc::new(TbMultiRowRecord { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::MultiRowRecord>> {
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<test::MultiRowRecord>> {
         self.data_map.get(key).map(|x| x.clone())
     }
     
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
-           let mut b = Box::from_raw(x.as_ref() as *const crate::test::MultiRowRecord as *mut crate::test::MultiRowRecord); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+           let mut b = Box::from_raw(x.as_ref() as *const test::MultiRowRecord as *mut test::MultiRowRecord); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
         });
     }
 }
 
 impl std::ops::Index<i32> for TbMultiRowRecord {
-    type Output = std::sync::Arc<crate::test::MultiRowRecord>;
+    type Output = std::sync::Arc<test::MultiRowRecord>;
 
     fn index(&self, index: i32) -> &Self::Output {
         &self.data_map.get(&index).unwrap()
@@ -2383,17 +2383,17 @@ impl std::ops::Index<i32> for TbMultiRowRecord {
 
 #[derive(Debug)]
 pub struct TbTestMultiColumn {
-    pub data_list: Vec<std::sync::Arc<crate::test::TestMultiColumn>>,
-    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestMultiColumn>>,
+    pub data_list: Vec<std::sync::Arc<test::TestMultiColumn>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<test::TestMultiColumn>>,
 }
 
 impl TbTestMultiColumn {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestMultiColumn>, LubanError> {
-        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestMultiColumn>> = Default::default();
-        let mut data_list: Vec<std::sync::Arc<crate::test::TestMultiColumn>> = vec![];
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<test::TestMultiColumn>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<test::TestMultiColumn>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
-            let row = std::sync::Arc::new(crate::test::TestMultiColumn::new(&mut buf)?);
+            let row = std::sync::Arc::new(test::TestMultiColumn::new(&mut buf)?);
             data_list.push(row.clone());
             data_map.insert(row.id.clone(), row.clone());
         }
@@ -2401,19 +2401,19 @@ impl TbTestMultiColumn {
         Ok(std::sync::Arc::new(TbTestMultiColumn { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestMultiColumn>> {
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<test::TestMultiColumn>> {
         self.data_map.get(key).map(|x| x.clone())
     }
     
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
-           let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestMultiColumn as *mut crate::test::TestMultiColumn); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+           let mut b = Box::from_raw(x.as_ref() as *const test::TestMultiColumn as *mut test::TestMultiColumn); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
         });
     }
 }
 
 impl std::ops::Index<i32> for TbTestMultiColumn {
-    type Output = std::sync::Arc<crate::test::TestMultiColumn>;
+    type Output = std::sync::Arc<test::TestMultiColumn>;
 
     fn index(&self, index: i32) -> &Self::Output {
         &self.data_map.get(&index).unwrap()
@@ -2423,17 +2423,17 @@ impl std::ops::Index<i32> for TbTestMultiColumn {
 
 #[derive(Debug)]
 pub struct TbMultiRowTitle {
-    pub data_list: Vec<std::sync::Arc<crate::test::MultiRowTitle>>,
-    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::MultiRowTitle>>,
+    pub data_list: Vec<std::sync::Arc<test::MultiRowTitle>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<test::MultiRowTitle>>,
 }
 
 impl TbMultiRowTitle {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbMultiRowTitle>, LubanError> {
-        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::MultiRowTitle>> = Default::default();
-        let mut data_list: Vec<std::sync::Arc<crate::test::MultiRowTitle>> = vec![];
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<test::MultiRowTitle>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<test::MultiRowTitle>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
-            let row = std::sync::Arc::new(crate::test::MultiRowTitle::new(&mut buf)?);
+            let row = std::sync::Arc::new(test::MultiRowTitle::new(&mut buf)?);
             data_list.push(row.clone());
             data_map.insert(row.id.clone(), row.clone());
         }
@@ -2441,19 +2441,19 @@ impl TbMultiRowTitle {
         Ok(std::sync::Arc::new(TbMultiRowTitle { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::MultiRowTitle>> {
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<test::MultiRowTitle>> {
         self.data_map.get(key).map(|x| x.clone())
     }
     
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
-           let mut b = Box::from_raw(x.as_ref() as *const crate::test::MultiRowTitle as *mut crate::test::MultiRowTitle); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+           let mut b = Box::from_raw(x.as_ref() as *const test::MultiRowTitle as *mut test::MultiRowTitle); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
         });
     }
 }
 
 impl std::ops::Index<i32> for TbMultiRowTitle {
-    type Output = std::sync::Arc<crate::test::MultiRowTitle>;
+    type Output = std::sync::Arc<test::MultiRowTitle>;
 
     fn index(&self, index: i32) -> &Self::Output {
         &self.data_map.get(&index).unwrap()
@@ -2463,17 +2463,17 @@ impl std::ops::Index<i32> for TbMultiRowTitle {
 
 #[derive(Debug)]
 pub struct TbTestNull {
-    pub data_list: Vec<std::sync::Arc<crate::test::TestNull>>,
-    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestNull>>,
+    pub data_list: Vec<std::sync::Arc<test::TestNull>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<test::TestNull>>,
 }
 
 impl TbTestNull {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestNull>, LubanError> {
-        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestNull>> = Default::default();
-        let mut data_list: Vec<std::sync::Arc<crate::test::TestNull>> = vec![];
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<test::TestNull>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<test::TestNull>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
-            let row = std::sync::Arc::new(crate::test::TestNull::new(&mut buf)?);
+            let row = std::sync::Arc::new(test::TestNull::new(&mut buf)?);
             data_list.push(row.clone());
             data_map.insert(row.id.clone(), row.clone());
         }
@@ -2481,19 +2481,19 @@ impl TbTestNull {
         Ok(std::sync::Arc::new(TbTestNull { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestNull>> {
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<test::TestNull>> {
         self.data_map.get(key).map(|x| x.clone())
     }
     
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
-           let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestNull as *mut crate::test::TestNull); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+           let mut b = Box::from_raw(x.as_ref() as *const test::TestNull as *mut test::TestNull); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
         });
     }
 }
 
 impl std::ops::Index<i32> for TbTestNull {
-    type Output = std::sync::Arc<crate::test::TestNull>;
+    type Output = std::sync::Arc<test::TestNull>;
 
     fn index(&self, index: i32) -> &Self::Output {
         &self.data_map.get(&index).unwrap()
@@ -2503,17 +2503,17 @@ impl std::ops::Index<i32> for TbTestNull {
 
 #[derive(Debug)]
 pub struct TbDemoPrimitive {
-    pub data_list: Vec<std::sync::Arc<crate::test::DemoPrimitiveTypesTable>>,
-    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::DemoPrimitiveTypesTable>>,
+    pub data_list: Vec<std::sync::Arc<test::DemoPrimitiveTypesTable>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<test::DemoPrimitiveTypesTable>>,
 }
 
 impl TbDemoPrimitive {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbDemoPrimitive>, LubanError> {
-        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::DemoPrimitiveTypesTable>> = Default::default();
-        let mut data_list: Vec<std::sync::Arc<crate::test::DemoPrimitiveTypesTable>> = vec![];
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<test::DemoPrimitiveTypesTable>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<test::DemoPrimitiveTypesTable>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
-            let row = std::sync::Arc::new(crate::test::DemoPrimitiveTypesTable::new(&mut buf)?);
+            let row = std::sync::Arc::new(test::DemoPrimitiveTypesTable::new(&mut buf)?);
             data_list.push(row.clone());
             data_map.insert(row.x4.clone(), row.clone());
         }
@@ -2521,19 +2521,19 @@ impl TbDemoPrimitive {
         Ok(std::sync::Arc::new(TbDemoPrimitive { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::DemoPrimitiveTypesTable>> {
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<test::DemoPrimitiveTypesTable>> {
         self.data_map.get(key).map(|x| x.clone())
     }
     
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
-           let mut b = Box::from_raw(x.as_ref() as *const crate::test::DemoPrimitiveTypesTable as *mut crate::test::DemoPrimitiveTypesTable); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+           let mut b = Box::from_raw(x.as_ref() as *const test::DemoPrimitiveTypesTable as *mut test::DemoPrimitiveTypesTable); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
         });
     }
 }
 
 impl std::ops::Index<i32> for TbDemoPrimitive {
-    type Output = std::sync::Arc<crate::test::DemoPrimitiveTypesTable>;
+    type Output = std::sync::Arc<test::DemoPrimitiveTypesTable>;
 
     fn index(&self, index: i32) -> &Self::Output {
         &self.data_map.get(&index).unwrap()
@@ -2543,17 +2543,17 @@ impl std::ops::Index<i32> for TbDemoPrimitive {
 
 #[derive(Debug)]
 pub struct TbTestString {
-    pub data_list: Vec<std::sync::Arc<crate::test::TestString>>,
-    pub data_map: std::collections::HashMap<String, std::sync::Arc<crate::test::TestString>>,
+    pub data_list: Vec<std::sync::Arc<test::TestString>>,
+    pub data_map: std::collections::HashMap<String, std::sync::Arc<test::TestString>>,
 }
 
 impl TbTestString {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestString>, LubanError> {
-        let mut data_map: std::collections::HashMap<String, std::sync::Arc<crate::test::TestString>> = Default::default();
-        let mut data_list: Vec<std::sync::Arc<crate::test::TestString>> = vec![];
+        let mut data_map: std::collections::HashMap<String, std::sync::Arc<test::TestString>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<test::TestString>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
-            let row = std::sync::Arc::new(crate::test::TestString::new(&mut buf)?);
+            let row = std::sync::Arc::new(test::TestString::new(&mut buf)?);
             data_list.push(row.clone());
             data_map.insert(row.id.clone(), row.clone());
         }
@@ -2561,19 +2561,19 @@ impl TbTestString {
         Ok(std::sync::Arc::new(TbTestString { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &String) -> Option<std::sync::Arc<crate::test::TestString>> {
+    pub fn get(&self, key: &String) -> Option<std::sync::Arc<test::TestString>> {
         self.data_map.get(key).map(|x| x.clone())
     }
     
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
-           let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestString as *mut crate::test::TestString); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+           let mut b = Box::from_raw(x.as_ref() as *const test::TestString as *mut test::TestString); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
         });
     }
 }
 
 impl std::ops::Index<String> for TbTestString {
-    type Output = std::sync::Arc<crate::test::TestString>;
+    type Output = std::sync::Arc<test::TestString>;
 
     fn index(&self, index: String) -> &Self::Output {
         &self.data_map.get(&index).unwrap()
@@ -2583,17 +2583,17 @@ impl std::ops::Index<String> for TbTestString {
 
 #[derive(Debug)]
 pub struct TbDemoGroup {
-    pub data_list: Vec<std::sync::Arc<crate::test::DemoGroup>>,
-    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::DemoGroup>>,
+    pub data_list: Vec<std::sync::Arc<test::DemoGroup>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<test::DemoGroup>>,
 }
 
 impl TbDemoGroup {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbDemoGroup>, LubanError> {
-        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::DemoGroup>> = Default::default();
-        let mut data_list: Vec<std::sync::Arc<crate::test::DemoGroup>> = vec![];
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<test::DemoGroup>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<test::DemoGroup>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
-            let row = std::sync::Arc::new(crate::test::DemoGroup::new(&mut buf)?);
+            let row = std::sync::Arc::new(test::DemoGroup::new(&mut buf)?);
             data_list.push(row.clone());
             data_map.insert(row.id.clone(), row.clone());
         }
@@ -2601,19 +2601,19 @@ impl TbDemoGroup {
         Ok(std::sync::Arc::new(TbDemoGroup { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::DemoGroup>> {
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<test::DemoGroup>> {
         self.data_map.get(key).map(|x| x.clone())
     }
     
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
-           let mut b = Box::from_raw(x.as_ref() as *const crate::test::DemoGroup as *mut crate::test::DemoGroup); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+           let mut b = Box::from_raw(x.as_ref() as *const test::DemoGroup as *mut test::DemoGroup); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
         });
     }
 }
 
 impl std::ops::Index<i32> for TbDemoGroup {
-    type Output = std::sync::Arc<crate::test::DemoGroup>;
+    type Output = std::sync::Arc<test::DemoGroup>;
 
     fn index(&self, index: i32) -> &Self::Output {
         &self.data_map.get(&index).unwrap()
@@ -2623,17 +2623,17 @@ impl std::ops::Index<i32> for TbDemoGroup {
 
 #[derive(Debug)]
 pub struct TbDemoGroup_C {
-    pub data_list: Vec<std::sync::Arc<crate::test::DemoGroup>>,
-    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::DemoGroup>>,
+    pub data_list: Vec<std::sync::Arc<test::DemoGroup>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<test::DemoGroup>>,
 }
 
 impl TbDemoGroup_C {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbDemoGroup_C>, LubanError> {
-        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::DemoGroup>> = Default::default();
-        let mut data_list: Vec<std::sync::Arc<crate::test::DemoGroup>> = vec![];
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<test::DemoGroup>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<test::DemoGroup>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
-            let row = std::sync::Arc::new(crate::test::DemoGroup::new(&mut buf)?);
+            let row = std::sync::Arc::new(test::DemoGroup::new(&mut buf)?);
             data_list.push(row.clone());
             data_map.insert(row.id.clone(), row.clone());
         }
@@ -2641,19 +2641,19 @@ impl TbDemoGroup_C {
         Ok(std::sync::Arc::new(TbDemoGroup_C { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::DemoGroup>> {
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<test::DemoGroup>> {
         self.data_map.get(key).map(|x| x.clone())
     }
     
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
-           let mut b = Box::from_raw(x.as_ref() as *const crate::test::DemoGroup as *mut crate::test::DemoGroup); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+           let mut b = Box::from_raw(x.as_ref() as *const test::DemoGroup as *mut test::DemoGroup); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
         });
     }
 }
 
 impl std::ops::Index<i32> for TbDemoGroup_C {
-    type Output = std::sync::Arc<crate::test::DemoGroup>;
+    type Output = std::sync::Arc<test::DemoGroup>;
 
     fn index(&self, index: i32) -> &Self::Output {
         &self.data_map.get(&index).unwrap()
@@ -2663,17 +2663,17 @@ impl std::ops::Index<i32> for TbDemoGroup_C {
 
 #[derive(Debug)]
 pub struct TbDemoGroup_S {
-    pub data_list: Vec<std::sync::Arc<crate::test::DemoGroup>>,
-    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::DemoGroup>>,
+    pub data_list: Vec<std::sync::Arc<test::DemoGroup>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<test::DemoGroup>>,
 }
 
 impl TbDemoGroup_S {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbDemoGroup_S>, LubanError> {
-        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::DemoGroup>> = Default::default();
-        let mut data_list: Vec<std::sync::Arc<crate::test::DemoGroup>> = vec![];
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<test::DemoGroup>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<test::DemoGroup>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
-            let row = std::sync::Arc::new(crate::test::DemoGroup::new(&mut buf)?);
+            let row = std::sync::Arc::new(test::DemoGroup::new(&mut buf)?);
             data_list.push(row.clone());
             data_map.insert(row.id.clone(), row.clone());
         }
@@ -2681,19 +2681,19 @@ impl TbDemoGroup_S {
         Ok(std::sync::Arc::new(TbDemoGroup_S { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::DemoGroup>> {
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<test::DemoGroup>> {
         self.data_map.get(key).map(|x| x.clone())
     }
     
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
-           let mut b = Box::from_raw(x.as_ref() as *const crate::test::DemoGroup as *mut crate::test::DemoGroup); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+           let mut b = Box::from_raw(x.as_ref() as *const test::DemoGroup as *mut test::DemoGroup); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
         });
     }
 }
 
 impl std::ops::Index<i32> for TbDemoGroup_S {
-    type Output = std::sync::Arc<crate::test::DemoGroup>;
+    type Output = std::sync::Arc<test::DemoGroup>;
 
     fn index(&self, index: i32) -> &Self::Output {
         &self.data_map.get(&index).unwrap()
@@ -2703,17 +2703,17 @@ impl std::ops::Index<i32> for TbDemoGroup_S {
 
 #[derive(Debug)]
 pub struct TbDemoGroup_E {
-    pub data_list: Vec<std::sync::Arc<crate::test::DemoGroup>>,
-    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::DemoGroup>>,
+    pub data_list: Vec<std::sync::Arc<test::DemoGroup>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<test::DemoGroup>>,
 }
 
 impl TbDemoGroup_E {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbDemoGroup_E>, LubanError> {
-        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::DemoGroup>> = Default::default();
-        let mut data_list: Vec<std::sync::Arc<crate::test::DemoGroup>> = vec![];
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<test::DemoGroup>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<test::DemoGroup>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
-            let row = std::sync::Arc::new(crate::test::DemoGroup::new(&mut buf)?);
+            let row = std::sync::Arc::new(test::DemoGroup::new(&mut buf)?);
             data_list.push(row.clone());
             data_map.insert(row.id.clone(), row.clone());
         }
@@ -2721,19 +2721,19 @@ impl TbDemoGroup_E {
         Ok(std::sync::Arc::new(TbDemoGroup_E { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::DemoGroup>> {
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<test::DemoGroup>> {
         self.data_map.get(key).map(|x| x.clone())
     }
     
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
-           let mut b = Box::from_raw(x.as_ref() as *const crate::test::DemoGroup as *mut crate::test::DemoGroup); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+           let mut b = Box::from_raw(x.as_ref() as *const test::DemoGroup as *mut test::DemoGroup); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
         });
     }
 }
 
 impl std::ops::Index<i32> for TbDemoGroup_E {
-    type Output = std::sync::Arc<crate::test::DemoGroup>;
+    type Output = std::sync::Arc<test::DemoGroup>;
 
     fn index(&self, index: i32) -> &Self::Output {
         &self.data_map.get(&index).unwrap()
@@ -2743,14 +2743,14 @@ impl std::ops::Index<i32> for TbDemoGroup_E {
 
 #[derive(Debug)]
 pub struct TbTestGlobal {
-    pub data: crate::test::TestGlobal,
+    pub data: test::TestGlobal,
 }
 
 impl TbTestGlobal {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestGlobal>, LubanError> {
         let n = buf.read_size();
         if n != 1 { return Err(LubanError::Table(format!("table mode=one, but size != 1"))); }
-        let data = crate::test::TestGlobal::new(&mut buf)?;
+        let data = test::TestGlobal::new(&mut buf)?;
         Ok(std::sync::Arc::new(TbTestGlobal { data }))
     }
     
@@ -2762,17 +2762,17 @@ impl TbTestGlobal {
 
 #[derive(Debug)]
 pub struct TbTestBeRef {
-    pub data_list: Vec<std::sync::Arc<crate::test::TestBeRef>>,
-    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestBeRef>>,
+    pub data_list: Vec<std::sync::Arc<test::TestBeRef>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<test::TestBeRef>>,
 }
 
 impl TbTestBeRef {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestBeRef>, LubanError> {
-        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestBeRef>> = Default::default();
-        let mut data_list: Vec<std::sync::Arc<crate::test::TestBeRef>> = vec![];
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<test::TestBeRef>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<test::TestBeRef>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
-            let row = std::sync::Arc::new(crate::test::TestBeRef::new(&mut buf)?);
+            let row = std::sync::Arc::new(test::TestBeRef::new(&mut buf)?);
             data_list.push(row.clone());
             data_map.insert(row.id.clone(), row.clone());
         }
@@ -2780,19 +2780,19 @@ impl TbTestBeRef {
         Ok(std::sync::Arc::new(TbTestBeRef { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestBeRef>> {
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<test::TestBeRef>> {
         self.data_map.get(key).map(|x| x.clone())
     }
     
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
-           let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestBeRef as *mut crate::test::TestBeRef); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+           let mut b = Box::from_raw(x.as_ref() as *const test::TestBeRef as *mut test::TestBeRef); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
         });
     }
 }
 
 impl std::ops::Index<i32> for TbTestBeRef {
-    type Output = std::sync::Arc<crate::test::TestBeRef>;
+    type Output = std::sync::Arc<test::TestBeRef>;
 
     fn index(&self, index: i32) -> &Self::Output {
         &self.data_map.get(&index).unwrap()
@@ -2802,17 +2802,17 @@ impl std::ops::Index<i32> for TbTestBeRef {
 
 #[derive(Debug)]
 pub struct TbTestBeRef2 {
-    pub data_list: Vec<std::sync::Arc<crate::test::TestBeRef>>,
-    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestBeRef>>,
+    pub data_list: Vec<std::sync::Arc<test::TestBeRef>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<test::TestBeRef>>,
 }
 
 impl TbTestBeRef2 {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestBeRef2>, LubanError> {
-        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestBeRef>> = Default::default();
-        let mut data_list: Vec<std::sync::Arc<crate::test::TestBeRef>> = vec![];
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<test::TestBeRef>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<test::TestBeRef>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
-            let row = std::sync::Arc::new(crate::test::TestBeRef::new(&mut buf)?);
+            let row = std::sync::Arc::new(test::TestBeRef::new(&mut buf)?);
             data_list.push(row.clone());
             data_map.insert(row.id.clone(), row.clone());
         }
@@ -2820,19 +2820,19 @@ impl TbTestBeRef2 {
         Ok(std::sync::Arc::new(TbTestBeRef2 { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestBeRef>> {
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<test::TestBeRef>> {
         self.data_map.get(key).map(|x| x.clone())
     }
     
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
-           let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestBeRef as *mut crate::test::TestBeRef); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+           let mut b = Box::from_raw(x.as_ref() as *const test::TestBeRef as *mut test::TestBeRef); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
         });
     }
 }
 
 impl std::ops::Index<i32> for TbTestBeRef2 {
-    type Output = std::sync::Arc<crate::test::TestBeRef>;
+    type Output = std::sync::Arc<test::TestBeRef>;
 
     fn index(&self, index: i32) -> &Self::Output {
         &self.data_map.get(&index).unwrap()
@@ -2842,17 +2842,17 @@ impl std::ops::Index<i32> for TbTestBeRef2 {
 
 #[derive(Debug)]
 pub struct TbTestRef {
-    pub data_list: Vec<std::sync::Arc<crate::test::TestRef>>,
-    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestRef>>,
+    pub data_list: Vec<std::sync::Arc<test::TestRef>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<test::TestRef>>,
 }
 
 impl TbTestRef {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestRef>, LubanError> {
-        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestRef>> = Default::default();
-        let mut data_list: Vec<std::sync::Arc<crate::test::TestRef>> = vec![];
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<test::TestRef>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<test::TestRef>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
-            let row = std::sync::Arc::new(crate::test::TestRef::new(&mut buf)?);
+            let row = std::sync::Arc::new(test::TestRef::new(&mut buf)?);
             data_list.push(row.clone());
             data_map.insert(row.id.clone(), row.clone());
         }
@@ -2860,19 +2860,19 @@ impl TbTestRef {
         Ok(std::sync::Arc::new(TbTestRef { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestRef>> {
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<test::TestRef>> {
         self.data_map.get(key).map(|x| x.clone())
     }
     
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
-           let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestRef as *mut crate::test::TestRef); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+           let mut b = Box::from_raw(x.as_ref() as *const test::TestRef as *mut test::TestRef); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
         });
     }
 }
 
 impl std::ops::Index<i32> for TbTestRef {
-    type Output = std::sync::Arc<crate::test::TestRef>;
+    type Output = std::sync::Arc<test::TestRef>;
 
     fn index(&self, index: i32) -> &Self::Output {
         &self.data_map.get(&index).unwrap()
@@ -2882,17 +2882,17 @@ impl std::ops::Index<i32> for TbTestRef {
 
 #[derive(Debug)]
 pub struct TbTestSize {
-    pub data_list: Vec<std::sync::Arc<crate::test::TestSize>>,
-    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestSize>>,
+    pub data_list: Vec<std::sync::Arc<test::TestSize>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<test::TestSize>>,
 }
 
 impl TbTestSize {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestSize>, LubanError> {
-        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestSize>> = Default::default();
-        let mut data_list: Vec<std::sync::Arc<crate::test::TestSize>> = vec![];
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<test::TestSize>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<test::TestSize>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
-            let row = std::sync::Arc::new(crate::test::TestSize::new(&mut buf)?);
+            let row = std::sync::Arc::new(test::TestSize::new(&mut buf)?);
             data_list.push(row.clone());
             data_map.insert(row.id.clone(), row.clone());
         }
@@ -2900,19 +2900,19 @@ impl TbTestSize {
         Ok(std::sync::Arc::new(TbTestSize { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestSize>> {
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<test::TestSize>> {
         self.data_map.get(key).map(|x| x.clone())
     }
     
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
-           let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestSize as *mut crate::test::TestSize); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+           let mut b = Box::from_raw(x.as_ref() as *const test::TestSize as *mut test::TestSize); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
         });
     }
 }
 
 impl std::ops::Index<i32> for TbTestSize {
-    type Output = std::sync::Arc<crate::test::TestSize>;
+    type Output = std::sync::Arc<test::TestSize>;
 
     fn index(&self, index: i32) -> &Self::Output {
         &self.data_map.get(&index).unwrap()
@@ -2922,17 +2922,17 @@ impl std::ops::Index<i32> for TbTestSize {
 
 #[derive(Debug)]
 pub struct TbTestSet {
-    pub data_list: Vec<std::sync::Arc<crate::test::TestSet>>,
-    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestSet>>,
+    pub data_list: Vec<std::sync::Arc<test::TestSet>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<test::TestSet>>,
 }
 
 impl TbTestSet {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestSet>, LubanError> {
-        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestSet>> = Default::default();
-        let mut data_list: Vec<std::sync::Arc<crate::test::TestSet>> = vec![];
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<test::TestSet>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<test::TestSet>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
-            let row = std::sync::Arc::new(crate::test::TestSet::new(&mut buf)?);
+            let row = std::sync::Arc::new(test::TestSet::new(&mut buf)?);
             data_list.push(row.clone());
             data_map.insert(row.id.clone(), row.clone());
         }
@@ -2940,19 +2940,19 @@ impl TbTestSet {
         Ok(std::sync::Arc::new(TbTestSet { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestSet>> {
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<test::TestSet>> {
         self.data_map.get(key).map(|x| x.clone())
     }
     
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
-           let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestSet as *mut crate::test::TestSet); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+           let mut b = Box::from_raw(x.as_ref() as *const test::TestSet as *mut test::TestSet); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
         });
     }
 }
 
 impl std::ops::Index<i32> for TbTestSet {
-    type Output = std::sync::Arc<crate::test::TestSet>;
+    type Output = std::sync::Arc<test::TestSet>;
 
     fn index(&self, index: i32) -> &Self::Output {
         &self.data_map.get(&index).unwrap()
@@ -2962,17 +2962,17 @@ impl std::ops::Index<i32> for TbTestSet {
 
 #[derive(Debug)]
 pub struct TbTestRange {
-    pub data_list: Vec<std::sync::Arc<crate::test::TestRange>>,
-    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestRange>>,
+    pub data_list: Vec<std::sync::Arc<test::TestRange>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<test::TestRange>>,
 }
 
 impl TbTestRange {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestRange>, LubanError> {
-        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestRange>> = Default::default();
-        let mut data_list: Vec<std::sync::Arc<crate::test::TestRange>> = vec![];
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<test::TestRange>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<test::TestRange>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
-            let row = std::sync::Arc::new(crate::test::TestRange::new(&mut buf)?);
+            let row = std::sync::Arc::new(test::TestRange::new(&mut buf)?);
             data_list.push(row.clone());
             data_map.insert(row.id.clone(), row.clone());
         }
@@ -2980,19 +2980,19 @@ impl TbTestRange {
         Ok(std::sync::Arc::new(TbTestRange { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestRange>> {
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<test::TestRange>> {
         self.data_map.get(key).map(|x| x.clone())
     }
     
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
-           let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestRange as *mut crate::test::TestRange); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+           let mut b = Box::from_raw(x.as_ref() as *const test::TestRange as *mut test::TestRange); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
         });
     }
 }
 
 impl std::ops::Index<i32> for TbTestRange {
-    type Output = std::sync::Arc<crate::test::TestRange>;
+    type Output = std::sync::Arc<test::TestRange>;
 
     fn index(&self, index: i32) -> &Self::Output {
         &self.data_map.get(&index).unwrap()
@@ -3002,17 +3002,17 @@ impl std::ops::Index<i32> for TbTestRange {
 
 #[derive(Debug)]
 pub struct TbDetectCsvEncoding {
-    pub data_list: Vec<std::sync::Arc<crate::test::DetectEncoding>>,
-    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::DetectEncoding>>,
+    pub data_list: Vec<std::sync::Arc<test::DetectEncoding>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<test::DetectEncoding>>,
 }
 
 impl TbDetectCsvEncoding {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbDetectCsvEncoding>, LubanError> {
-        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::DetectEncoding>> = Default::default();
-        let mut data_list: Vec<std::sync::Arc<crate::test::DetectEncoding>> = vec![];
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<test::DetectEncoding>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<test::DetectEncoding>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
-            let row = std::sync::Arc::new(crate::test::DetectEncoding::new(&mut buf)?);
+            let row = std::sync::Arc::new(test::DetectEncoding::new(&mut buf)?);
             data_list.push(row.clone());
             data_map.insert(row.id.clone(), row.clone());
         }
@@ -3020,19 +3020,19 @@ impl TbDetectCsvEncoding {
         Ok(std::sync::Arc::new(TbDetectCsvEncoding { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::DetectEncoding>> {
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<test::DetectEncoding>> {
         self.data_map.get(key).map(|x| x.clone())
     }
     
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
-           let mut b = Box::from_raw(x.as_ref() as *const crate::test::DetectEncoding as *mut crate::test::DetectEncoding); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+           let mut b = Box::from_raw(x.as_ref() as *const test::DetectEncoding as *mut test::DetectEncoding); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
         });
     }
 }
 
 impl std::ops::Index<i32> for TbDetectCsvEncoding {
-    type Output = std::sync::Arc<crate::test::DetectEncoding>;
+    type Output = std::sync::Arc<test::DetectEncoding>;
 
     fn index(&self, index: i32) -> &Self::Output {
         &self.data_map.get(&index).unwrap()
@@ -3042,17 +3042,17 @@ impl std::ops::Index<i32> for TbDetectCsvEncoding {
 
 #[derive(Debug)]
 pub struct TbItem2 {
-    pub data_list: Vec<std::sync::Arc<crate::test::ItemBase>>,
-    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::ItemBase>>,
+    pub data_list: Vec<std::sync::Arc<test::ItemBase>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<test::ItemBase>>,
 }
 
 impl TbItem2 {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbItem2>, LubanError> {
-        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::ItemBase>> = Default::default();
-        let mut data_list: Vec<std::sync::Arc<crate::test::ItemBase>> = vec![];
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<test::ItemBase>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<test::ItemBase>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
-            let row = std::sync::Arc::new(crate::test::ItemBase::new(&mut buf)?);
+            let row = std::sync::Arc::new(test::ItemBase::new(&mut buf)?);
             data_list.push(row.clone());
             data_map.insert(row.get_id().clone(), row.clone());
         }
@@ -3060,19 +3060,19 @@ impl TbItem2 {
         Ok(std::sync::Arc::new(TbItem2 { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::ItemBase>> {
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<test::ItemBase>> {
         self.data_map.get(key).map(|x| x.clone())
     }
     
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
-           let mut b = Box::from_raw(x.as_ref() as *const crate::test::ItemBase as *mut crate::test::ItemBase); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+           let mut b = Box::from_raw(x.as_ref() as *const test::ItemBase as *mut test::ItemBase); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
         });
     }
 }
 
 impl std::ops::Index<i32> for TbItem2 {
-    type Output = std::sync::Arc<crate::test::ItemBase>;
+    type Output = std::sync::Arc<test::ItemBase>;
 
     fn index(&self, index: i32) -> &Self::Output {
         &self.data_map.get(&index).unwrap()
@@ -3082,17 +3082,17 @@ impl std::ops::Index<i32> for TbItem2 {
 
 #[derive(Debug)]
 pub struct TbTestIndex {
-    pub data_list: Vec<std::sync::Arc<crate::test::TestIndex>>,
-    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestIndex>>,
+    pub data_list: Vec<std::sync::Arc<test::TestIndex>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<test::TestIndex>>,
 }
 
 impl TbTestIndex {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestIndex>, LubanError> {
-        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestIndex>> = Default::default();
-        let mut data_list: Vec<std::sync::Arc<crate::test::TestIndex>> = vec![];
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<test::TestIndex>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<test::TestIndex>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
-            let row = std::sync::Arc::new(crate::test::TestIndex::new(&mut buf)?);
+            let row = std::sync::Arc::new(test::TestIndex::new(&mut buf)?);
             data_list.push(row.clone());
             data_map.insert(row.id.clone(), row.clone());
         }
@@ -3100,19 +3100,19 @@ impl TbTestIndex {
         Ok(std::sync::Arc::new(TbTestIndex { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestIndex>> {
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<test::TestIndex>> {
         self.data_map.get(key).map(|x| x.clone())
     }
     
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
-           let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestIndex as *mut crate::test::TestIndex); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+           let mut b = Box::from_raw(x.as_ref() as *const test::TestIndex as *mut test::TestIndex); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
         });
     }
 }
 
 impl std::ops::Index<i32> for TbTestIndex {
-    type Output = std::sync::Arc<crate::test::TestIndex>;
+    type Output = std::sync::Arc<test::TestIndex>;
 
     fn index(&self, index: i32) -> &Self::Output {
         &self.data_map.get(&index).unwrap()
@@ -3122,17 +3122,17 @@ impl std::ops::Index<i32> for TbTestIndex {
 
 #[derive(Debug)]
 pub struct TbTestMap {
-    pub data_list: Vec<std::sync::Arc<crate::test::TestMap>>,
-    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestMap>>,
+    pub data_list: Vec<std::sync::Arc<test::TestMap>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<test::TestMap>>,
 }
 
 impl TbTestMap {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestMap>, LubanError> {
-        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestMap>> = Default::default();
-        let mut data_list: Vec<std::sync::Arc<crate::test::TestMap>> = vec![];
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<test::TestMap>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<test::TestMap>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
-            let row = std::sync::Arc::new(crate::test::TestMap::new(&mut buf)?);
+            let row = std::sync::Arc::new(test::TestMap::new(&mut buf)?);
             data_list.push(row.clone());
             data_map.insert(row.id.clone(), row.clone());
         }
@@ -3140,19 +3140,19 @@ impl TbTestMap {
         Ok(std::sync::Arc::new(TbTestMap { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestMap>> {
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<test::TestMap>> {
         self.data_map.get(key).map(|x| x.clone())
     }
     
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
-           let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestMap as *mut crate::test::TestMap); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+           let mut b = Box::from_raw(x.as_ref() as *const test::TestMap as *mut test::TestMap); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
         });
     }
 }
 
 impl std::ops::Index<i32> for TbTestMap {
-    type Output = std::sync::Arc<crate::test::TestMap>;
+    type Output = std::sync::Arc<test::TestMap>;
 
     fn index(&self, index: i32) -> &Self::Output {
         &self.data_map.get(&index).unwrap()
@@ -3162,17 +3162,17 @@ impl std::ops::Index<i32> for TbTestMap {
 
 #[derive(Debug)]
 pub struct TbExcelFromJson {
-    pub data_list: Vec<std::sync::Arc<crate::test::ExcelFromJson>>,
-    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::ExcelFromJson>>,
+    pub data_list: Vec<std::sync::Arc<test::ExcelFromJson>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<test::ExcelFromJson>>,
 }
 
 impl TbExcelFromJson {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbExcelFromJson>, LubanError> {
-        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::ExcelFromJson>> = Default::default();
-        let mut data_list: Vec<std::sync::Arc<crate::test::ExcelFromJson>> = vec![];
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<test::ExcelFromJson>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<test::ExcelFromJson>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
-            let row = std::sync::Arc::new(crate::test::ExcelFromJson::new(&mut buf)?);
+            let row = std::sync::Arc::new(test::ExcelFromJson::new(&mut buf)?);
             data_list.push(row.clone());
             data_map.insert(row.x4.clone(), row.clone());
         }
@@ -3180,19 +3180,19 @@ impl TbExcelFromJson {
         Ok(std::sync::Arc::new(TbExcelFromJson { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::ExcelFromJson>> {
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<test::ExcelFromJson>> {
         self.data_map.get(key).map(|x| x.clone())
     }
     
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
-           let mut b = Box::from_raw(x.as_ref() as *const crate::test::ExcelFromJson as *mut crate::test::ExcelFromJson); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+           let mut b = Box::from_raw(x.as_ref() as *const test::ExcelFromJson as *mut test::ExcelFromJson); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
         });
     }
 }
 
 impl std::ops::Index<i32> for TbExcelFromJson {
-    type Output = std::sync::Arc<crate::test::ExcelFromJson>;
+    type Output = std::sync::Arc<test::ExcelFromJson>;
 
     fn index(&self, index: i32) -> &Self::Output {
         &self.data_map.get(&index).unwrap()
@@ -3202,17 +3202,17 @@ impl std::ops::Index<i32> for TbExcelFromJson {
 
 #[derive(Debug)]
 pub struct TbCompositeJsonTable1 {
-    pub data_list: Vec<std::sync::Arc<crate::test::CompositeJsonTable1>>,
-    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::CompositeJsonTable1>>,
+    pub data_list: Vec<std::sync::Arc<test::CompositeJsonTable1>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<test::CompositeJsonTable1>>,
 }
 
 impl TbCompositeJsonTable1 {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbCompositeJsonTable1>, LubanError> {
-        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::CompositeJsonTable1>> = Default::default();
-        let mut data_list: Vec<std::sync::Arc<crate::test::CompositeJsonTable1>> = vec![];
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<test::CompositeJsonTable1>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<test::CompositeJsonTable1>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
-            let row = std::sync::Arc::new(crate::test::CompositeJsonTable1::new(&mut buf)?);
+            let row = std::sync::Arc::new(test::CompositeJsonTable1::new(&mut buf)?);
             data_list.push(row.clone());
             data_map.insert(row.id.clone(), row.clone());
         }
@@ -3220,19 +3220,19 @@ impl TbCompositeJsonTable1 {
         Ok(std::sync::Arc::new(TbCompositeJsonTable1 { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::CompositeJsonTable1>> {
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<test::CompositeJsonTable1>> {
         self.data_map.get(key).map(|x| x.clone())
     }
     
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
-           let mut b = Box::from_raw(x.as_ref() as *const crate::test::CompositeJsonTable1 as *mut crate::test::CompositeJsonTable1); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+           let mut b = Box::from_raw(x.as_ref() as *const test::CompositeJsonTable1 as *mut test::CompositeJsonTable1); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
         });
     }
 }
 
 impl std::ops::Index<i32> for TbCompositeJsonTable1 {
-    type Output = std::sync::Arc<crate::test::CompositeJsonTable1>;
+    type Output = std::sync::Arc<test::CompositeJsonTable1>;
 
     fn index(&self, index: i32) -> &Self::Output {
         &self.data_map.get(&index).unwrap()
@@ -3242,17 +3242,17 @@ impl std::ops::Index<i32> for TbCompositeJsonTable1 {
 
 #[derive(Debug)]
 pub struct TbCompositeJsonTable2 {
-    pub data_list: Vec<std::sync::Arc<crate::test::CompositeJsonTable2>>,
-    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::CompositeJsonTable2>>,
+    pub data_list: Vec<std::sync::Arc<test::CompositeJsonTable2>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<test::CompositeJsonTable2>>,
 }
 
 impl TbCompositeJsonTable2 {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbCompositeJsonTable2>, LubanError> {
-        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::CompositeJsonTable2>> = Default::default();
-        let mut data_list: Vec<std::sync::Arc<crate::test::CompositeJsonTable2>> = vec![];
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<test::CompositeJsonTable2>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<test::CompositeJsonTable2>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
-            let row = std::sync::Arc::new(crate::test::CompositeJsonTable2::new(&mut buf)?);
+            let row = std::sync::Arc::new(test::CompositeJsonTable2::new(&mut buf)?);
             data_list.push(row.clone());
             data_map.insert(row.id.clone(), row.clone());
         }
@@ -3260,19 +3260,19 @@ impl TbCompositeJsonTable2 {
         Ok(std::sync::Arc::new(TbCompositeJsonTable2 { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::CompositeJsonTable2>> {
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<test::CompositeJsonTable2>> {
         self.data_map.get(key).map(|x| x.clone())
     }
     
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
-           let mut b = Box::from_raw(x.as_ref() as *const crate::test::CompositeJsonTable2 as *mut crate::test::CompositeJsonTable2); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+           let mut b = Box::from_raw(x.as_ref() as *const test::CompositeJsonTable2 as *mut test::CompositeJsonTable2); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
         });
     }
 }
 
 impl std::ops::Index<i32> for TbCompositeJsonTable2 {
-    type Output = std::sync::Arc<crate::test::CompositeJsonTable2>;
+    type Output = std::sync::Arc<test::CompositeJsonTable2>;
 
     fn index(&self, index: i32) -> &Self::Output {
         &self.data_map.get(&index).unwrap()
@@ -3282,14 +3282,14 @@ impl std::ops::Index<i32> for TbCompositeJsonTable2 {
 
 #[derive(Debug)]
 pub struct TbCompositeJsonTable3 {
-    pub data: crate::test::CompositeJsonTable3,
+    pub data: test::CompositeJsonTable3,
 }
 
 impl TbCompositeJsonTable3 {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbCompositeJsonTable3>, LubanError> {
         let n = buf.read_size();
         if n != 1 { return Err(LubanError::Table(format!("table mode=one, but size != 1"))); }
-        let data = crate::test::CompositeJsonTable3::new(&mut buf)?;
+        let data = test::CompositeJsonTable3::new(&mut buf)?;
         Ok(std::sync::Arc::new(TbCompositeJsonTable3 { data }))
     }
     
@@ -3301,17 +3301,17 @@ impl TbCompositeJsonTable3 {
 
 #[derive(Debug)]
 pub struct TbExcelFromJsonMultiRow {
-    pub data_list: Vec<std::sync::Arc<crate::test::ExcelFromJsonMultiRow>>,
-    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::ExcelFromJsonMultiRow>>,
+    pub data_list: Vec<std::sync::Arc<test::ExcelFromJsonMultiRow>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<test::ExcelFromJsonMultiRow>>,
 }
 
 impl TbExcelFromJsonMultiRow {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbExcelFromJsonMultiRow>, LubanError> {
-        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::ExcelFromJsonMultiRow>> = Default::default();
-        let mut data_list: Vec<std::sync::Arc<crate::test::ExcelFromJsonMultiRow>> = vec![];
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<test::ExcelFromJsonMultiRow>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<test::ExcelFromJsonMultiRow>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
-            let row = std::sync::Arc::new(crate::test::ExcelFromJsonMultiRow::new(&mut buf)?);
+            let row = std::sync::Arc::new(test::ExcelFromJsonMultiRow::new(&mut buf)?);
             data_list.push(row.clone());
             data_map.insert(row.id.clone(), row.clone());
         }
@@ -3319,19 +3319,19 @@ impl TbExcelFromJsonMultiRow {
         Ok(std::sync::Arc::new(TbExcelFromJsonMultiRow { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::ExcelFromJsonMultiRow>> {
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<test::ExcelFromJsonMultiRow>> {
         self.data_map.get(key).map(|x| x.clone())
     }
     
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
-           let mut b = Box::from_raw(x.as_ref() as *const crate::test::ExcelFromJsonMultiRow as *mut crate::test::ExcelFromJsonMultiRow); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+           let mut b = Box::from_raw(x.as_ref() as *const test::ExcelFromJsonMultiRow as *mut test::ExcelFromJsonMultiRow); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
         });
     }
 }
 
 impl std::ops::Index<i32> for TbExcelFromJsonMultiRow {
-    type Output = std::sync::Arc<crate::test::ExcelFromJsonMultiRow>;
+    type Output = std::sync::Arc<test::ExcelFromJsonMultiRow>;
 
     fn index(&self, index: i32) -> &Self::Output {
         &self.data_map.get(&index).unwrap()
@@ -3341,17 +3341,17 @@ impl std::ops::Index<i32> for TbExcelFromJsonMultiRow {
 
 #[derive(Debug)]
 pub struct TbTestScriptableObject {
-    pub data_list: Vec<std::sync::Arc<crate::test::TestScriptableObject>>,
-    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestScriptableObject>>,
+    pub data_list: Vec<std::sync::Arc<test::TestScriptableObject>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<test::TestScriptableObject>>,
 }
 
 impl TbTestScriptableObject {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestScriptableObject>, LubanError> {
-        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestScriptableObject>> = Default::default();
-        let mut data_list: Vec<std::sync::Arc<crate::test::TestScriptableObject>> = vec![];
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<test::TestScriptableObject>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<test::TestScriptableObject>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
-            let row = std::sync::Arc::new(crate::test::TestScriptableObject::new(&mut buf)?);
+            let row = std::sync::Arc::new(test::TestScriptableObject::new(&mut buf)?);
             data_list.push(row.clone());
             data_map.insert(row.id.clone(), row.clone());
         }
@@ -3359,19 +3359,19 @@ impl TbTestScriptableObject {
         Ok(std::sync::Arc::new(TbTestScriptableObject { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestScriptableObject>> {
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<test::TestScriptableObject>> {
         self.data_map.get(key).map(|x| x.clone())
     }
     
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
-           let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestScriptableObject as *mut crate::test::TestScriptableObject); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+           let mut b = Box::from_raw(x.as_ref() as *const test::TestScriptableObject as *mut test::TestScriptableObject); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
         });
     }
 }
 
 impl std::ops::Index<i32> for TbTestScriptableObject {
-    type Output = std::sync::Arc<crate::test::TestScriptableObject>;
+    type Output = std::sync::Arc<test::TestScriptableObject>;
 
     fn index(&self, index: i32) -> &Self::Output {
         &self.data_map.get(&index).unwrap()
@@ -3381,17 +3381,17 @@ impl std::ops::Index<i32> for TbTestScriptableObject {
 
 #[derive(Debug)]
 pub struct TbPath {
-    pub data_list: Vec<std::sync::Arc<crate::test::Path>>,
-    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::Path>>,
+    pub data_list: Vec<std::sync::Arc<test::Path>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<test::Path>>,
 }
 
 impl TbPath {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbPath>, LubanError> {
-        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::Path>> = Default::default();
-        let mut data_list: Vec<std::sync::Arc<crate::test::Path>> = vec![];
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<test::Path>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<test::Path>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
-            let row = std::sync::Arc::new(crate::test::Path::new(&mut buf)?);
+            let row = std::sync::Arc::new(test::Path::new(&mut buf)?);
             data_list.push(row.clone());
             data_map.insert(row.id.clone(), row.clone());
         }
@@ -3399,19 +3399,19 @@ impl TbPath {
         Ok(std::sync::Arc::new(TbPath { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::Path>> {
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<test::Path>> {
         self.data_map.get(key).map(|x| x.clone())
     }
     
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
-           let mut b = Box::from_raw(x.as_ref() as *const crate::test::Path as *mut crate::test::Path); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+           let mut b = Box::from_raw(x.as_ref() as *const test::Path as *mut test::Path); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
         });
     }
 }
 
 impl std::ops::Index<i32> for TbPath {
-    type Output = std::sync::Arc<crate::test::Path>;
+    type Output = std::sync::Arc<test::Path>;
 
     fn index(&self, index: i32) -> &Self::Output {
         &self.data_map.get(&index).unwrap()
@@ -3421,17 +3421,17 @@ impl std::ops::Index<i32> for TbPath {
 
 #[derive(Debug)]
 pub struct TbTestFieldAlias {
-    pub data_list: Vec<std::sync::Arc<crate::test::TestFieldAlias>>,
-    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestFieldAlias>>,
+    pub data_list: Vec<std::sync::Arc<test::TestFieldAlias>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<test::TestFieldAlias>>,
 }
 
 impl TbTestFieldAlias {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestFieldAlias>, LubanError> {
-        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestFieldAlias>> = Default::default();
-        let mut data_list: Vec<std::sync::Arc<crate::test::TestFieldAlias>> = vec![];
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<test::TestFieldAlias>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<test::TestFieldAlias>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
-            let row = std::sync::Arc::new(crate::test::TestFieldAlias::new(&mut buf)?);
+            let row = std::sync::Arc::new(test::TestFieldAlias::new(&mut buf)?);
             data_list.push(row.clone());
             data_map.insert(row.id.clone(), row.clone());
         }
@@ -3439,19 +3439,19 @@ impl TbTestFieldAlias {
         Ok(std::sync::Arc::new(TbTestFieldAlias { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestFieldAlias>> {
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<test::TestFieldAlias>> {
         self.data_map.get(key).map(|x| x.clone())
     }
     
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
-           let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestFieldAlias as *mut crate::test::TestFieldAlias); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+           let mut b = Box::from_raw(x.as_ref() as *const test::TestFieldAlias as *mut test::TestFieldAlias); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
         });
     }
 }
 
 impl std::ops::Index<i32> for TbTestFieldAlias {
-    type Output = std::sync::Arc<crate::test::TestFieldAlias>;
+    type Output = std::sync::Arc<test::TestFieldAlias>;
 
     fn index(&self, index: i32) -> &Self::Output {
         &self.data_map.get(&index).unwrap()
@@ -3461,17 +3461,17 @@ impl std::ops::Index<i32> for TbTestFieldAlias {
 
 #[derive(Debug)]
 pub struct TbTestFieldVariant {
-    pub data_list: Vec<std::sync::Arc<crate::test::TestFieldVariant>>,
-    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestFieldVariant>>,
+    pub data_list: Vec<std::sync::Arc<test::TestFieldVariant>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<test::TestFieldVariant>>,
 }
 
 impl TbTestFieldVariant {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestFieldVariant>, LubanError> {
-        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestFieldVariant>> = Default::default();
-        let mut data_list: Vec<std::sync::Arc<crate::test::TestFieldVariant>> = vec![];
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<test::TestFieldVariant>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<test::TestFieldVariant>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
-            let row = std::sync::Arc::new(crate::test::TestFieldVariant::new(&mut buf)?);
+            let row = std::sync::Arc::new(test::TestFieldVariant::new(&mut buf)?);
             data_list.push(row.clone());
             data_map.insert(row.id.clone(), row.clone());
         }
@@ -3479,19 +3479,19 @@ impl TbTestFieldVariant {
         Ok(std::sync::Arc::new(TbTestFieldVariant { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestFieldVariant>> {
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<test::TestFieldVariant>> {
         self.data_map.get(key).map(|x| x.clone())
     }
     
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
-           let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestFieldVariant as *mut crate::test::TestFieldVariant); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+           let mut b = Box::from_raw(x.as_ref() as *const test::TestFieldVariant as *mut test::TestFieldVariant); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
         });
     }
 }
 
 impl std::ops::Index<i32> for TbTestFieldVariant {
-    type Output = std::sync::Arc<crate::test::TestFieldVariant>;
+    type Output = std::sync::Arc<test::TestFieldVariant>;
 
     fn index(&self, index: i32) -> &Self::Output {
         &self.data_map.get(&index).unwrap()
@@ -3501,17 +3501,17 @@ impl std::ops::Index<i32> for TbTestFieldVariant {
 
 #[derive(Debug)]
 pub struct TbTestFieldVariant2 {
-    pub data_list: Vec<std::sync::Arc<crate::test::TestFieldVariant2>>,
-    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestFieldVariant2>>,
+    pub data_list: Vec<std::sync::Arc<test::TestFieldVariant2>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<test::TestFieldVariant2>>,
 }
 
 impl TbTestFieldVariant2 {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestFieldVariant2>, LubanError> {
-        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestFieldVariant2>> = Default::default();
-        let mut data_list: Vec<std::sync::Arc<crate::test::TestFieldVariant2>> = vec![];
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<test::TestFieldVariant2>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<test::TestFieldVariant2>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
-            let row = std::sync::Arc::new(crate::test::TestFieldVariant2::new(&mut buf)?);
+            let row = std::sync::Arc::new(test::TestFieldVariant2::new(&mut buf)?);
             data_list.push(row.clone());
             data_map.insert(row.id.clone(), row.clone());
         }
@@ -3519,19 +3519,19 @@ impl TbTestFieldVariant2 {
         Ok(std::sync::Arc::new(TbTestFieldVariant2 { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestFieldVariant2>> {
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<test::TestFieldVariant2>> {
         self.data_map.get(key).map(|x| x.clone())
     }
     
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
-           let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestFieldVariant2 as *mut crate::test::TestFieldVariant2); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+           let mut b = Box::from_raw(x.as_ref() as *const test::TestFieldVariant2 as *mut test::TestFieldVariant2); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
         });
     }
 }
 
 impl std::ops::Index<i32> for TbTestFieldVariant2 {
-    type Output = std::sync::Arc<crate::test::TestFieldVariant2>;
+    type Output = std::sync::Arc<test::TestFieldVariant2>;
 
     fn index(&self, index: i32) -> &Self::Output {
         &self.data_map.get(&index).unwrap()
@@ -3541,17 +3541,17 @@ impl std::ops::Index<i32> for TbTestFieldVariant2 {
 
 #[derive(Debug)]
 pub struct TbTestMapper {
-    pub data_list: Vec<std::sync::Arc<crate::test::TestMapper>>,
-    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestMapper>>,
+    pub data_list: Vec<std::sync::Arc<test::TestMapper>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<test::TestMapper>>,
 }
 
 impl TbTestMapper {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestMapper>, LubanError> {
-        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestMapper>> = Default::default();
-        let mut data_list: Vec<std::sync::Arc<crate::test::TestMapper>> = vec![];
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<test::TestMapper>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<test::TestMapper>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
-            let row = std::sync::Arc::new(crate::test::TestMapper::new(&mut buf)?);
+            let row = std::sync::Arc::new(test::TestMapper::new(&mut buf)?);
             data_list.push(row.clone());
             data_map.insert(row.id.clone(), row.clone());
         }
@@ -3559,19 +3559,19 @@ impl TbTestMapper {
         Ok(std::sync::Arc::new(TbTestMapper { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestMapper>> {
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<test::TestMapper>> {
         self.data_map.get(key).map(|x| x.clone())
     }
     
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
-           let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestMapper as *mut crate::test::TestMapper); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+           let mut b = Box::from_raw(x.as_ref() as *const test::TestMapper as *mut test::TestMapper); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
         });
     }
 }
 
 impl std::ops::Index<i32> for TbTestMapper {
-    type Output = std::sync::Arc<crate::test::TestMapper>;
+    type Output = std::sync::Arc<test::TestMapper>;
 
     fn index(&self, index: i32) -> &Self::Output {
         &self.data_map.get(&index).unwrap()
@@ -3581,17 +3581,17 @@ impl std::ops::Index<i32> for TbTestMapper {
 
 #[derive(Debug)]
 pub struct TbDefineFromExcel2 {
-    pub data_list: Vec<std::sync::Arc<crate::test::DefineFromExcel2>>,
-    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::DefineFromExcel2>>,
+    pub data_list: Vec<std::sync::Arc<test::DefineFromExcel2>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<test::DefineFromExcel2>>,
 }
 
 impl TbDefineFromExcel2 {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbDefineFromExcel2>, LubanError> {
-        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::DefineFromExcel2>> = Default::default();
-        let mut data_list: Vec<std::sync::Arc<crate::test::DefineFromExcel2>> = vec![];
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<test::DefineFromExcel2>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<test::DefineFromExcel2>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
-            let row = std::sync::Arc::new(crate::test::DefineFromExcel2::new(&mut buf)?);
+            let row = std::sync::Arc::new(test::DefineFromExcel2::new(&mut buf)?);
             data_list.push(row.clone());
             data_map.insert(row.id.clone(), row.clone());
         }
@@ -3599,19 +3599,19 @@ impl TbDefineFromExcel2 {
         Ok(std::sync::Arc::new(TbDefineFromExcel2 { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::DefineFromExcel2>> {
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<test::DefineFromExcel2>> {
         self.data_map.get(key).map(|x| x.clone())
     }
     
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
-           let mut b = Box::from_raw(x.as_ref() as *const crate::test::DefineFromExcel2 as *mut crate::test::DefineFromExcel2); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+           let mut b = Box::from_raw(x.as_ref() as *const test::DefineFromExcel2 as *mut test::DefineFromExcel2); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
         });
     }
 }
 
 impl std::ops::Index<i32> for TbDefineFromExcel2 {
-    type Output = std::sync::Arc<crate::test::DefineFromExcel2>;
+    type Output = std::sync::Arc<test::DefineFromExcel2>;
 
     fn index(&self, index: i32) -> &Self::Output {
         &self.data_map.get(&index).unwrap()
@@ -3621,17 +3621,17 @@ impl std::ops::Index<i32> for TbDefineFromExcel2 {
 
 #[derive(Debug)]
 pub struct TbAutoImport2 {
-    pub data_list: Vec<std::sync::Arc<crate::test::AutoImport2>>,
-    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::AutoImport2>>,
+    pub data_list: Vec<std::sync::Arc<test::AutoImport2>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<test::AutoImport2>>,
 }
 
 impl TbAutoImport2 {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbAutoImport2>, LubanError> {
-        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::AutoImport2>> = Default::default();
-        let mut data_list: Vec<std::sync::Arc<crate::test::AutoImport2>> = vec![];
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<test::AutoImport2>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<test::AutoImport2>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
-            let row = std::sync::Arc::new(crate::test::AutoImport2::new(&mut buf)?);
+            let row = std::sync::Arc::new(test::AutoImport2::new(&mut buf)?);
             data_list.push(row.clone());
             data_map.insert(row.id.clone(), row.clone());
         }
@@ -3639,19 +3639,19 @@ impl TbAutoImport2 {
         Ok(std::sync::Arc::new(TbAutoImport2 { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::AutoImport2>> {
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<test::AutoImport2>> {
         self.data_map.get(key).map(|x| x.clone())
     }
     
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
-           let mut b = Box::from_raw(x.as_ref() as *const crate::test::AutoImport2 as *mut crate::test::AutoImport2); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+           let mut b = Box::from_raw(x.as_ref() as *const test::AutoImport2 as *mut test::AutoImport2); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
         });
     }
 }
 
 impl std::ops::Index<i32> for TbAutoImport2 {
-    type Output = std::sync::Arc<crate::test::AutoImport2>;
+    type Output = std::sync::Arc<test::AutoImport2>;
 
     fn index(&self, index: i32) -> &Self::Output {
         &self.data_map.get(&index).unwrap()
@@ -3661,17 +3661,17 @@ impl std::ops::Index<i32> for TbAutoImport2 {
 
 #[derive(Debug)]
 pub struct TbTestFormat {
-    pub data_list: Vec<std::sync::Arc<crate::test::TestFormat>>,
-    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestFormat>>,
+    pub data_list: Vec<std::sync::Arc<test::TestFormat>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<test::TestFormat>>,
 }
 
 impl TbTestFormat {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbTestFormat>, LubanError> {
-        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::test::TestFormat>> = Default::default();
-        let mut data_list: Vec<std::sync::Arc<crate::test::TestFormat>> = vec![];
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<test::TestFormat>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<test::TestFormat>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
-            let row = std::sync::Arc::new(crate::test::TestFormat::new(&mut buf)?);
+            let row = std::sync::Arc::new(test::TestFormat::new(&mut buf)?);
             data_list.push(row.clone());
             data_map.insert(row.id.clone(), row.clone());
         }
@@ -3679,19 +3679,19 @@ impl TbTestFormat {
         Ok(std::sync::Arc::new(TbTestFormat { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::test::TestFormat>> {
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<test::TestFormat>> {
         self.data_map.get(key).map(|x| x.clone())
     }
     
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
-           let mut b = Box::from_raw(x.as_ref() as *const crate::test::TestFormat as *mut crate::test::TestFormat); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+           let mut b = Box::from_raw(x.as_ref() as *const test::TestFormat as *mut test::TestFormat); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
         });
     }
 }
 
 impl std::ops::Index<i32> for TbTestFormat {
-    type Output = std::sync::Arc<crate::test::TestFormat>;
+    type Output = std::sync::Arc<test::TestFormat>;
 
     fn index(&self, index: i32) -> &Self::Output {
         &self.data_map.get(&index).unwrap()

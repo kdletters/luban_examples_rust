@@ -11,7 +11,7 @@
 use super::*;
 use luban_lib::*;
 
-#[derive(Debug, Hash, Eq, PartialEq, macros::EnumFromNum)]
+#[derive(Debug, Hash, Eq, PartialEq, luban_macros::EnumFromNum)]
 pub enum EBoolOperator {
     AND = 0,
     OR = 1,
@@ -120,14 +120,14 @@ impl IntRange{
 
 #[derive(Debug)]
 pub struct OneDayTimeRange {
-    pub start_time: crate::common::TimeOfDay,
-    pub end_time: crate::common::TimeOfDay,
+    pub start_time: common::TimeOfDay,
+    pub end_time: common::TimeOfDay,
 }
 
 impl OneDayTimeRange{
     pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<OneDayTimeRange, LubanError> {
-        let start_time = crate::common::TimeOfDay::new(&mut buf)?;
-        let end_time = crate::common::TimeOfDay::new(&mut buf)?;
+        let start_time = common::TimeOfDay::new(&mut buf)?;
+        let end_time = common::TimeOfDay::new(&mut buf)?;
         
         Ok(OneDayTimeRange { start_time, end_time, })
     }    
@@ -165,14 +165,14 @@ impl TimeOfDay{
 
 #[derive(Debug)]
 pub struct TbGlobalConfig {
-    pub data: crate::common::GlobalConfig,
+    pub data: common::GlobalConfig,
 }
 
 impl TbGlobalConfig {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbGlobalConfig>, LubanError> {
         let n = buf.read_size();
         if n != 1 { return Err(LubanError::Table(format!("table mode=one, but size != 1"))); }
-        let data = crate::common::GlobalConfig::new(&mut buf)?;
+        let data = common::GlobalConfig::new(&mut buf)?;
         Ok(std::sync::Arc::new(TbGlobalConfig { data }))
     }
     

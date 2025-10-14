@@ -9,6 +9,9 @@
         <mapper target="server" codeTarget="cs-bin,cs-dotnet-json">
             <option name="type" value="CustomAudioType"/>
         </mapper>
+        <mapper target="all" codeTarget="rust-bin,rust-json">
+            <option name="type" value="crate::CustomAudioType"/>
+        </mapper>
     </enum>
 
     <bean name="vec2" valueType="1" sep=",">
@@ -21,6 +24,9 @@
         <mapper target="server" codeTarget="cs-bin,cs-dotnet-json,cs-newtonsoft-json">
             <option name="type" value="System.Numerics.Vector2"/>
             <option name="constructor" value="ExternalTypeUtil.NewVector2"/>
+        </mapper>
+        <mapper target="all" codeTarget="rust-bin,rust-json">
+            <option name="type" value="crate::Vec2"/>
         </mapper>
     </bean>
     <bean name="vec3" valueType="1" sep=",">
@@ -35,6 +41,9 @@
             <option name="type" value="System.Numerics.Vector3"/>
             <option name="constructor" value="ExternalTypeUtil.NewVector3"/>
         </mapper>
+        <mapper target="all" codeTarget="rust-bin,rust-json">
+            <option name="type" value="crate::Vec3"/>
+        </mapper>
     </bean>
     <bean name="vec4" valueType="1" sep=",">
         <var name="x" type="float"/>
@@ -47,7 +56,9 @@
         </mapper>
         <mapper target="server" codeTarget="cs-bin,cs-dotnet-json,cs-newtonsoft-json">
             <option name="type" value="System.Numerics.Vector4"/>
-            <option name="constructor" value="ExternalTypeUtil.NewVector4"/>
+        </mapper>
+        <mapper target="all" codeTarget="rust-bin,rust-json">
+            <option name="type" value="crate::Vec4"/>
         </mapper>
     </bean>
 </module>

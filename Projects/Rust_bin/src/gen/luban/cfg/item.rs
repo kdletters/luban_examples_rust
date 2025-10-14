@@ -11,7 +11,7 @@
 use super::*;
 use luban_lib::*;
 
-#[derive(Debug, Hash, Eq, PartialEq, macros::EnumFromNum)]
+#[derive(Debug, Hash, Eq, PartialEq, luban_macros::EnumFromNum)]
 pub enum EClothersStarQualityType {
     ///一星
     ONE = 1,
@@ -53,7 +53,7 @@ impl From<i32> for EClothersStarQualityType {
     }
 }
 
-#[derive(Debug, Hash, Eq, PartialEq, macros::EnumFromNum)]
+#[derive(Debug, Hash, Eq, PartialEq, luban_macros::EnumFromNum)]
 pub enum EClothersTag {
     ///防晒
     FANG_SHAI = 1,
@@ -71,7 +71,7 @@ impl From<i32> for EClothersTag {
     }
 }
 
-#[derive(Debug, Hash, Eq, PartialEq, macros::EnumFromNum)]
+#[derive(Debug, Hash, Eq, PartialEq, luban_macros::EnumFromNum)]
 pub enum EClothesHidePartType {
     ///胸部
     CHEST = 0,
@@ -107,7 +107,7 @@ impl From<i32> for EClothesHidePartType {
     }
 }
 
-#[derive(Debug, Hash, Eq, PartialEq, macros::EnumFromNum)]
+#[derive(Debug, Hash, Eq, PartialEq, luban_macros::EnumFromNum)]
 pub enum EClothesPropertyType {
     ///简约
     JIAN_YUE = 1,
@@ -149,7 +149,7 @@ impl From<i32> for EClothesPropertyType {
     }
 }
 
-#[derive(Debug, Hash, Eq, PartialEq, macros::EnumFromNum)]
+#[derive(Debug, Hash, Eq, PartialEq, luban_macros::EnumFromNum)]
 pub enum ECurrencyType {
     ///钻石
     DIAMOND = 1,
@@ -177,7 +177,7 @@ impl From<i32> for ECurrencyType {
 }
 
 ///道具品质
-#[derive(Debug, Hash, Eq, PartialEq, macros::EnumFromNum)]
+#[derive(Debug, Hash, Eq, PartialEq, luban_macros::EnumFromNum)]
 pub enum EItemQuality {
     ///白
     WHITE = 0,
@@ -204,7 +204,7 @@ impl From<i32> for EItemQuality {
     }
 }
 
-#[derive(Debug, Hash, Eq, PartialEq, macros::EnumFromNum)]
+#[derive(Debug, Hash, Eq, PartialEq, luban_macros::EnumFromNum)]
 pub enum EMajorType {
     ///货币
     CURRENCY = 1,
@@ -249,7 +249,7 @@ impl From<i32> for EMajorType {
     }
 }
 
-#[derive(Debug, Hash, Eq, PartialEq, macros::EnumFromNum)]
+#[derive(Debug, Hash, Eq, PartialEq, luban_macros::EnumFromNum)]
 pub enum EMinorType {
     ///钻石
     DIAMOND = 101,
@@ -408,7 +408,7 @@ impl From<i32> for EMinorType {
     }
 }
 
-#[derive(Debug, Hash, Eq, PartialEq, macros::EnumFromNum)]
+#[derive(Debug, Hash, Eq, PartialEq, luban_macros::EnumFromNum)]
 pub enum EUseType {
     ///手动
     MANUAL = 0,
@@ -431,10 +431,10 @@ pub struct Item {
     /// 道具id
     pub id: i32,
     pub name: String,
-    pub major_type: crate::item::EMajorType,
-    pub minor_type: crate::item::EMinorType,
+    pub major_type: item::EMajorType,
+    pub minor_type: item::EMinorType,
     pub max_pile_num: i32,
-    pub quality: crate::item::EItemQuality,
+    pub quality: item::EItemQuality,
     pub icon: String,
     pub icon_backgroud: String,
     pub icon_mask: String,
@@ -469,17 +469,17 @@ impl Item{
 ///道具表
 #[derive(Debug)]
 pub struct TbItem {
-    pub data_list: Vec<std::sync::Arc<crate::item::Item>>,
-    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::item::Item>>,
+    pub data_list: Vec<std::sync::Arc<item::Item>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<item::Item>>,
 }
 
 impl TbItem {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbItem>, LubanError> {
-        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::item::Item>> = Default::default();
-        let mut data_list: Vec<std::sync::Arc<crate::item::Item>> = vec![];
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<item::Item>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<item::Item>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
-            let row = std::sync::Arc::new(crate::item::Item::new(&mut buf)?);
+            let row = std::sync::Arc::new(item::Item::new(&mut buf)?);
             data_list.push(row.clone());
             data_map.insert(row.id.clone(), row.clone());
         }
@@ -487,19 +487,19 @@ impl TbItem {
         Ok(std::sync::Arc::new(TbItem { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::item::Item>> {
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<item::Item>> {
         self.data_map.get(key).map(|x| x.clone())
     }
     
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
-           let mut b = Box::from_raw(x.as_ref() as *const crate::item::Item as *mut crate::item::Item); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+           let mut b = Box::from_raw(x.as_ref() as *const item::Item as *mut item::Item); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
         });
     }
 }
 
 impl std::ops::Index<i32> for TbItem {
-    type Output = std::sync::Arc<crate::item::Item>;
+    type Output = std::sync::Arc<item::Item>;
 
     fn index(&self, index: i32) -> &Self::Output {
         &self.data_map.get(&index).unwrap()

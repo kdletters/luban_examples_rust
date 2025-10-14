@@ -11,7 +11,7 @@
 use super::*;
 use serde::Deserialize;
 
-#[derive(Deserialize, Debug, Hash, Eq, PartialEq, macros::EnumFromNum)]
+#[derive(Deserialize, Debug, Hash, Eq, PartialEq, luban_macros::EnumFromNum)]
 pub enum EExecutor {
     CLIENT = 0,
     SERVER = 1,
@@ -27,7 +27,7 @@ impl From<i32> for EExecutor {
     }
 }
 
-#[derive(Deserialize, Debug, Hash, Eq, PartialEq, macros::EnumFromNum)]
+#[derive(Deserialize, Debug, Hash, Eq, PartialEq, luban_macros::EnumFromNum)]
 pub enum EFinishMode {
     IMMEDIATE = 0,
     DELAYED = 1,
@@ -43,7 +43,7 @@ impl From<i32> for EFinishMode {
     }
 }
 
-#[derive(Deserialize, Debug, Hash, Eq, PartialEq, macros::EnumFromNum)]
+#[derive(Deserialize, Debug, Hash, Eq, PartialEq, luban_macros::EnumFromNum)]
 pub enum EFlowAbortMode {
     NONE = 0,
     LOWER_PRIORITY = 1,
@@ -63,7 +63,7 @@ impl From<i32> for EFlowAbortMode {
     }
 }
 
-#[derive(Deserialize, Debug, Hash, Eq, PartialEq, macros::EnumFromNum)]
+#[derive(Deserialize, Debug, Hash, Eq, PartialEq, luban_macros::EnumFromNum)]
 pub enum EKeyType {
     BOOL = 1,
     INT = 2,
@@ -95,7 +95,7 @@ impl From<i32> for EKeyType {
     }
 }
 
-#[derive(Deserialize, Debug, Hash, Eq, PartialEq, macros::EnumFromNum)]
+#[derive(Deserialize, Debug, Hash, Eq, PartialEq, luban_macros::EnumFromNum)]
 pub enum ENotifyObserverMode {
     ON_VALUE_CHANGE = 0,
     ON_RESULT_CHANGE = 1,
@@ -111,7 +111,7 @@ impl From<i32> for ENotifyObserverMode {
     }
 }
 
-#[derive(Deserialize, Debug, Hash, Eq, PartialEq, macros::EnumFromNum)]
+#[derive(Deserialize, Debug, Hash, Eq, PartialEq, luban_macros::EnumFromNum)]
 pub enum EOperator {
     IS_EQUAL_TO = 0,
     IS_NOT_EQUAL_TO = 1,
@@ -145,8 +145,8 @@ pub struct BehaviorTree {
     pub name: String,
     pub desc: String,
     pub blackboard_id: String,
-    pub blackboard_id_ref: Option<std::sync::Arc<crate::ai::Blackboard>>,
-    pub root: crate::ai::ComposeNode,
+    pub blackboard_id_ref: Option<std::sync::Arc<ai::Blackboard>>,
+    pub root: ai::ComposeNode,
 }
 
 impl BehaviorTree{
@@ -156,7 +156,7 @@ impl BehaviorTree{
         let desc = json["desc"].as_str().unwrap().to_string();
         let blackboard_id = json["blackboard_id"].as_str().unwrap().to_string();
         let blackboard_id_ref = None;
-        let root = crate::ai::ComposeNode::new(&json["root"])?;
+        let root = ai::ComposeNode::new(&json["root"])?;
         
         Ok(BehaviorTree { id, name, desc, blackboard_id, blackboard_id_ref, root, })
     }    
@@ -172,8 +172,8 @@ pub struct Blackboard {
     pub name: String,
     pub desc: String,
     pub parent_name: String,
-    pub parent_name_ref: Option<std::sync::Arc<crate::ai::Blackboard>>,
-    pub keys: Vec<crate::ai::BlackboardKey>,
+    pub parent_name_ref: Option<std::sync::Arc<ai::Blackboard>>,
+    pub keys: Vec<ai::BlackboardKey>,
 }
 
 impl Blackboard{
@@ -182,7 +182,7 @@ impl Blackboard{
         let desc = json["desc"].as_str().unwrap().to_string();
         let parent_name = json["parent_name"].as_str().unwrap().to_string();
         let parent_name_ref = None;
-        let keys = json["keys"].as_array().unwrap().iter().map(|field| crate::ai::BlackboardKey::new(&field).unwrap()).collect();
+        let keys = json["keys"].as_array().unwrap().iter().map(|field| ai::BlackboardKey::new(&field).unwrap()).collect();
         
         Ok(Blackboard { name, desc, parent_name, parent_name_ref, keys, })
     }    
@@ -198,7 +198,7 @@ pub struct BlackboardKey {
     pub name: String,
     pub desc: String,
     pub is_static: bool,
-    pub key_type: crate::ai::EKeyType,
+    pub key_type: ai::EKeyType,
     pub type_class_name: String,
 }
 
@@ -219,30 +219,30 @@ impl BlackboardKey{
 
 #[derive(Debug)]
 pub enum KeyData {
-    FloatKeyData(std::sync::Arc<crate::ai::FloatKeyData>),
-    IntKeyData(std::sync::Arc<crate::ai::IntKeyData>),
-    StringKeyData(std::sync::Arc<crate::ai::StringKeyData>),
-    BlackboardKeyData(std::sync::Arc<crate::ai::BlackboardKeyData>),
+    FloatKeyData(std::sync::Arc<ai::FloatKeyData>),
+    IntKeyData(std::sync::Arc<ai::IntKeyData>),
+    StringKeyData(std::sync::Arc<ai::StringKeyData>),
+    BlackboardKeyData(std::sync::Arc<ai::BlackboardKeyData>),
 }
 
 impl KeyData {
     pub(crate) fn new(json: &serde_json::Value) -> Result<Self, LubanError> {
         let type_id = json["$type"].as_str().unwrap();
         match type_id {
-            "FloatKeyData" => Ok(Self::FloatKeyData(std::sync::Arc::new(crate::ai::FloatKeyData::new(json)?))),
-            "IntKeyData" => Ok(Self::IntKeyData(std::sync::Arc::new(crate::ai::IntKeyData::new(json)?))),
-            "StringKeyData" => Ok(Self::StringKeyData(std::sync::Arc::new(crate::ai::StringKeyData::new(json)?))),
-            "BlackboardKeyData" => Ok(Self::BlackboardKeyData(std::sync::Arc::new(crate::ai::BlackboardKeyData::new(json)?))),
+            "FloatKeyData" => Ok(Self::FloatKeyData(std::sync::Arc::new(ai::FloatKeyData::new(json)?))),
+            "IntKeyData" => Ok(Self::IntKeyData(std::sync::Arc::new(ai::IntKeyData::new(json)?))),
+            "StringKeyData" => Ok(Self::StringKeyData(std::sync::Arc::new(ai::StringKeyData::new(json)?))),
+            "BlackboardKeyData" => Ok(Self::BlackboardKeyData(std::sync::Arc::new(ai::BlackboardKeyData::new(json)?))),
             _ => Err(LubanError::Bean(format!("Invalid type for KeyData:{}", type_id)))
         }
     }
 
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         match self {
-            Self::FloatKeyData(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::FloatKeyData as *mut crate::ai::FloatKeyData); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::IntKeyData(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::IntKeyData as *mut crate::ai::IntKeyData); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::StringKeyData(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::StringKeyData as *mut crate::ai::StringKeyData); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::BlackboardKeyData(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::BlackboardKeyData as *mut crate::ai::BlackboardKeyData); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::FloatKeyData(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::FloatKeyData as *mut ai::FloatKeyData); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::IntKeyData(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::IntKeyData as *mut ai::IntKeyData); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::StringKeyData(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::StringKeyData as *mut ai::StringKeyData); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::BlackboardKeyData(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::BlackboardKeyData as *mut ai::BlackboardKeyData); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
         }
     }
 }
@@ -314,27 +314,27 @@ impl StringKeyData{
 
 #[derive(Debug)]
 pub enum KeyQueryOperator {
-    IsSet2(std::sync::Arc<crate::ai::IsSet2>),
-    IsNotSet(std::sync::Arc<crate::ai::IsNotSet>),
-    BinaryOperator(std::sync::Arc<crate::ai::BinaryOperator>),
+    IsSet2(std::sync::Arc<ai::IsSet2>),
+    IsNotSet(std::sync::Arc<ai::IsNotSet>),
+    BinaryOperator(std::sync::Arc<ai::BinaryOperator>),
 }
 
 impl KeyQueryOperator {
     pub(crate) fn new(json: &serde_json::Value) -> Result<Self, LubanError> {
         let type_id = json["$type"].as_str().unwrap();
         match type_id {
-            "IsSet2" => Ok(Self::IsSet2(std::sync::Arc::new(crate::ai::IsSet2::new(json)?))),
-            "IsNotSet" => Ok(Self::IsNotSet(std::sync::Arc::new(crate::ai::IsNotSet::new(json)?))),
-            "BinaryOperator" => Ok(Self::BinaryOperator(std::sync::Arc::new(crate::ai::BinaryOperator::new(json)?))),
+            "IsSet2" => Ok(Self::IsSet2(std::sync::Arc::new(ai::IsSet2::new(json)?))),
+            "IsNotSet" => Ok(Self::IsNotSet(std::sync::Arc::new(ai::IsNotSet::new(json)?))),
+            "BinaryOperator" => Ok(Self::BinaryOperator(std::sync::Arc::new(ai::BinaryOperator::new(json)?))),
             _ => Err(LubanError::Bean(format!("Invalid type for KeyQueryOperator:{}", type_id)))
         }
     }
 
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         match self {
-            Self::IsSet2(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::IsSet2 as *mut crate::ai::IsSet2); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::IsNotSet(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::IsNotSet as *mut crate::ai::IsNotSet); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::BinaryOperator(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::BinaryOperator as *mut crate::ai::BinaryOperator); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::IsSet2(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::IsSet2 as *mut ai::IsSet2); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::IsNotSet(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::IsNotSet as *mut ai::IsNotSet); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::BinaryOperator(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::BinaryOperator as *mut ai::BinaryOperator); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
         }
     }
 }
@@ -342,14 +342,14 @@ impl KeyQueryOperator {
 
 #[derive(Debug)]
 pub struct BinaryOperator {
-    pub oper: crate::ai::EOperator,
-    pub data: crate::ai::KeyData,
+    pub oper: ai::EOperator,
+    pub data: ai::KeyData,
 }
 
 impl BinaryOperator{
     pub(crate) fn new(json: &serde_json::Value) -> Result<BinaryOperator, LubanError> {
         let oper = json["oper"].as_i64().unwrap().into();
-        let data = crate::ai::KeyData::new(&json["data"])?;
+        let data = ai::KeyData::new(&json["data"])?;
         
         Ok(BinaryOperator { oper, data, })
     }    
@@ -389,58 +389,58 @@ impl IsSet2{
 
 #[derive(Debug)]
 pub enum Node {
-    UeSetDefaultFocus(std::sync::Arc<crate::ai::UeSetDefaultFocus>),
-    ExecuteTimeStatistic(std::sync::Arc<crate::ai::ExecuteTimeStatistic>),
-    ChooseTarget(std::sync::Arc<crate::ai::ChooseTarget>),
-    KeepFaceTarget(std::sync::Arc<crate::ai::KeepFaceTarget>),
-    GetOwnerPlayer(std::sync::Arc<crate::ai::GetOwnerPlayer>),
-    UpdateDailyBehaviorProps(std::sync::Arc<crate::ai::UpdateDailyBehaviorProps>),
-    UeLoop(std::sync::Arc<crate::ai::UeLoop>),
-    UeCooldown(std::sync::Arc<crate::ai::UeCooldown>),
-    UeTimeLimit(std::sync::Arc<crate::ai::UeTimeLimit>),
-    UeBlackboard(std::sync::Arc<crate::ai::UeBlackboard>),
-    UeForceSuccess(std::sync::Arc<crate::ai::UeForceSuccess>),
-    IsAtLocation(std::sync::Arc<crate::ai::IsAtLocation>),
-    DistanceLessThan(std::sync::Arc<crate::ai::DistanceLessThan>),
-    Sequence(std::sync::Arc<crate::ai::Sequence>),
-    Selector(std::sync::Arc<crate::ai::Selector>),
-    SimpleParallel(std::sync::Arc<crate::ai::SimpleParallel>),
-    UeWait(std::sync::Arc<crate::ai::UeWait>),
-    UeWaitBlackboardTime(std::sync::Arc<crate::ai::UeWaitBlackboardTime>),
-    MoveToTarget(std::sync::Arc<crate::ai::MoveToTarget>),
-    ChooseSkill(std::sync::Arc<crate::ai::ChooseSkill>),
-    MoveToRandomLocation(std::sync::Arc<crate::ai::MoveToRandomLocation>),
-    MoveToLocation(std::sync::Arc<crate::ai::MoveToLocation>),
-    DebugPrint(std::sync::Arc<crate::ai::DebugPrint>),
+    UeSetDefaultFocus(std::sync::Arc<ai::UeSetDefaultFocus>),
+    ExecuteTimeStatistic(std::sync::Arc<ai::ExecuteTimeStatistic>),
+    ChooseTarget(std::sync::Arc<ai::ChooseTarget>),
+    KeepFaceTarget(std::sync::Arc<ai::KeepFaceTarget>),
+    GetOwnerPlayer(std::sync::Arc<ai::GetOwnerPlayer>),
+    UpdateDailyBehaviorProps(std::sync::Arc<ai::UpdateDailyBehaviorProps>),
+    UeLoop(std::sync::Arc<ai::UeLoop>),
+    UeCooldown(std::sync::Arc<ai::UeCooldown>),
+    UeTimeLimit(std::sync::Arc<ai::UeTimeLimit>),
+    UeBlackboard(std::sync::Arc<ai::UeBlackboard>),
+    UeForceSuccess(std::sync::Arc<ai::UeForceSuccess>),
+    IsAtLocation(std::sync::Arc<ai::IsAtLocation>),
+    DistanceLessThan(std::sync::Arc<ai::DistanceLessThan>),
+    Sequence(std::sync::Arc<ai::Sequence>),
+    Selector(std::sync::Arc<ai::Selector>),
+    SimpleParallel(std::sync::Arc<ai::SimpleParallel>),
+    UeWait(std::sync::Arc<ai::UeWait>),
+    UeWaitBlackboardTime(std::sync::Arc<ai::UeWaitBlackboardTime>),
+    MoveToTarget(std::sync::Arc<ai::MoveToTarget>),
+    ChooseSkill(std::sync::Arc<ai::ChooseSkill>),
+    MoveToRandomLocation(std::sync::Arc<ai::MoveToRandomLocation>),
+    MoveToLocation(std::sync::Arc<ai::MoveToLocation>),
+    DebugPrint(std::sync::Arc<ai::DebugPrint>),
 }
 
 impl Node {
     pub(crate) fn new(json: &serde_json::Value) -> Result<Self, LubanError> {
         let type_id = json["$type"].as_str().unwrap();
         match type_id {
-            "UeSetDefaultFocus" => Ok(Self::UeSetDefaultFocus(std::sync::Arc::new(crate::ai::UeSetDefaultFocus::new(json)?))),
-            "ExecuteTimeStatistic" => Ok(Self::ExecuteTimeStatistic(std::sync::Arc::new(crate::ai::ExecuteTimeStatistic::new(json)?))),
-            "ChooseTarget" => Ok(Self::ChooseTarget(std::sync::Arc::new(crate::ai::ChooseTarget::new(json)?))),
-            "KeepFaceTarget" => Ok(Self::KeepFaceTarget(std::sync::Arc::new(crate::ai::KeepFaceTarget::new(json)?))),
-            "GetOwnerPlayer" => Ok(Self::GetOwnerPlayer(std::sync::Arc::new(crate::ai::GetOwnerPlayer::new(json)?))),
-            "UpdateDailyBehaviorProps" => Ok(Self::UpdateDailyBehaviorProps(std::sync::Arc::new(crate::ai::UpdateDailyBehaviorProps::new(json)?))),
-            "UeLoop" => Ok(Self::UeLoop(std::sync::Arc::new(crate::ai::UeLoop::new(json)?))),
-            "UeCooldown" => Ok(Self::UeCooldown(std::sync::Arc::new(crate::ai::UeCooldown::new(json)?))),
-            "UeTimeLimit" => Ok(Self::UeTimeLimit(std::sync::Arc::new(crate::ai::UeTimeLimit::new(json)?))),
-            "UeBlackboard" => Ok(Self::UeBlackboard(std::sync::Arc::new(crate::ai::UeBlackboard::new(json)?))),
-            "UeForceSuccess" => Ok(Self::UeForceSuccess(std::sync::Arc::new(crate::ai::UeForceSuccess::new(json)?))),
-            "IsAtLocation" => Ok(Self::IsAtLocation(std::sync::Arc::new(crate::ai::IsAtLocation::new(json)?))),
-            "DistanceLessThan" => Ok(Self::DistanceLessThan(std::sync::Arc::new(crate::ai::DistanceLessThan::new(json)?))),
-            "Sequence" => Ok(Self::Sequence(std::sync::Arc::new(crate::ai::Sequence::new(json)?))),
-            "Selector" => Ok(Self::Selector(std::sync::Arc::new(crate::ai::Selector::new(json)?))),
-            "SimpleParallel" => Ok(Self::SimpleParallel(std::sync::Arc::new(crate::ai::SimpleParallel::new(json)?))),
-            "UeWait" => Ok(Self::UeWait(std::sync::Arc::new(crate::ai::UeWait::new(json)?))),
-            "UeWaitBlackboardTime" => Ok(Self::UeWaitBlackboardTime(std::sync::Arc::new(crate::ai::UeWaitBlackboardTime::new(json)?))),
-            "MoveToTarget" => Ok(Self::MoveToTarget(std::sync::Arc::new(crate::ai::MoveToTarget::new(json)?))),
-            "ChooseSkill" => Ok(Self::ChooseSkill(std::sync::Arc::new(crate::ai::ChooseSkill::new(json)?))),
-            "MoveToRandomLocation" => Ok(Self::MoveToRandomLocation(std::sync::Arc::new(crate::ai::MoveToRandomLocation::new(json)?))),
-            "MoveToLocation" => Ok(Self::MoveToLocation(std::sync::Arc::new(crate::ai::MoveToLocation::new(json)?))),
-            "DebugPrint" => Ok(Self::DebugPrint(std::sync::Arc::new(crate::ai::DebugPrint::new(json)?))),
+            "UeSetDefaultFocus" => Ok(Self::UeSetDefaultFocus(std::sync::Arc::new(ai::UeSetDefaultFocus::new(json)?))),
+            "ExecuteTimeStatistic" => Ok(Self::ExecuteTimeStatistic(std::sync::Arc::new(ai::ExecuteTimeStatistic::new(json)?))),
+            "ChooseTarget" => Ok(Self::ChooseTarget(std::sync::Arc::new(ai::ChooseTarget::new(json)?))),
+            "KeepFaceTarget" => Ok(Self::KeepFaceTarget(std::sync::Arc::new(ai::KeepFaceTarget::new(json)?))),
+            "GetOwnerPlayer" => Ok(Self::GetOwnerPlayer(std::sync::Arc::new(ai::GetOwnerPlayer::new(json)?))),
+            "UpdateDailyBehaviorProps" => Ok(Self::UpdateDailyBehaviorProps(std::sync::Arc::new(ai::UpdateDailyBehaviorProps::new(json)?))),
+            "UeLoop" => Ok(Self::UeLoop(std::sync::Arc::new(ai::UeLoop::new(json)?))),
+            "UeCooldown" => Ok(Self::UeCooldown(std::sync::Arc::new(ai::UeCooldown::new(json)?))),
+            "UeTimeLimit" => Ok(Self::UeTimeLimit(std::sync::Arc::new(ai::UeTimeLimit::new(json)?))),
+            "UeBlackboard" => Ok(Self::UeBlackboard(std::sync::Arc::new(ai::UeBlackboard::new(json)?))),
+            "UeForceSuccess" => Ok(Self::UeForceSuccess(std::sync::Arc::new(ai::UeForceSuccess::new(json)?))),
+            "IsAtLocation" => Ok(Self::IsAtLocation(std::sync::Arc::new(ai::IsAtLocation::new(json)?))),
+            "DistanceLessThan" => Ok(Self::DistanceLessThan(std::sync::Arc::new(ai::DistanceLessThan::new(json)?))),
+            "Sequence" => Ok(Self::Sequence(std::sync::Arc::new(ai::Sequence::new(json)?))),
+            "Selector" => Ok(Self::Selector(std::sync::Arc::new(ai::Selector::new(json)?))),
+            "SimpleParallel" => Ok(Self::SimpleParallel(std::sync::Arc::new(ai::SimpleParallel::new(json)?))),
+            "UeWait" => Ok(Self::UeWait(std::sync::Arc::new(ai::UeWait::new(json)?))),
+            "UeWaitBlackboardTime" => Ok(Self::UeWaitBlackboardTime(std::sync::Arc::new(ai::UeWaitBlackboardTime::new(json)?))),
+            "MoveToTarget" => Ok(Self::MoveToTarget(std::sync::Arc::new(ai::MoveToTarget::new(json)?))),
+            "ChooseSkill" => Ok(Self::ChooseSkill(std::sync::Arc::new(ai::ChooseSkill::new(json)?))),
+            "MoveToRandomLocation" => Ok(Self::MoveToRandomLocation(std::sync::Arc::new(ai::MoveToRandomLocation::new(json)?))),
+            "MoveToLocation" => Ok(Self::MoveToLocation(std::sync::Arc::new(ai::MoveToLocation::new(json)?))),
+            "DebugPrint" => Ok(Self::DebugPrint(std::sync::Arc::new(ai::DebugPrint::new(json)?))),
             _ => Err(LubanError::Bean(format!("Invalid type for Node:{}", type_id)))
         }
     }
@@ -503,29 +503,29 @@ impl Node {
 
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         match self {
-            Self::UeSetDefaultFocus(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::UeSetDefaultFocus as *mut crate::ai::UeSetDefaultFocus); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::ExecuteTimeStatistic(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::ExecuteTimeStatistic as *mut crate::ai::ExecuteTimeStatistic); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::ChooseTarget(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::ChooseTarget as *mut crate::ai::ChooseTarget); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::KeepFaceTarget(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::KeepFaceTarget as *mut crate::ai::KeepFaceTarget); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::GetOwnerPlayer(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::GetOwnerPlayer as *mut crate::ai::GetOwnerPlayer); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::UpdateDailyBehaviorProps(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::UpdateDailyBehaviorProps as *mut crate::ai::UpdateDailyBehaviorProps); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::UeLoop(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::UeLoop as *mut crate::ai::UeLoop); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::UeCooldown(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::UeCooldown as *mut crate::ai::UeCooldown); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::UeTimeLimit(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::UeTimeLimit as *mut crate::ai::UeTimeLimit); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::UeBlackboard(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::UeBlackboard as *mut crate::ai::UeBlackboard); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::UeForceSuccess(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::UeForceSuccess as *mut crate::ai::UeForceSuccess); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::IsAtLocation(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::IsAtLocation as *mut crate::ai::IsAtLocation); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::DistanceLessThan(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::DistanceLessThan as *mut crate::ai::DistanceLessThan); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::Sequence(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::Sequence as *mut crate::ai::Sequence); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::Selector(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::Selector as *mut crate::ai::Selector); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::SimpleParallel(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::SimpleParallel as *mut crate::ai::SimpleParallel); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::UeWait(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::UeWait as *mut crate::ai::UeWait); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::UeWaitBlackboardTime(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::UeWaitBlackboardTime as *mut crate::ai::UeWaitBlackboardTime); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::MoveToTarget(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::MoveToTarget as *mut crate::ai::MoveToTarget); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::ChooseSkill(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::ChooseSkill as *mut crate::ai::ChooseSkill); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::MoveToRandomLocation(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::MoveToRandomLocation as *mut crate::ai::MoveToRandomLocation); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::MoveToLocation(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::MoveToLocation as *mut crate::ai::MoveToLocation); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::DebugPrint(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::DebugPrint as *mut crate::ai::DebugPrint); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::UeSetDefaultFocus(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::UeSetDefaultFocus as *mut ai::UeSetDefaultFocus); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::ExecuteTimeStatistic(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::ExecuteTimeStatistic as *mut ai::ExecuteTimeStatistic); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::ChooseTarget(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::ChooseTarget as *mut ai::ChooseTarget); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::KeepFaceTarget(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::KeepFaceTarget as *mut ai::KeepFaceTarget); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::GetOwnerPlayer(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::GetOwnerPlayer as *mut ai::GetOwnerPlayer); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::UpdateDailyBehaviorProps(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::UpdateDailyBehaviorProps as *mut ai::UpdateDailyBehaviorProps); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::UeLoop(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::UeLoop as *mut ai::UeLoop); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::UeCooldown(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::UeCooldown as *mut ai::UeCooldown); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::UeTimeLimit(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::UeTimeLimit as *mut ai::UeTimeLimit); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::UeBlackboard(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::UeBlackboard as *mut ai::UeBlackboard); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::UeForceSuccess(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::UeForceSuccess as *mut ai::UeForceSuccess); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::IsAtLocation(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::IsAtLocation as *mut ai::IsAtLocation); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::DistanceLessThan(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::DistanceLessThan as *mut ai::DistanceLessThan); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::Sequence(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::Sequence as *mut ai::Sequence); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::Selector(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::Selector as *mut ai::Selector); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::SimpleParallel(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::SimpleParallel as *mut ai::SimpleParallel); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::UeWait(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::UeWait as *mut ai::UeWait); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::UeWaitBlackboardTime(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::UeWaitBlackboardTime as *mut ai::UeWaitBlackboardTime); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::MoveToTarget(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::MoveToTarget as *mut ai::MoveToTarget); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::ChooseSkill(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::ChooseSkill as *mut ai::ChooseSkill); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::MoveToRandomLocation(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::MoveToRandomLocation as *mut ai::MoveToRandomLocation); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::MoveToLocation(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::MoveToLocation as *mut ai::MoveToLocation); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::DebugPrint(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::DebugPrint as *mut ai::DebugPrint); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
         }
     }
 }
@@ -533,26 +533,26 @@ impl Node {
 
 #[derive(Debug)]
 pub enum Decorator {
-    UeLoop(std::sync::Arc<crate::ai::UeLoop>),
-    UeCooldown(std::sync::Arc<crate::ai::UeCooldown>),
-    UeTimeLimit(std::sync::Arc<crate::ai::UeTimeLimit>),
-    UeBlackboard(std::sync::Arc<crate::ai::UeBlackboard>),
-    UeForceSuccess(std::sync::Arc<crate::ai::UeForceSuccess>),
-    IsAtLocation(std::sync::Arc<crate::ai::IsAtLocation>),
-    DistanceLessThan(std::sync::Arc<crate::ai::DistanceLessThan>),
+    UeLoop(std::sync::Arc<ai::UeLoop>),
+    UeCooldown(std::sync::Arc<ai::UeCooldown>),
+    UeTimeLimit(std::sync::Arc<ai::UeTimeLimit>),
+    UeBlackboard(std::sync::Arc<ai::UeBlackboard>),
+    UeForceSuccess(std::sync::Arc<ai::UeForceSuccess>),
+    IsAtLocation(std::sync::Arc<ai::IsAtLocation>),
+    DistanceLessThan(std::sync::Arc<ai::DistanceLessThan>),
 }
 
 impl Decorator {
     pub(crate) fn new(json: &serde_json::Value) -> Result<Self, LubanError> {
         let type_id = json["$type"].as_str().unwrap();
         match type_id {
-            "UeLoop" => Ok(Self::UeLoop(std::sync::Arc::new(crate::ai::UeLoop::new(json)?))),
-            "UeCooldown" => Ok(Self::UeCooldown(std::sync::Arc::new(crate::ai::UeCooldown::new(json)?))),
-            "UeTimeLimit" => Ok(Self::UeTimeLimit(std::sync::Arc::new(crate::ai::UeTimeLimit::new(json)?))),
-            "UeBlackboard" => Ok(Self::UeBlackboard(std::sync::Arc::new(crate::ai::UeBlackboard::new(json)?))),
-            "UeForceSuccess" => Ok(Self::UeForceSuccess(std::sync::Arc::new(crate::ai::UeForceSuccess::new(json)?))),
-            "IsAtLocation" => Ok(Self::IsAtLocation(std::sync::Arc::new(crate::ai::IsAtLocation::new(json)?))),
-            "DistanceLessThan" => Ok(Self::DistanceLessThan(std::sync::Arc::new(crate::ai::DistanceLessThan::new(json)?))),
+            "UeLoop" => Ok(Self::UeLoop(std::sync::Arc::new(ai::UeLoop::new(json)?))),
+            "UeCooldown" => Ok(Self::UeCooldown(std::sync::Arc::new(ai::UeCooldown::new(json)?))),
+            "UeTimeLimit" => Ok(Self::UeTimeLimit(std::sync::Arc::new(ai::UeTimeLimit::new(json)?))),
+            "UeBlackboard" => Ok(Self::UeBlackboard(std::sync::Arc::new(ai::UeBlackboard::new(json)?))),
+            "UeForceSuccess" => Ok(Self::UeForceSuccess(std::sync::Arc::new(ai::UeForceSuccess::new(json)?))),
+            "IsAtLocation" => Ok(Self::IsAtLocation(std::sync::Arc::new(ai::IsAtLocation::new(json)?))),
+            "DistanceLessThan" => Ok(Self::DistanceLessThan(std::sync::Arc::new(ai::DistanceLessThan::new(json)?))),
             _ => Err(LubanError::Bean(format!("Invalid type for Decorator:{}", type_id)))
         }
     }
@@ -581,7 +581,7 @@ impl Decorator {
         }
     }    
     
-    pub fn get_flow_abort_mode(&self) -> &crate::ai::EFlowAbortMode {
+    pub fn get_flow_abort_mode(&self) -> &ai::EFlowAbortMode {
         match self {
             Self::UeLoop(x) => { &x.flow_abort_mode }
             Self::UeCooldown(x) => { &x.flow_abort_mode }
@@ -595,13 +595,13 @@ impl Decorator {
 
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         match self {
-            Self::UeLoop(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::UeLoop as *mut crate::ai::UeLoop); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::UeCooldown(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::UeCooldown as *mut crate::ai::UeCooldown); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::UeTimeLimit(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::UeTimeLimit as *mut crate::ai::UeTimeLimit); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::UeBlackboard(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::UeBlackboard as *mut crate::ai::UeBlackboard); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::UeForceSuccess(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::UeForceSuccess as *mut crate::ai::UeForceSuccess); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::IsAtLocation(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::IsAtLocation as *mut crate::ai::IsAtLocation); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::DistanceLessThan(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::DistanceLessThan as *mut crate::ai::DistanceLessThan); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::UeLoop(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::UeLoop as *mut ai::UeLoop); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::UeCooldown(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::UeCooldown as *mut ai::UeCooldown); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::UeTimeLimit(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::UeTimeLimit as *mut ai::UeTimeLimit); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::UeBlackboard(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::UeBlackboard as *mut ai::UeBlackboard); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::UeForceSuccess(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::UeForceSuccess as *mut ai::UeForceSuccess); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::IsAtLocation(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::IsAtLocation as *mut ai::IsAtLocation); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::DistanceLessThan(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::DistanceLessThan as *mut ai::DistanceLessThan); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
         }
     }
 }
@@ -611,7 +611,7 @@ impl Decorator {
 pub struct DistanceLessThan {
     pub id: i32,
     pub node_name: String,
-    pub flow_abort_mode: crate::ai::EFlowAbortMode,
+    pub flow_abort_mode: ai::EFlowAbortMode,
     pub actor1_key: String,
     pub actor2_key: String,
     pub distance: f32,
@@ -639,7 +639,7 @@ impl DistanceLessThan{
 pub struct IsAtLocation {
     pub id: i32,
     pub node_name: String,
-    pub flow_abort_mode: crate::ai::EFlowAbortMode,
+    pub flow_abort_mode: ai::EFlowAbortMode,
     pub acceptable_radius: f32,
     pub keyboard_key: String,
     pub inverse_condition: bool,
@@ -665,10 +665,10 @@ impl IsAtLocation{
 pub struct UeBlackboard {
     pub id: i32,
     pub node_name: String,
-    pub flow_abort_mode: crate::ai::EFlowAbortMode,
-    pub notify_observer: crate::ai::ENotifyObserverMode,
+    pub flow_abort_mode: ai::EFlowAbortMode,
+    pub notify_observer: ai::ENotifyObserverMode,
     pub blackboard_key: String,
-    pub key_query: crate::ai::KeyQueryOperator,
+    pub key_query: ai::KeyQueryOperator,
 }
 
 impl UeBlackboard{
@@ -678,7 +678,7 @@ impl UeBlackboard{
         let flow_abort_mode = json["flow_abort_mode"].as_i64().unwrap().into();
         let notify_observer = json["notify_observer"].as_i64().unwrap().into();
         let blackboard_key = json["blackboard_key"].as_str().unwrap().to_string();
-        let key_query = crate::ai::KeyQueryOperator::new(&json["key_query"])?;
+        let key_query = ai::KeyQueryOperator::new(&json["key_query"])?;
         
         Ok(UeBlackboard { id, node_name, flow_abort_mode, notify_observer, blackboard_key, key_query, })
     }    
@@ -692,7 +692,7 @@ impl UeBlackboard{
 pub struct UeCooldown {
     pub id: i32,
     pub node_name: String,
-    pub flow_abort_mode: crate::ai::EFlowAbortMode,
+    pub flow_abort_mode: ai::EFlowAbortMode,
     pub cooldown_time: f32,
 }
 
@@ -714,7 +714,7 @@ impl UeCooldown{
 pub struct UeForceSuccess {
     pub id: i32,
     pub node_name: String,
-    pub flow_abort_mode: crate::ai::EFlowAbortMode,
+    pub flow_abort_mode: ai::EFlowAbortMode,
 }
 
 impl UeForceSuccess{
@@ -734,7 +734,7 @@ impl UeForceSuccess{
 pub struct UeLoop {
     pub id: i32,
     pub node_name: String,
-    pub flow_abort_mode: crate::ai::EFlowAbortMode,
+    pub flow_abort_mode: ai::EFlowAbortMode,
     pub num_loops: i32,
     pub infinite_loop: bool,
     pub infinite_loop_timeout_time: f32,
@@ -760,7 +760,7 @@ impl UeLoop{
 pub struct UeTimeLimit {
     pub id: i32,
     pub node_name: String,
-    pub flow_abort_mode: crate::ai::EFlowAbortMode,
+    pub flow_abort_mode: ai::EFlowAbortMode,
     pub limit_time: f32,
 }
 
@@ -780,32 +780,32 @@ impl UeTimeLimit{
 
 #[derive(Debug)]
 pub enum FlowNode {
-    Sequence(std::sync::Arc<crate::ai::Sequence>),
-    Selector(std::sync::Arc<crate::ai::Selector>),
-    SimpleParallel(std::sync::Arc<crate::ai::SimpleParallel>),
-    UeWait(std::sync::Arc<crate::ai::UeWait>),
-    UeWaitBlackboardTime(std::sync::Arc<crate::ai::UeWaitBlackboardTime>),
-    MoveToTarget(std::sync::Arc<crate::ai::MoveToTarget>),
-    ChooseSkill(std::sync::Arc<crate::ai::ChooseSkill>),
-    MoveToRandomLocation(std::sync::Arc<crate::ai::MoveToRandomLocation>),
-    MoveToLocation(std::sync::Arc<crate::ai::MoveToLocation>),
-    DebugPrint(std::sync::Arc<crate::ai::DebugPrint>),
+    Sequence(std::sync::Arc<ai::Sequence>),
+    Selector(std::sync::Arc<ai::Selector>),
+    SimpleParallel(std::sync::Arc<ai::SimpleParallel>),
+    UeWait(std::sync::Arc<ai::UeWait>),
+    UeWaitBlackboardTime(std::sync::Arc<ai::UeWaitBlackboardTime>),
+    MoveToTarget(std::sync::Arc<ai::MoveToTarget>),
+    ChooseSkill(std::sync::Arc<ai::ChooseSkill>),
+    MoveToRandomLocation(std::sync::Arc<ai::MoveToRandomLocation>),
+    MoveToLocation(std::sync::Arc<ai::MoveToLocation>),
+    DebugPrint(std::sync::Arc<ai::DebugPrint>),
 }
 
 impl FlowNode {
     pub(crate) fn new(json: &serde_json::Value) -> Result<Self, LubanError> {
         let type_id = json["$type"].as_str().unwrap();
         match type_id {
-            "Sequence" => Ok(Self::Sequence(std::sync::Arc::new(crate::ai::Sequence::new(json)?))),
-            "Selector" => Ok(Self::Selector(std::sync::Arc::new(crate::ai::Selector::new(json)?))),
-            "SimpleParallel" => Ok(Self::SimpleParallel(std::sync::Arc::new(crate::ai::SimpleParallel::new(json)?))),
-            "UeWait" => Ok(Self::UeWait(std::sync::Arc::new(crate::ai::UeWait::new(json)?))),
-            "UeWaitBlackboardTime" => Ok(Self::UeWaitBlackboardTime(std::sync::Arc::new(crate::ai::UeWaitBlackboardTime::new(json)?))),
-            "MoveToTarget" => Ok(Self::MoveToTarget(std::sync::Arc::new(crate::ai::MoveToTarget::new(json)?))),
-            "ChooseSkill" => Ok(Self::ChooseSkill(std::sync::Arc::new(crate::ai::ChooseSkill::new(json)?))),
-            "MoveToRandomLocation" => Ok(Self::MoveToRandomLocation(std::sync::Arc::new(crate::ai::MoveToRandomLocation::new(json)?))),
-            "MoveToLocation" => Ok(Self::MoveToLocation(std::sync::Arc::new(crate::ai::MoveToLocation::new(json)?))),
-            "DebugPrint" => Ok(Self::DebugPrint(std::sync::Arc::new(crate::ai::DebugPrint::new(json)?))),
+            "Sequence" => Ok(Self::Sequence(std::sync::Arc::new(ai::Sequence::new(json)?))),
+            "Selector" => Ok(Self::Selector(std::sync::Arc::new(ai::Selector::new(json)?))),
+            "SimpleParallel" => Ok(Self::SimpleParallel(std::sync::Arc::new(ai::SimpleParallel::new(json)?))),
+            "UeWait" => Ok(Self::UeWait(std::sync::Arc::new(ai::UeWait::new(json)?))),
+            "UeWaitBlackboardTime" => Ok(Self::UeWaitBlackboardTime(std::sync::Arc::new(ai::UeWaitBlackboardTime::new(json)?))),
+            "MoveToTarget" => Ok(Self::MoveToTarget(std::sync::Arc::new(ai::MoveToTarget::new(json)?))),
+            "ChooseSkill" => Ok(Self::ChooseSkill(std::sync::Arc::new(ai::ChooseSkill::new(json)?))),
+            "MoveToRandomLocation" => Ok(Self::MoveToRandomLocation(std::sync::Arc::new(ai::MoveToRandomLocation::new(json)?))),
+            "MoveToLocation" => Ok(Self::MoveToLocation(std::sync::Arc::new(ai::MoveToLocation::new(json)?))),
+            "DebugPrint" => Ok(Self::DebugPrint(std::sync::Arc::new(ai::DebugPrint::new(json)?))),
             _ => Err(LubanError::Bean(format!("Invalid type for FlowNode:{}", type_id)))
         }
     }
@@ -840,7 +840,7 @@ impl FlowNode {
         }
     }    
     
-    pub fn get_decorators(&self) -> &Vec<crate::ai::Decorator> {
+    pub fn get_decorators(&self) -> &Vec<ai::Decorator> {
         match self {
             Self::Sequence(x) => { &x.decorators }
             Self::Selector(x) => { &x.decorators }
@@ -855,7 +855,7 @@ impl FlowNode {
         }
     }    
     
-    pub fn get_services(&self) -> &Vec<crate::ai::Service> {
+    pub fn get_services(&self) -> &Vec<ai::Service> {
         match self {
             Self::Sequence(x) => { &x.services }
             Self::Selector(x) => { &x.services }
@@ -872,16 +872,16 @@ impl FlowNode {
 
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         match self {
-            Self::Sequence(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::Sequence as *mut crate::ai::Sequence); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::Selector(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::Selector as *mut crate::ai::Selector); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::SimpleParallel(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::SimpleParallel as *mut crate::ai::SimpleParallel); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::UeWait(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::UeWait as *mut crate::ai::UeWait); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::UeWaitBlackboardTime(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::UeWaitBlackboardTime as *mut crate::ai::UeWaitBlackboardTime); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::MoveToTarget(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::MoveToTarget as *mut crate::ai::MoveToTarget); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::ChooseSkill(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::ChooseSkill as *mut crate::ai::ChooseSkill); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::MoveToRandomLocation(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::MoveToRandomLocation as *mut crate::ai::MoveToRandomLocation); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::MoveToLocation(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::MoveToLocation as *mut crate::ai::MoveToLocation); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::DebugPrint(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::DebugPrint as *mut crate::ai::DebugPrint); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::Sequence(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::Sequence as *mut ai::Sequence); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::Selector(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::Selector as *mut ai::Selector); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::SimpleParallel(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::SimpleParallel as *mut ai::SimpleParallel); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::UeWait(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::UeWait as *mut ai::UeWait); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::UeWaitBlackboardTime(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::UeWaitBlackboardTime as *mut ai::UeWaitBlackboardTime); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::MoveToTarget(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::MoveToTarget as *mut ai::MoveToTarget); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::ChooseSkill(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::ChooseSkill as *mut ai::ChooseSkill); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::MoveToRandomLocation(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::MoveToRandomLocation as *mut ai::MoveToRandomLocation); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::MoveToLocation(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::MoveToLocation as *mut ai::MoveToLocation); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::DebugPrint(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::DebugPrint as *mut ai::DebugPrint); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
         }
     }
 }
@@ -889,18 +889,18 @@ impl FlowNode {
 
 #[derive(Debug)]
 pub enum ComposeNode {
-    Sequence(std::sync::Arc<crate::ai::Sequence>),
-    Selector(std::sync::Arc<crate::ai::Selector>),
-    SimpleParallel(std::sync::Arc<crate::ai::SimpleParallel>),
+    Sequence(std::sync::Arc<ai::Sequence>),
+    Selector(std::sync::Arc<ai::Selector>),
+    SimpleParallel(std::sync::Arc<ai::SimpleParallel>),
 }
 
 impl ComposeNode {
     pub(crate) fn new(json: &serde_json::Value) -> Result<Self, LubanError> {
         let type_id = json["$type"].as_str().unwrap();
         match type_id {
-            "Sequence" => Ok(Self::Sequence(std::sync::Arc::new(crate::ai::Sequence::new(json)?))),
-            "Selector" => Ok(Self::Selector(std::sync::Arc::new(crate::ai::Selector::new(json)?))),
-            "SimpleParallel" => Ok(Self::SimpleParallel(std::sync::Arc::new(crate::ai::SimpleParallel::new(json)?))),
+            "Sequence" => Ok(Self::Sequence(std::sync::Arc::new(ai::Sequence::new(json)?))),
+            "Selector" => Ok(Self::Selector(std::sync::Arc::new(ai::Selector::new(json)?))),
+            "SimpleParallel" => Ok(Self::SimpleParallel(std::sync::Arc::new(ai::SimpleParallel::new(json)?))),
             _ => Err(LubanError::Bean(format!("Invalid type for ComposeNode:{}", type_id)))
         }
     }
@@ -921,7 +921,7 @@ impl ComposeNode {
         }
     }    
     
-    pub fn get_decorators(&self) -> &Vec<crate::ai::Decorator> {
+    pub fn get_decorators(&self) -> &Vec<ai::Decorator> {
         match self {
             Self::Sequence(x) => { &x.decorators }
             Self::Selector(x) => { &x.decorators }
@@ -929,7 +929,7 @@ impl ComposeNode {
         }
     }    
     
-    pub fn get_services(&self) -> &Vec<crate::ai::Service> {
+    pub fn get_services(&self) -> &Vec<ai::Service> {
         match self {
             Self::Sequence(x) => { &x.services }
             Self::Selector(x) => { &x.services }
@@ -939,9 +939,9 @@ impl ComposeNode {
 
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         match self {
-            Self::Sequence(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::Sequence as *mut crate::ai::Sequence); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::Selector(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::Selector as *mut crate::ai::Selector); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::SimpleParallel(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::SimpleParallel as *mut crate::ai::SimpleParallel); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::Sequence(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::Sequence as *mut ai::Sequence); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::Selector(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::Selector as *mut ai::Selector); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::SimpleParallel(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::SimpleParallel as *mut ai::SimpleParallel); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
         }
     }
 }
@@ -951,18 +951,18 @@ impl ComposeNode {
 pub struct Selector {
     pub id: i32,
     pub node_name: String,
-    pub decorators: Vec<crate::ai::Decorator>,
-    pub services: Vec<crate::ai::Service>,
-    pub children: Vec<crate::ai::FlowNode>,
+    pub decorators: Vec<ai::Decorator>,
+    pub services: Vec<ai::Service>,
+    pub children: Vec<ai::FlowNode>,
 }
 
 impl Selector{
     pub(crate) fn new(json: &serde_json::Value) -> Result<Selector, LubanError> {
         let id = (json["id"].as_i64().unwrap() as i32);
         let node_name = json["node_name"].as_str().unwrap().to_string();
-        let decorators = json["decorators"].as_array().unwrap().iter().map(|field| crate::ai::Decorator::new(&field).unwrap()).collect();
-        let services = json["services"].as_array().unwrap().iter().map(|field| crate::ai::Service::new(&field).unwrap()).collect();
-        let children = json["children"].as_array().unwrap().iter().map(|field| crate::ai::FlowNode::new(&field).unwrap()).collect();
+        let decorators = json["decorators"].as_array().unwrap().iter().map(|field| ai::Decorator::new(&field).unwrap()).collect();
+        let services = json["services"].as_array().unwrap().iter().map(|field| ai::Service::new(&field).unwrap()).collect();
+        let children = json["children"].as_array().unwrap().iter().map(|field| ai::FlowNode::new(&field).unwrap()).collect();
         
         Ok(Selector { id, node_name, decorators, services, children, })
     }    
@@ -978,18 +978,18 @@ impl Selector{
 pub struct Sequence {
     pub id: i32,
     pub node_name: String,
-    pub decorators: Vec<crate::ai::Decorator>,
-    pub services: Vec<crate::ai::Service>,
-    pub children: Vec<crate::ai::FlowNode>,
+    pub decorators: Vec<ai::Decorator>,
+    pub services: Vec<ai::Service>,
+    pub children: Vec<ai::FlowNode>,
 }
 
 impl Sequence{
     pub(crate) fn new(json: &serde_json::Value) -> Result<Sequence, LubanError> {
         let id = (json["id"].as_i64().unwrap() as i32);
         let node_name = json["node_name"].as_str().unwrap().to_string();
-        let decorators = json["decorators"].as_array().unwrap().iter().map(|field| crate::ai::Decorator::new(&field).unwrap()).collect();
-        let services = json["services"].as_array().unwrap().iter().map(|field| crate::ai::Service::new(&field).unwrap()).collect();
-        let children = json["children"].as_array().unwrap().iter().map(|field| crate::ai::FlowNode::new(&field).unwrap()).collect();
+        let decorators = json["decorators"].as_array().unwrap().iter().map(|field| ai::Decorator::new(&field).unwrap()).collect();
+        let services = json["services"].as_array().unwrap().iter().map(|field| ai::Service::new(&field).unwrap()).collect();
+        let children = json["children"].as_array().unwrap().iter().map(|field| ai::FlowNode::new(&field).unwrap()).collect();
         
         Ok(Sequence { id, node_name, decorators, services, children, })
     }    
@@ -1005,22 +1005,22 @@ impl Sequence{
 pub struct SimpleParallel {
     pub id: i32,
     pub node_name: String,
-    pub decorators: Vec<crate::ai::Decorator>,
-    pub services: Vec<crate::ai::Service>,
-    pub finish_mode: crate::ai::EFinishMode,
-    pub main_task: crate::ai::Task,
-    pub background_node: crate::ai::FlowNode,
+    pub decorators: Vec<ai::Decorator>,
+    pub services: Vec<ai::Service>,
+    pub finish_mode: ai::EFinishMode,
+    pub main_task: ai::Task,
+    pub background_node: ai::FlowNode,
 }
 
 impl SimpleParallel{
     pub(crate) fn new(json: &serde_json::Value) -> Result<SimpleParallel, LubanError> {
         let id = (json["id"].as_i64().unwrap() as i32);
         let node_name = json["node_name"].as_str().unwrap().to_string();
-        let decorators = json["decorators"].as_array().unwrap().iter().map(|field| crate::ai::Decorator::new(&field).unwrap()).collect();
-        let services = json["services"].as_array().unwrap().iter().map(|field| crate::ai::Service::new(&field).unwrap()).collect();
+        let decorators = json["decorators"].as_array().unwrap().iter().map(|field| ai::Decorator::new(&field).unwrap()).collect();
+        let services = json["services"].as_array().unwrap().iter().map(|field| ai::Service::new(&field).unwrap()).collect();
         let finish_mode = json["finish_mode"].as_i64().unwrap().into();
-        let main_task = crate::ai::Task::new(&json["main_task"])?;
-        let background_node = crate::ai::FlowNode::new(&json["background_node"])?;
+        let main_task = ai::Task::new(&json["main_task"])?;
+        let background_node = ai::FlowNode::new(&json["background_node"])?;
         
         Ok(SimpleParallel { id, node_name, decorators, services, finish_mode, main_task, background_node, })
     }    
@@ -1035,26 +1035,26 @@ impl SimpleParallel{
 
 #[derive(Debug)]
 pub enum Task {
-    UeWait(std::sync::Arc<crate::ai::UeWait>),
-    UeWaitBlackboardTime(std::sync::Arc<crate::ai::UeWaitBlackboardTime>),
-    MoveToTarget(std::sync::Arc<crate::ai::MoveToTarget>),
-    ChooseSkill(std::sync::Arc<crate::ai::ChooseSkill>),
-    MoveToRandomLocation(std::sync::Arc<crate::ai::MoveToRandomLocation>),
-    MoveToLocation(std::sync::Arc<crate::ai::MoveToLocation>),
-    DebugPrint(std::sync::Arc<crate::ai::DebugPrint>),
+    UeWait(std::sync::Arc<ai::UeWait>),
+    UeWaitBlackboardTime(std::sync::Arc<ai::UeWaitBlackboardTime>),
+    MoveToTarget(std::sync::Arc<ai::MoveToTarget>),
+    ChooseSkill(std::sync::Arc<ai::ChooseSkill>),
+    MoveToRandomLocation(std::sync::Arc<ai::MoveToRandomLocation>),
+    MoveToLocation(std::sync::Arc<ai::MoveToLocation>),
+    DebugPrint(std::sync::Arc<ai::DebugPrint>),
 }
 
 impl Task {
     pub(crate) fn new(json: &serde_json::Value) -> Result<Self, LubanError> {
         let type_id = json["$type"].as_str().unwrap();
         match type_id {
-            "UeWait" => Ok(Self::UeWait(std::sync::Arc::new(crate::ai::UeWait::new(json)?))),
-            "UeWaitBlackboardTime" => Ok(Self::UeWaitBlackboardTime(std::sync::Arc::new(crate::ai::UeWaitBlackboardTime::new(json)?))),
-            "MoveToTarget" => Ok(Self::MoveToTarget(std::sync::Arc::new(crate::ai::MoveToTarget::new(json)?))),
-            "ChooseSkill" => Ok(Self::ChooseSkill(std::sync::Arc::new(crate::ai::ChooseSkill::new(json)?))),
-            "MoveToRandomLocation" => Ok(Self::MoveToRandomLocation(std::sync::Arc::new(crate::ai::MoveToRandomLocation::new(json)?))),
-            "MoveToLocation" => Ok(Self::MoveToLocation(std::sync::Arc::new(crate::ai::MoveToLocation::new(json)?))),
-            "DebugPrint" => Ok(Self::DebugPrint(std::sync::Arc::new(crate::ai::DebugPrint::new(json)?))),
+            "UeWait" => Ok(Self::UeWait(std::sync::Arc::new(ai::UeWait::new(json)?))),
+            "UeWaitBlackboardTime" => Ok(Self::UeWaitBlackboardTime(std::sync::Arc::new(ai::UeWaitBlackboardTime::new(json)?))),
+            "MoveToTarget" => Ok(Self::MoveToTarget(std::sync::Arc::new(ai::MoveToTarget::new(json)?))),
+            "ChooseSkill" => Ok(Self::ChooseSkill(std::sync::Arc::new(ai::ChooseSkill::new(json)?))),
+            "MoveToRandomLocation" => Ok(Self::MoveToRandomLocation(std::sync::Arc::new(ai::MoveToRandomLocation::new(json)?))),
+            "MoveToLocation" => Ok(Self::MoveToLocation(std::sync::Arc::new(ai::MoveToLocation::new(json)?))),
+            "DebugPrint" => Ok(Self::DebugPrint(std::sync::Arc::new(ai::DebugPrint::new(json)?))),
             _ => Err(LubanError::Bean(format!("Invalid type for Task:{}", type_id)))
         }
     }
@@ -1083,7 +1083,7 @@ impl Task {
         }
     }    
     
-    pub fn get_decorators(&self) -> &Vec<crate::ai::Decorator> {
+    pub fn get_decorators(&self) -> &Vec<ai::Decorator> {
         match self {
             Self::UeWait(x) => { &x.decorators }
             Self::UeWaitBlackboardTime(x) => { &x.decorators }
@@ -1095,7 +1095,7 @@ impl Task {
         }
     }    
     
-    pub fn get_services(&self) -> &Vec<crate::ai::Service> {
+    pub fn get_services(&self) -> &Vec<ai::Service> {
         match self {
             Self::UeWait(x) => { &x.services }
             Self::UeWaitBlackboardTime(x) => { &x.services }
@@ -1121,13 +1121,13 @@ impl Task {
 
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         match self {
-            Self::UeWait(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::UeWait as *mut crate::ai::UeWait); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::UeWaitBlackboardTime(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::UeWaitBlackboardTime as *mut crate::ai::UeWaitBlackboardTime); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::MoveToTarget(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::MoveToTarget as *mut crate::ai::MoveToTarget); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::ChooseSkill(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::ChooseSkill as *mut crate::ai::ChooseSkill); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::MoveToRandomLocation(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::MoveToRandomLocation as *mut crate::ai::MoveToRandomLocation); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::MoveToLocation(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::MoveToLocation as *mut crate::ai::MoveToLocation); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::DebugPrint(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::DebugPrint as *mut crate::ai::DebugPrint); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::UeWait(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::UeWait as *mut ai::UeWait); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::UeWaitBlackboardTime(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::UeWaitBlackboardTime as *mut ai::UeWaitBlackboardTime); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::MoveToTarget(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::MoveToTarget as *mut ai::MoveToTarget); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::ChooseSkill(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::ChooseSkill as *mut ai::ChooseSkill); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::MoveToRandomLocation(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::MoveToRandomLocation as *mut ai::MoveToRandomLocation); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::MoveToLocation(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::MoveToLocation as *mut ai::MoveToLocation); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::DebugPrint(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::DebugPrint as *mut ai::DebugPrint); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
         }
     }
 }
@@ -1137,8 +1137,8 @@ impl Task {
 pub struct ChooseSkill {
     pub id: i32,
     pub node_name: String,
-    pub decorators: Vec<crate::ai::Decorator>,
-    pub services: Vec<crate::ai::Service>,
+    pub decorators: Vec<ai::Decorator>,
+    pub services: Vec<ai::Service>,
     pub ignore_restart_self: bool,
     pub target_actor_key: String,
     pub result_skill_id_key: String,
@@ -1148,8 +1148,8 @@ impl ChooseSkill{
     pub(crate) fn new(json: &serde_json::Value) -> Result<ChooseSkill, LubanError> {
         let id = (json["id"].as_i64().unwrap() as i32);
         let node_name = json["node_name"].as_str().unwrap().to_string();
-        let decorators = json["decorators"].as_array().unwrap().iter().map(|field| crate::ai::Decorator::new(&field).unwrap()).collect();
-        let services = json["services"].as_array().unwrap().iter().map(|field| crate::ai::Service::new(&field).unwrap()).collect();
+        let decorators = json["decorators"].as_array().unwrap().iter().map(|field| ai::Decorator::new(&field).unwrap()).collect();
+        let services = json["services"].as_array().unwrap().iter().map(|field| ai::Service::new(&field).unwrap()).collect();
         let ignore_restart_self = json["ignore_restart_self"].as_bool().unwrap();
         let target_actor_key = json["target_actor_key"].as_str().unwrap().to_string();
         let result_skill_id_key = json["result_skill_id_key"].as_str().unwrap().to_string();
@@ -1167,8 +1167,8 @@ impl ChooseSkill{
 pub struct DebugPrint {
     pub id: i32,
     pub node_name: String,
-    pub decorators: Vec<crate::ai::Decorator>,
-    pub services: Vec<crate::ai::Service>,
+    pub decorators: Vec<ai::Decorator>,
+    pub services: Vec<ai::Service>,
     pub ignore_restart_self: bool,
     pub text: String,
 }
@@ -1177,8 +1177,8 @@ impl DebugPrint{
     pub(crate) fn new(json: &serde_json::Value) -> Result<DebugPrint, LubanError> {
         let id = (json["id"].as_i64().unwrap() as i32);
         let node_name = json["node_name"].as_str().unwrap().to_string();
-        let decorators = json["decorators"].as_array().unwrap().iter().map(|field| crate::ai::Decorator::new(&field).unwrap()).collect();
-        let services = json["services"].as_array().unwrap().iter().map(|field| crate::ai::Service::new(&field).unwrap()).collect();
+        let decorators = json["decorators"].as_array().unwrap().iter().map(|field| ai::Decorator::new(&field).unwrap()).collect();
+        let services = json["services"].as_array().unwrap().iter().map(|field| ai::Service::new(&field).unwrap()).collect();
         let ignore_restart_self = json["ignore_restart_self"].as_bool().unwrap();
         let text = json["text"].as_str().unwrap().to_string();
         
@@ -1195,8 +1195,8 @@ impl DebugPrint{
 pub struct MoveToLocation {
     pub id: i32,
     pub node_name: String,
-    pub decorators: Vec<crate::ai::Decorator>,
-    pub services: Vec<crate::ai::Service>,
+    pub decorators: Vec<ai::Decorator>,
+    pub services: Vec<ai::Service>,
     pub ignore_restart_self: bool,
     pub acceptable_radius: f32,
 }
@@ -1205,8 +1205,8 @@ impl MoveToLocation{
     pub(crate) fn new(json: &serde_json::Value) -> Result<MoveToLocation, LubanError> {
         let id = (json["id"].as_i64().unwrap() as i32);
         let node_name = json["node_name"].as_str().unwrap().to_string();
-        let decorators = json["decorators"].as_array().unwrap().iter().map(|field| crate::ai::Decorator::new(&field).unwrap()).collect();
-        let services = json["services"].as_array().unwrap().iter().map(|field| crate::ai::Service::new(&field).unwrap()).collect();
+        let decorators = json["decorators"].as_array().unwrap().iter().map(|field| ai::Decorator::new(&field).unwrap()).collect();
+        let services = json["services"].as_array().unwrap().iter().map(|field| ai::Service::new(&field).unwrap()).collect();
         let ignore_restart_self = json["ignore_restart_self"].as_bool().unwrap();
         let acceptable_radius = (json["acceptable_radius"].as_f64().unwrap() as f32);
         
@@ -1223,8 +1223,8 @@ impl MoveToLocation{
 pub struct MoveToRandomLocation {
     pub id: i32,
     pub node_name: String,
-    pub decorators: Vec<crate::ai::Decorator>,
-    pub services: Vec<crate::ai::Service>,
+    pub decorators: Vec<ai::Decorator>,
+    pub services: Vec<ai::Service>,
     pub ignore_restart_self: bool,
     pub origin_position_key: String,
     pub radius: f32,
@@ -1234,8 +1234,8 @@ impl MoveToRandomLocation{
     pub(crate) fn new(json: &serde_json::Value) -> Result<MoveToRandomLocation, LubanError> {
         let id = (json["id"].as_i64().unwrap() as i32);
         let node_name = json["node_name"].as_str().unwrap().to_string();
-        let decorators = json["decorators"].as_array().unwrap().iter().map(|field| crate::ai::Decorator::new(&field).unwrap()).collect();
-        let services = json["services"].as_array().unwrap().iter().map(|field| crate::ai::Service::new(&field).unwrap()).collect();
+        let decorators = json["decorators"].as_array().unwrap().iter().map(|field| ai::Decorator::new(&field).unwrap()).collect();
+        let services = json["services"].as_array().unwrap().iter().map(|field| ai::Service::new(&field).unwrap()).collect();
         let ignore_restart_self = json["ignore_restart_self"].as_bool().unwrap();
         let origin_position_key = json["origin_position_key"].as_str().unwrap().to_string();
         let radius = (json["radius"].as_f64().unwrap() as f32);
@@ -1253,8 +1253,8 @@ impl MoveToRandomLocation{
 pub struct MoveToTarget {
     pub id: i32,
     pub node_name: String,
-    pub decorators: Vec<crate::ai::Decorator>,
-    pub services: Vec<crate::ai::Service>,
+    pub decorators: Vec<ai::Decorator>,
+    pub services: Vec<ai::Service>,
     pub ignore_restart_self: bool,
     pub target_actor_key: String,
     pub acceptable_radius: f32,
@@ -1264,8 +1264,8 @@ impl MoveToTarget{
     pub(crate) fn new(json: &serde_json::Value) -> Result<MoveToTarget, LubanError> {
         let id = (json["id"].as_i64().unwrap() as i32);
         let node_name = json["node_name"].as_str().unwrap().to_string();
-        let decorators = json["decorators"].as_array().unwrap().iter().map(|field| crate::ai::Decorator::new(&field).unwrap()).collect();
-        let services = json["services"].as_array().unwrap().iter().map(|field| crate::ai::Service::new(&field).unwrap()).collect();
+        let decorators = json["decorators"].as_array().unwrap().iter().map(|field| ai::Decorator::new(&field).unwrap()).collect();
+        let services = json["services"].as_array().unwrap().iter().map(|field| ai::Service::new(&field).unwrap()).collect();
         let ignore_restart_self = json["ignore_restart_self"].as_bool().unwrap();
         let target_actor_key = json["target_actor_key"].as_str().unwrap().to_string();
         let acceptable_radius = (json["acceptable_radius"].as_f64().unwrap() as f32);
@@ -1283,8 +1283,8 @@ impl MoveToTarget{
 pub struct UeWait {
     pub id: i32,
     pub node_name: String,
-    pub decorators: Vec<crate::ai::Decorator>,
-    pub services: Vec<crate::ai::Service>,
+    pub decorators: Vec<ai::Decorator>,
+    pub services: Vec<ai::Service>,
     pub ignore_restart_self: bool,
     pub wait_time: f32,
     pub random_deviation: f32,
@@ -1294,8 +1294,8 @@ impl UeWait{
     pub(crate) fn new(json: &serde_json::Value) -> Result<UeWait, LubanError> {
         let id = (json["id"].as_i64().unwrap() as i32);
         let node_name = json["node_name"].as_str().unwrap().to_string();
-        let decorators = json["decorators"].as_array().unwrap().iter().map(|field| crate::ai::Decorator::new(&field).unwrap()).collect();
-        let services = json["services"].as_array().unwrap().iter().map(|field| crate::ai::Service::new(&field).unwrap()).collect();
+        let decorators = json["decorators"].as_array().unwrap().iter().map(|field| ai::Decorator::new(&field).unwrap()).collect();
+        let services = json["services"].as_array().unwrap().iter().map(|field| ai::Service::new(&field).unwrap()).collect();
         let ignore_restart_self = json["ignore_restart_self"].as_bool().unwrap();
         let wait_time = (json["wait_time"].as_f64().unwrap() as f32);
         let random_deviation = (json["random_deviation"].as_f64().unwrap() as f32);
@@ -1313,8 +1313,8 @@ impl UeWait{
 pub struct UeWaitBlackboardTime {
     pub id: i32,
     pub node_name: String,
-    pub decorators: Vec<crate::ai::Decorator>,
-    pub services: Vec<crate::ai::Service>,
+    pub decorators: Vec<ai::Decorator>,
+    pub services: Vec<ai::Service>,
     pub ignore_restart_self: bool,
     pub blackboard_key: String,
 }
@@ -1323,8 +1323,8 @@ impl UeWaitBlackboardTime{
     pub(crate) fn new(json: &serde_json::Value) -> Result<UeWaitBlackboardTime, LubanError> {
         let id = (json["id"].as_i64().unwrap() as i32);
         let node_name = json["node_name"].as_str().unwrap().to_string();
-        let decorators = json["decorators"].as_array().unwrap().iter().map(|field| crate::ai::Decorator::new(&field).unwrap()).collect();
-        let services = json["services"].as_array().unwrap().iter().map(|field| crate::ai::Service::new(&field).unwrap()).collect();
+        let decorators = json["decorators"].as_array().unwrap().iter().map(|field| ai::Decorator::new(&field).unwrap()).collect();
+        let services = json["services"].as_array().unwrap().iter().map(|field| ai::Service::new(&field).unwrap()).collect();
         let ignore_restart_self = json["ignore_restart_self"].as_bool().unwrap();
         let blackboard_key = json["blackboard_key"].as_str().unwrap().to_string();
         
@@ -1339,24 +1339,24 @@ impl UeWaitBlackboardTime{
 
 #[derive(Debug)]
 pub enum Service {
-    UeSetDefaultFocus(std::sync::Arc<crate::ai::UeSetDefaultFocus>),
-    ExecuteTimeStatistic(std::sync::Arc<crate::ai::ExecuteTimeStatistic>),
-    ChooseTarget(std::sync::Arc<crate::ai::ChooseTarget>),
-    KeepFaceTarget(std::sync::Arc<crate::ai::KeepFaceTarget>),
-    GetOwnerPlayer(std::sync::Arc<crate::ai::GetOwnerPlayer>),
-    UpdateDailyBehaviorProps(std::sync::Arc<crate::ai::UpdateDailyBehaviorProps>),
+    UeSetDefaultFocus(std::sync::Arc<ai::UeSetDefaultFocus>),
+    ExecuteTimeStatistic(std::sync::Arc<ai::ExecuteTimeStatistic>),
+    ChooseTarget(std::sync::Arc<ai::ChooseTarget>),
+    KeepFaceTarget(std::sync::Arc<ai::KeepFaceTarget>),
+    GetOwnerPlayer(std::sync::Arc<ai::GetOwnerPlayer>),
+    UpdateDailyBehaviorProps(std::sync::Arc<ai::UpdateDailyBehaviorProps>),
 }
 
 impl Service {
     pub(crate) fn new(json: &serde_json::Value) -> Result<Self, LubanError> {
         let type_id = json["$type"].as_str().unwrap();
         match type_id {
-            "UeSetDefaultFocus" => Ok(Self::UeSetDefaultFocus(std::sync::Arc::new(crate::ai::UeSetDefaultFocus::new(json)?))),
-            "ExecuteTimeStatistic" => Ok(Self::ExecuteTimeStatistic(std::sync::Arc::new(crate::ai::ExecuteTimeStatistic::new(json)?))),
-            "ChooseTarget" => Ok(Self::ChooseTarget(std::sync::Arc::new(crate::ai::ChooseTarget::new(json)?))),
-            "KeepFaceTarget" => Ok(Self::KeepFaceTarget(std::sync::Arc::new(crate::ai::KeepFaceTarget::new(json)?))),
-            "GetOwnerPlayer" => Ok(Self::GetOwnerPlayer(std::sync::Arc::new(crate::ai::GetOwnerPlayer::new(json)?))),
-            "UpdateDailyBehaviorProps" => Ok(Self::UpdateDailyBehaviorProps(std::sync::Arc::new(crate::ai::UpdateDailyBehaviorProps::new(json)?))),
+            "UeSetDefaultFocus" => Ok(Self::UeSetDefaultFocus(std::sync::Arc::new(ai::UeSetDefaultFocus::new(json)?))),
+            "ExecuteTimeStatistic" => Ok(Self::ExecuteTimeStatistic(std::sync::Arc::new(ai::ExecuteTimeStatistic::new(json)?))),
+            "ChooseTarget" => Ok(Self::ChooseTarget(std::sync::Arc::new(ai::ChooseTarget::new(json)?))),
+            "KeepFaceTarget" => Ok(Self::KeepFaceTarget(std::sync::Arc::new(ai::KeepFaceTarget::new(json)?))),
+            "GetOwnerPlayer" => Ok(Self::GetOwnerPlayer(std::sync::Arc::new(ai::GetOwnerPlayer::new(json)?))),
+            "UpdateDailyBehaviorProps" => Ok(Self::UpdateDailyBehaviorProps(std::sync::Arc::new(ai::UpdateDailyBehaviorProps::new(json)?))),
             _ => Err(LubanError::Bean(format!("Invalid type for Service:{}", type_id)))
         }
     }
@@ -1385,12 +1385,12 @@ impl Service {
 
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         match self {
-            Self::UeSetDefaultFocus(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::UeSetDefaultFocus as *mut crate::ai::UeSetDefaultFocus); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::ExecuteTimeStatistic(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::ExecuteTimeStatistic as *mut crate::ai::ExecuteTimeStatistic); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::ChooseTarget(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::ChooseTarget as *mut crate::ai::ChooseTarget); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::KeepFaceTarget(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::KeepFaceTarget as *mut crate::ai::KeepFaceTarget); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::GetOwnerPlayer(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::GetOwnerPlayer as *mut crate::ai::GetOwnerPlayer); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
-            Self::UpdateDailyBehaviorProps(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const crate::ai::UpdateDailyBehaviorProps as *mut crate::ai::UpdateDailyBehaviorProps); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::UeSetDefaultFocus(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::UeSetDefaultFocus as *mut ai::UeSetDefaultFocus); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::ExecuteTimeStatistic(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::ExecuteTimeStatistic as *mut ai::ExecuteTimeStatistic); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::ChooseTarget(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::ChooseTarget as *mut ai::ChooseTarget); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::KeepFaceTarget(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::KeepFaceTarget as *mut ai::KeepFaceTarget); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::GetOwnerPlayer(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::GetOwnerPlayer as *mut ai::GetOwnerPlayer); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
+            Self::UpdateDailyBehaviorProps(ref mut x) => { let mut b = Box::from_raw(x.as_ref() as *const ai::UpdateDailyBehaviorProps as *mut ai::UpdateDailyBehaviorProps); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b); }
         }
     }
 }
@@ -1533,17 +1533,17 @@ impl UpdateDailyBehaviorProps{
 
 #[derive(Debug)]
 pub struct TbBlackboard {
-    pub data_list: Vec<std::sync::Arc<crate::ai::Blackboard>>,
-    pub data_map: std::collections::HashMap<String, std::sync::Arc<crate::ai::Blackboard>>,
+    pub data_list: Vec<std::sync::Arc<ai::Blackboard>>,
+    pub data_map: std::collections::HashMap<String, std::sync::Arc<ai::Blackboard>>,
 }
 
 impl TbBlackboard {
     pub(crate) fn new(json: &serde_json::Value) -> Result<std::sync::Arc<TbBlackboard>, LubanError> {
-        let mut data_map: std::collections::HashMap<String, std::sync::Arc<crate::ai::Blackboard>> = Default::default();
-        let mut data_list: Vec<std::sync::Arc<crate::ai::Blackboard>> = vec![];
+        let mut data_map: std::collections::HashMap<String, std::sync::Arc<ai::Blackboard>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<ai::Blackboard>> = vec![];
 
         for x in json.as_array().unwrap() {
-            let row = std::sync::Arc::new(crate::ai::Blackboard::new(&x)?);
+            let row = std::sync::Arc::new(ai::Blackboard::new(&x)?);
             data_list.push(row.clone());
             data_map.insert(row.name.clone(), row.clone());
         }
@@ -1551,19 +1551,19 @@ impl TbBlackboard {
         Ok(std::sync::Arc::new(TbBlackboard { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &String) -> Option<std::sync::Arc<crate::ai::Blackboard>> {
+    pub fn get(&self, key: &String) -> Option<std::sync::Arc<ai::Blackboard>> {
         self.data_map.get(key).map(|x| x.clone())
     }
     
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
-           let mut b = Box::from_raw(x.as_ref() as *const crate::ai::Blackboard as *mut crate::ai::Blackboard); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+           let mut b = Box::from_raw(x.as_ref() as *const ai::Blackboard as *mut ai::Blackboard); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
         });
     }
 }
 
 impl std::ops::Index<String> for TbBlackboard {
-    type Output = std::sync::Arc<crate::ai::Blackboard>;
+    type Output = std::sync::Arc<ai::Blackboard>;
 
     fn index(&self, index: String) -> &Self::Output {
         &self.data_map.get(&index).unwrap()
@@ -1573,17 +1573,17 @@ impl std::ops::Index<String> for TbBlackboard {
 
 #[derive(Debug)]
 pub struct TbBehaviorTree {
-    pub data_list: Vec<std::sync::Arc<crate::ai::BehaviorTree>>,
-    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::ai::BehaviorTree>>,
+    pub data_list: Vec<std::sync::Arc<ai::BehaviorTree>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<ai::BehaviorTree>>,
 }
 
 impl TbBehaviorTree {
     pub(crate) fn new(json: &serde_json::Value) -> Result<std::sync::Arc<TbBehaviorTree>, LubanError> {
-        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::ai::BehaviorTree>> = Default::default();
-        let mut data_list: Vec<std::sync::Arc<crate::ai::BehaviorTree>> = vec![];
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<ai::BehaviorTree>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<ai::BehaviorTree>> = vec![];
 
         for x in json.as_array().unwrap() {
-            let row = std::sync::Arc::new(crate::ai::BehaviorTree::new(&x)?);
+            let row = std::sync::Arc::new(ai::BehaviorTree::new(&x)?);
             data_list.push(row.clone());
             data_map.insert(row.id.clone(), row.clone());
         }
@@ -1591,19 +1591,19 @@ impl TbBehaviorTree {
         Ok(std::sync::Arc::new(TbBehaviorTree { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::ai::BehaviorTree>> {
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<ai::BehaviorTree>> {
         self.data_map.get(key).map(|x| x.clone())
     }
     
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
-           let mut b = Box::from_raw(x.as_ref() as *const crate::ai::BehaviorTree as *mut crate::ai::BehaviorTree); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+           let mut b = Box::from_raw(x.as_ref() as *const ai::BehaviorTree as *mut ai::BehaviorTree); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
         });
     }
 }
 
 impl std::ops::Index<i32> for TbBehaviorTree {
-    type Output = std::sync::Arc<crate::ai::BehaviorTree>;
+    type Output = std::sync::Arc<ai::BehaviorTree>;
 
     fn index(&self, index: i32) -> &Self::Output {
         &self.data_map.get(&index).unwrap()

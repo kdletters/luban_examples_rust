@@ -8,7 +8,7 @@ dotnet %LUBAN_DLL% ^
     -c rust-bin ^
     -d bin^
     --conf %CONF_ROOT%\luban.conf ^
-    -x outputCodeDir=gen ^
+    -x outputCodeDir=./src/gen/luban ^
     -x outputDataDir=..\GenerateDatas\bytes ^
     -x pathValidator.rootDir=%WORKSPACE%\Projects\Csharp_Unity_bin ^
     -x l10n.provider=default ^

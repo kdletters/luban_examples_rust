@@ -54,17 +54,17 @@ impl PatchDemo{
 
 #[derive(Debug)]
 pub struct TbL10NDemo {
-    pub data_list: Vec<std::sync::Arc<crate::l10n::L10NDemo>>,
-    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::l10n::L10NDemo>>,
+    pub data_list: Vec<std::sync::Arc<l10n::L10NDemo>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<l10n::L10NDemo>>,
 }
 
 impl TbL10NDemo {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbL10NDemo>, LubanError> {
-        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::l10n::L10NDemo>> = Default::default();
-        let mut data_list: Vec<std::sync::Arc<crate::l10n::L10NDemo>> = vec![];
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<l10n::L10NDemo>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<l10n::L10NDemo>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
-            let row = std::sync::Arc::new(crate::l10n::L10NDemo::new(&mut buf)?);
+            let row = std::sync::Arc::new(l10n::L10NDemo::new(&mut buf)?);
             data_list.push(row.clone());
             data_map.insert(row.id.clone(), row.clone());
         }
@@ -72,19 +72,19 @@ impl TbL10NDemo {
         Ok(std::sync::Arc::new(TbL10NDemo { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::l10n::L10NDemo>> {
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<l10n::L10NDemo>> {
         self.data_map.get(key).map(|x| x.clone())
     }
     
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
-           let mut b = Box::from_raw(x.as_ref() as *const crate::l10n::L10NDemo as *mut crate::l10n::L10NDemo); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+           let mut b = Box::from_raw(x.as_ref() as *const l10n::L10NDemo as *mut l10n::L10NDemo); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
         });
     }
 }
 
 impl std::ops::Index<i32> for TbL10NDemo {
-    type Output = std::sync::Arc<crate::l10n::L10NDemo>;
+    type Output = std::sync::Arc<l10n::L10NDemo>;
 
     fn index(&self, index: i32) -> &Self::Output {
         &self.data_map.get(&index).unwrap()
@@ -94,17 +94,17 @@ impl std::ops::Index<i32> for TbL10NDemo {
 
 #[derive(Debug)]
 pub struct TbPatchDemo {
-    pub data_list: Vec<std::sync::Arc<crate::l10n::PatchDemo>>,
-    pub data_map: std::collections::HashMap<i32, std::sync::Arc<crate::l10n::PatchDemo>>,
+    pub data_list: Vec<std::sync::Arc<l10n::PatchDemo>>,
+    pub data_map: std::collections::HashMap<i32, std::sync::Arc<l10n::PatchDemo>>,
 }
 
 impl TbPatchDemo {
     pub(crate) fn new(mut buf: ByteBuf) -> Result<std::sync::Arc<TbPatchDemo>, LubanError> {
-        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<crate::l10n::PatchDemo>> = Default::default();
-        let mut data_list: Vec<std::sync::Arc<crate::l10n::PatchDemo>> = vec![];
+        let mut data_map: std::collections::HashMap<i32, std::sync::Arc<l10n::PatchDemo>> = Default::default();
+        let mut data_list: Vec<std::sync::Arc<l10n::PatchDemo>> = vec![];
 
         for x in (0..buf.read_size()).rev() {
-            let row = std::sync::Arc::new(crate::l10n::PatchDemo::new(&mut buf)?);
+            let row = std::sync::Arc::new(l10n::PatchDemo::new(&mut buf)?);
             data_list.push(row.clone());
             data_map.insert(row.id.clone(), row.clone());
         }
@@ -112,19 +112,19 @@ impl TbPatchDemo {
         Ok(std::sync::Arc::new(TbPatchDemo { data_map, data_list }))
     }
 
-    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<crate::l10n::PatchDemo>> {
+    pub fn get(&self, key: &i32) -> Option<std::sync::Arc<l10n::PatchDemo>> {
         self.data_map.get(key).map(|x| x.clone())
     }
     
     pub(crate) unsafe fn resolve_ref(&mut self, tables: &Tables) {
         self.data_list.iter_mut().for_each(|mut x| {
-           let mut b = Box::from_raw(x.as_ref() as *const crate::l10n::PatchDemo as *mut crate::l10n::PatchDemo); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
+           let mut b = Box::from_raw(x.as_ref() as *const l10n::PatchDemo as *mut l10n::PatchDemo); b.as_mut().resolve_ref(tables); let _ = Box::into_raw(b);
         });
     }
 }
 
 impl std::ops::Index<i32> for TbPatchDemo {
-    type Output = std::sync::Arc<crate::l10n::PatchDemo>;
+    type Output = std::sync::Arc<l10n::PatchDemo>;
 
     fn index(&self, index: i32) -> &Self::Output {
         &self.data_map.get(&index).unwrap()

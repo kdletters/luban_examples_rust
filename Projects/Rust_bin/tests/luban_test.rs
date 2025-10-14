@@ -1,4 +1,4 @@
-use cfg::prelude::*;
+use Rust_bin::cfg::prelude::*;
 use Rust_bin::TABLES;
 
 #[test]
@@ -94,4 +94,10 @@ pub fn test_double() {
     let row = TABLES.TbFullTypes.data_list[0].clone();
     println!("{:?}", row.x7);
     assert_eq!(1.23457891_f64, row.x7);
+}
+
+#[test]
+pub fn test_map() {
+    let row = TABLES.TbAutoImport1.data_list[0].clone();
+    println!("{:?}", row.v2);
 }
