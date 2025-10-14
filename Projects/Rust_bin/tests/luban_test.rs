@@ -1,3 +1,4 @@
+use std::any::Any;
 use Rust_bin::cfg::prelude::*;
 use Rust_bin::TABLES;
 
@@ -98,6 +99,9 @@ pub fn test_double() {
 
 #[test]
 pub fn test_map() {
-    let row = TABLES.TbAutoImport1.data_list[0].clone();
+    let row = TABLES.TbTestMapper.data_list[0].clone();
+    assert_eq!(row.v2.type_id(), Rust_bin::Vec2 { x: 0., y: 0. }.type_id());
     println!("{:?}", row.v2);
+    assert_eq!(row.audio_type.type_id(), Rust_bin::CustomAudioType::ACC.type_id());
+    println!("{:?}", row.audio_type);
 }

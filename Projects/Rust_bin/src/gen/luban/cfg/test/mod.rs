@@ -182,7 +182,7 @@ impl AutoImport2{
         let x6 = buf.read_float();
         let x8 = buf.read_int();
         let x10 = buf.read_string();
-        let x13 = buf.read_int().into();
+        let x13 = Into::<test::DemoEnum>::into(buf.read_int());
         let x13_2 = test::DemoFlag::from_bits_truncate(buf.read_uint());
         let x14 = test::DemoDynamic::new(&mut buf)?;
         let x15 = test::Shape::new(&mut buf)?;
@@ -343,7 +343,7 @@ impl DefineFromExcel2{
         let x6 = buf.read_float();
         let x8 = buf.read_int();
         let x10 = buf.read_string();
-        let x13 = buf.read_int().into();
+        let x13 = Into::<test::DemoEnum>::into(buf.read_int());
         let x13_2 = test::DemoFlag::from_bits_truncate(buf.read_uint());
         let x13_3 = test::DemoFlag::from_bits_truncate(buf.read_uint());
         let x14 = test::DemoDynamic::new(&mut buf)?;
@@ -723,7 +723,7 @@ impl DemoType2{
         let x9 = buf.read_long();
         let x10 = buf.read_string();
         let x12 = test::DemoType1::new(&mut buf)?;
-        let x13 = buf.read_int().into();
+        let x13 = Into::<test::DemoEnum>::into(buf.read_int());
         let x14 = test::DemoDynamic::new(&mut buf)?;
         let s1 = buf.read_string();
         let t1 = buf.read_ulong();
@@ -796,7 +796,7 @@ impl ExcelFromJson{
         let s2 = buf.read_string();
         let t1 = buf.read_ulong();
         let x12 = test::DemoType1::new(&mut buf)?;
-        let x13 = buf.read_int().into();
+        let x13 = Into::<test::DemoEnum>::into(buf.read_int());
         let x14 = test::DemoDynamic::new(&mut buf)?;
         let k1 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_int()); } _e0 };
         let k8 = {let n0 = std::cmp::min(buf.read_size(), buf.size()); let mut _e0 = std::collections::HashMap::with_capacity(n0 * 3 / 2);for i0 in 0..n0 { let _k0 = buf.read_int(); let _v0 = buf.read_int(); _e0.insert(_k0, _v0);} _e0 };
@@ -1015,7 +1015,7 @@ impl Equipment{
         let id = buf.read_int();
         let name = buf.read_string();
         let desc = buf.read_string();
-        let attr = buf.read_int().into();
+        let attr = Into::<test::DemoEnum>::into(buf.read_int());
         let value = buf.read_int();
         
         Ok(Equipment { id, name, desc, attr, value, })
@@ -1708,7 +1708,7 @@ impl TestMap{
         let x1 = {let n0 = std::cmp::min(buf.read_size(), buf.size()); let mut _e0 = std::collections::HashMap::with_capacity(n0 * 3 / 2);for i0 in 0..n0 { let _k0 = buf.read_int(); let _v0 = buf.read_int(); _e0.insert(_k0, _v0);} _e0 };
         let x2 = {let n0 = std::cmp::min(buf.read_size(), buf.size()); let mut _e0 = std::collections::HashMap::with_capacity(n0 * 3 / 2);for i0 in 0..n0 { let _k0 = buf.read_long(); let _v0 = buf.read_int(); _e0.insert(_k0, _v0);} _e0 };
         let x3 = {let n0 = std::cmp::min(buf.read_size(), buf.size()); let mut _e0 = std::collections::HashMap::with_capacity(n0 * 3 / 2);for i0 in 0..n0 { let _k0 = buf.read_string(); let _v0 = buf.read_int(); _e0.insert(_k0, _v0);} _e0 };
-        let x4 = {let n0 = std::cmp::min(buf.read_size(), buf.size()); let mut _e0 = std::collections::HashMap::with_capacity(n0 * 3 / 2);for i0 in 0..n0 { let _k0 = buf.read_int().into(); let _v0 = buf.read_int(); _e0.insert(_k0, _v0);} _e0 };
+        let x4 = {let n0 = std::cmp::min(buf.read_size(), buf.size()); let mut _e0 = std::collections::HashMap::with_capacity(n0 * 3 / 2);for i0 in 0..n0 { let _k0 = Into::<test::DemoEnum>::into(buf.read_int()); let _v0 = buf.read_int(); _e0.insert(_k0, _v0);} _e0 };
         
         Ok(TestMap { id, id_ref, x1, x2, x3, x4, })
     }    
@@ -1730,7 +1730,7 @@ pub struct TestMapper {
 impl TestMapper{
     pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<TestMapper, LubanError> {
         let id = buf.read_int();
-        let audio_type = buf.read_int().into();
+        let audio_type = Into::<AudioType>::into(buf.read_int()).into();
         let v2 = vec2::new(&mut buf)?.into();
         
         Ok(TestMapper { id, audio_type, v2, })
@@ -1784,7 +1784,7 @@ impl TestNull{
     pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<TestNull, LubanError> {
         let id = buf.read_int();
         let mut x1 = if buf.read_bool() { Some(buf.read_int()) } else { None };
-        let mut x2 = if buf.read_bool() { Some(buf.read_int().into()) } else { None };
+        let mut x2 = if buf.read_bool() { Some(Into::<test::DemoEnum>::into(buf.read_int())) } else { None };
         let mut x3 = if buf.read_bool() { Some(test::DemoType1::new(&mut buf)?) } else { None };
         let mut x4 = if buf.read_bool() { Some(test::DemoDynamic::new(&mut buf)?) } else { None };
         let mut s1 = if buf.read_bool() { Some(buf.read_string()) } else { None };
@@ -2011,7 +2011,7 @@ impl TestSet{
         let x1 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_int()); } _e0 };
         let x2 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_long()); } _e0 };
         let x3 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_string()); } _e0 };
-        let x4 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_int().into()); } _e0 };
+        let x4 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(Into::<test::DemoEnum>::into(buf.read_int())); } _e0 };
         
         Ok(TestSet { id, x0, x1, x2, x3, x4, })
     }    
@@ -2109,7 +2109,7 @@ impl TestUeType{
         let x6 = buf.read_float();
         let x10 = buf.read_string();
         let x12 = test::DemoType1::new(&mut buf)?;
-        let x13 = buf.read_int().into();
+        let x13 = Into::<test::ETestUeType>::into(buf.read_int());
         let t1 = buf.read_ulong();
         let k1 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_int()); } _e0 };
         let k2 = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(buf.read_int()); } _e0 };

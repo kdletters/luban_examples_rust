@@ -446,10 +446,10 @@ impl Item{
     pub(crate) fn new(json: &serde_json::Value) -> Result<Item, LubanError> {
         let id = (json["id"].as_i64().unwrap() as i32);
         let name = json["name"].as_str().unwrap().to_string();
-        let major_type = json["major_type"].as_i64().unwrap().into();
-        let minor_type = json["minor_type"].as_i64().unwrap().into();
+        let major_type = Into::<item::EMajorType>::into(json["major_type"].as_i64().unwrap());
+        let minor_type = Into::<item::EMinorType>::into(json["minor_type"].as_i64().unwrap());
         let max_pile_num = (json["max_pile_num"].as_i64().unwrap() as i32);
-        let quality = json["quality"].as_i64().unwrap().into();
+        let quality = Into::<item::EItemQuality>::into(json["quality"].as_i64().unwrap());
         let icon = json["icon"].as_str().unwrap().to_string();
         let icon_backgroud = json["icon_backgroud"].as_str().unwrap().to_string();
         let icon_mask = json["icon_mask"].as_str().unwrap().to_string();

@@ -182,7 +182,7 @@ impl AutoImport2{
         let x6 = (json["x6"].as_f64().unwrap() as f32);
         let x8 = (json["x8"].as_i64().unwrap() as i32);
         let x10 = json["x10"].as_str().unwrap().to_string();
-        let x13 = json["x13"].as_i64().unwrap().into();
+        let x13 = Into::<test::DemoEnum>::into(json["x13"].as_i64().unwrap());
         let x13_2 = test::DemoFlag::from_bits_truncate(<u32 as std::str::FromStr>::from_str(&json["x13_2"].to_string()).unwrap());
         let x14 = test::DemoDynamic::new(&json["x14"])?;
         let x15 = test::Shape::new(&json["x15"])?;
@@ -331,7 +331,7 @@ impl DefineFromExcel2{
         let x6 = (json["x6"].as_f64().unwrap() as f32);
         let x8 = (json["x8"].as_i64().unwrap() as i32);
         let x10 = json["x10"].as_str().unwrap().to_string();
-        let x13 = json["x13"].as_i64().unwrap().into();
+        let x13 = Into::<test::DemoEnum>::into(json["x13"].as_i64().unwrap());
         let x13_2 = test::DemoFlag::from_bits_truncate(<u32 as std::str::FromStr>::from_str(&json["x13_2"].to_string()).unwrap());
         let x13_3 = test::DemoFlag::from_bits_truncate(<u32 as std::str::FromStr>::from_str(&json["x13_3"].to_string()).unwrap());
         let x14 = test::DemoDynamic::new(&json["x14"])?;
@@ -691,7 +691,7 @@ impl DemoType2{
         let x9 = json["x9"].as_i64().unwrap();
         let x10 = json["x10"].as_str().unwrap().to_string();
         let x12 = test::DemoType1::new(&json["x12"])?;
-        let x13 = json["x13"].as_i64().unwrap().into();
+        let x13 = Into::<test::DemoEnum>::into(json["x13"].as_i64().unwrap());
         let x14 = test::DemoDynamic::new(&json["x14"])?;
         let s1 = json["s1"].as_str().unwrap().to_string();
         let t1 = (json["t1"].as_i64().unwrap() as u64);
@@ -760,7 +760,7 @@ impl ExcelFromJson{
         let s2 = json["s2"].as_str().unwrap().to_string();
         let t1 = (json["t1"].as_i64().unwrap() as u64);
         let x12 = test::DemoType1::new(&json["x12"])?;
-        let x13 = json["x13"].as_i64().unwrap().into();
+        let x13 = Into::<test::DemoEnum>::into(json["x13"].as_i64().unwrap());
         let x14 = test::DemoDynamic::new(&json["x14"])?;
         let k1 = json["k1"].as_array().unwrap().iter().map(|field| (field.as_i64().unwrap() as i32)).collect();
         let k8 = std::collections::HashMap::from_iter(json["k8"].as_array().unwrap().iter().map(|x| {let array = x.as_array().unwrap();((array[0].as_i64().unwrap() as i32), (array[1].as_i64().unwrap() as i32))}).collect::<Vec<(i32, i32)>>());
@@ -965,7 +965,7 @@ impl Equipment{
         let id = (json["id"].as_i64().unwrap() as i32);
         let name = json["name"].as_str().unwrap().to_string();
         let desc = json["desc"].as_str().unwrap().to_string();
-        let attr = json["attr"].as_i64().unwrap().into();
+        let attr = Into::<test::DemoEnum>::into(json["attr"].as_i64().unwrap());
         let value = (json["value"].as_i64().unwrap() as i32);
         
         Ok(Equipment { id, name, desc, attr, value, })
@@ -1608,7 +1608,7 @@ impl TestMap{
         let x1 = std::collections::HashMap::from_iter(json["x1"].as_array().unwrap().iter().map(|x| {let array = x.as_array().unwrap();((array[0].as_i64().unwrap() as i32), (array[1].as_i64().unwrap() as i32))}).collect::<Vec<(i32, i32)>>());
         let x2 = std::collections::HashMap::from_iter(json["x2"].as_array().unwrap().iter().map(|x| {let array = x.as_array().unwrap();(array[0].as_i64().unwrap(), (array[1].as_i64().unwrap() as i32))}).collect::<Vec<(i64, i32)>>());
         let x3 = std::collections::HashMap::from_iter(json["x3"].as_array().unwrap().iter().map(|x| {let array = x.as_array().unwrap();(array[0].as_str().unwrap().to_string(), (array[1].as_i64().unwrap() as i32))}).collect::<Vec<(String, i32)>>());
-        let x4 = std::collections::HashMap::from_iter(json["x4"].as_array().unwrap().iter().map(|x| {let array = x.as_array().unwrap();(array[0].as_i64().unwrap().into(), (array[1].as_i64().unwrap() as i32))}).collect::<Vec<(test::DemoEnum, i32)>>());
+        let x4 = std::collections::HashMap::from_iter(json["x4"].as_array().unwrap().iter().map(|x| {let array = x.as_array().unwrap();(Into::<test::DemoEnum>::into(array[0].as_i64().unwrap()), (array[1].as_i64().unwrap() as i32))}).collect::<Vec<(test::DemoEnum, i32)>>());
         
         Ok(TestMap { id, id_ref, x1, x2, x3, x4, })
     }    
@@ -1628,7 +1628,7 @@ pub struct TestMapper {
 impl TestMapper{
     pub(crate) fn new(json: &serde_json::Value) -> Result<TestMapper, LubanError> {
         let id = (json["id"].as_i64().unwrap() as i32);
-        let audio_type = json["audio_type"].as_i64().unwrap().into();
+        let audio_type = Into::<AudioType>::into(json["audio_type"].as_i64().unwrap()).into();
         let v2 = vec2::new(&json["v2"])?.into();
         
         Ok(TestMapper { id, audio_type, v2, })
@@ -1678,7 +1678,7 @@ impl TestNull{
     pub(crate) fn new(json: &serde_json::Value) -> Result<TestNull, LubanError> {
         let id = (json["id"].as_i64().unwrap() as i32);
         let mut x1 = None; if let Some(value) = json.get("x1") { x1 = Some((json["x1"].as_i64().unwrap() as i32)); }
-        let mut x2 = None; if let Some(value) = json.get("x2") { x2 = Some(json["x2"].as_i64().unwrap().into()); }
+        let mut x2 = None; if let Some(value) = json.get("x2") { x2 = Some(Into::<test::DemoEnum>::into(json["x2"].as_i64().unwrap())); }
         let mut x3 = None; if let Some(value) = json.get("x3") { x3 = Some(test::DemoType1::new(&json["x3"])?); }
         let mut x4 = None; if let Some(value) = json.get("x4") { x4 = Some(test::DemoDynamic::new(&json["x4"])?); }
         let mut s1 = None; if let Some(value) = json.get("s1") { s1 = Some(json["s1"].as_str().unwrap().to_string()); }
@@ -1895,7 +1895,7 @@ impl TestSet{
         let x1 = json["x1"].as_array().unwrap().iter().map(|field| (field.as_i64().unwrap() as i32)).collect();
         let x2 = json["x2"].as_array().unwrap().iter().map(|field| field.as_i64().unwrap()).collect();
         let x3 = json["x3"].as_array().unwrap().iter().map(|field| field.as_str().unwrap().to_string()).collect();
-        let x4 = json["x4"].as_array().unwrap().iter().map(|field| field.as_i64().unwrap().into()).collect();
+        let x4 = json["x4"].as_array().unwrap().iter().map(|field| Into::<test::DemoEnum>::into(field.as_i64().unwrap())).collect();
         
         Ok(TestSet { id, x0, x1, x2, x3, x4, })
     }    
@@ -1987,7 +1987,7 @@ impl TestUeType{
         let x6 = (json["x6"].as_f64().unwrap() as f32);
         let x10 = json["x10"].as_str().unwrap().to_string();
         let x12 = test::DemoType1::new(&json["x12"])?;
-        let x13 = json["x13"].as_i64().unwrap().into();
+        let x13 = Into::<test::ETestUeType>::into(json["x13"].as_i64().unwrap());
         let t1 = (json["t1"].as_i64().unwrap() as u64);
         let k1 = json["k1"].as_array().unwrap().iter().map(|field| (field.as_i64().unwrap() as i32)).collect();
         let k2 = json["k2"].as_array().unwrap().iter().map(|field| (field.as_i64().unwrap() as i32)).collect();

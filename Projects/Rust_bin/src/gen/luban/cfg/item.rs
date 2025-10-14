@@ -446,10 +446,10 @@ impl Item{
     pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<Item, LubanError> {
         let id = buf.read_int();
         let name = buf.read_string();
-        let major_type = buf.read_int().into();
-        let minor_type = buf.read_int().into();
+        let major_type = Into::<item::EMajorType>::into(buf.read_int());
+        let minor_type = Into::<item::EMinorType>::into(buf.read_int());
         let max_pile_num = buf.read_int();
-        let quality = buf.read_int().into();
+        let quality = Into::<item::EItemQuality>::into(buf.read_int());
         let icon = buf.read_string();
         let icon_backgroud = buf.read_string();
         let icon_mask = buf.read_string();

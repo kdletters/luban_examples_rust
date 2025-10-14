@@ -264,7 +264,7 @@ impl AutoImport1{
         let x6 = (json["x6"].as_f64().unwrap() as f32);
         let x8 = (json["x8"].as_i64().unwrap() as i32);
         let x10 = json["x10"].as_str().unwrap().to_string();
-        let x13 = json["x13"].as_i64().unwrap().into();
+        let x13 = Into::<test::DemoEnum>::into(json["x13"].as_i64().unwrap());
         let x13_2 = test::DemoFlag::from_bits_truncate(<u32 as std::str::FromStr>::from_str(&json["x13_2"].to_string()).unwrap());
         let x14 = test::DemoDynamic::new(&json["x14"])?;
         let x15 = test::Shape::new(&json["x15"])?;

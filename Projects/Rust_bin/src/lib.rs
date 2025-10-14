@@ -16,22 +16,11 @@ lazy_static! {
     };
 }
 
-#[derive(Debug, Hash, Eq, PartialEq, luban_macros::EnumFromNum)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub enum CustomAudioType {
     UNKNOWN = 0,
     ACC = 1,
     AIFF = 2,
-}
-
-impl From<i32> for CustomAudioType {
-    fn from(value: i32) -> Self {
-        match value {
-            0 => CustomAudioType::UNKNOWN,
-            1 => CustomAudioType::ACC,
-            2 => CustomAudioType::AIFF,
-            _ => panic!("Invalid value for CustomAudioType:{}", value),
-        }
-    }
 }
 
 impl From<cfg::AudioType> for CustomAudioType {

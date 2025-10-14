@@ -1,3 +1,4 @@
+use std::any::Any;
 use Rust_json::cfg::prelude::*;
 use Rust_json::TABLES;
 
@@ -96,8 +97,12 @@ pub fn test_double() {
     assert_eq!(1.23457891_f64, row.x7);
 }
 
+
 #[test]
 pub fn test_map() {
-    let row = TABLES.TbAutoImport1.data_list[0].clone();
+    let row = TABLES.TbTestMapper.data_list[0].clone();
+    assert_eq!(row.v2.type_id(), Rust_json::Vec2 { x: 0., y: 0. }.type_id());
     println!("{:?}", row.v2);
+    assert_eq!(row.audio_type.type_id(), Rust_json::CustomAudioType::ACC.type_id());
+    println!("{:?}", row.audio_type);
 }

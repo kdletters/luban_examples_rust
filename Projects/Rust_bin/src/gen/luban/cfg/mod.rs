@@ -264,7 +264,7 @@ impl AutoImport1{
         let x6 = buf.read_float();
         let x8 = buf.read_int();
         let x10 = buf.read_string();
-        let x13 = buf.read_int().into();
+        let x13 = Into::<test::DemoEnum>::into(buf.read_int());
         let x13_2 = test::DemoFlag::from_bits_truncate(buf.read_uint());
         let x14 = test::DemoDynamic::new(&mut buf)?;
         let x15 = test::Shape::new(&mut buf)?;

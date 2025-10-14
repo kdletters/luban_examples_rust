@@ -125,7 +125,7 @@ impl {{bean.name}} {
         let type_id = buf.read_int();
         match type_id {
             {{~for child in bean.hierarchy_not_abstract_children~}}
-            {{full_name child}}::__ID__ => Ok(Self::{{child.name}}(std::sync::Arc::new({{full_name child}}::new(buf)?{{~if child.has_type_mapper~}}.into(){{~end~}}))),
+            {{full_name child}}::__ID__ => Ok(Self::{{child.name}}(std::sync::Arc::new({{full_name child}}::new(buf)?))),
             {{~end~}}
             _ => Err(LubanError::Bean(format!("Invalid type for {{bean.name}}:{}", type_id)))
         }

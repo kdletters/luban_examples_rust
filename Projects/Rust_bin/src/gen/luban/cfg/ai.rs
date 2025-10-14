@@ -211,7 +211,7 @@ impl BlackboardKey{
         let name = buf.read_string();
         let desc = buf.read_string();
         let is_static = buf.read_bool();
-        let key_type = buf.read_int().into();
+        let key_type = Into::<ai::EKeyType>::into(buf.read_int());
         let type_class_name = buf.read_string();
         
         Ok(BlackboardKey { name, desc, is_static, key_type, type_class_name, })
@@ -362,7 +362,7 @@ pub struct BinaryOperator {
 
 impl BinaryOperator{
     pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<BinaryOperator, LubanError> {
-        let oper = buf.read_int().into();
+        let oper = Into::<ai::EOperator>::into(buf.read_int());
         let data = ai::KeyData::new(&mut buf)?;
         
         Ok(BinaryOperator { oper, data, })
@@ -642,7 +642,7 @@ impl DistanceLessThan{
     pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<DistanceLessThan, LubanError> {
         let id = buf.read_int();
         let node_name = buf.read_string();
-        let flow_abort_mode = buf.read_int().into();
+        let flow_abort_mode = Into::<ai::EFlowAbortMode>::into(buf.read_int());
         let actor1_key = buf.read_string();
         let actor2_key = buf.read_string();
         let distance = buf.read_float();
@@ -671,7 +671,7 @@ impl IsAtLocation{
     pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<IsAtLocation, LubanError> {
         let id = buf.read_int();
         let node_name = buf.read_string();
-        let flow_abort_mode = buf.read_int().into();
+        let flow_abort_mode = Into::<ai::EFlowAbortMode>::into(buf.read_int());
         let acceptable_radius = buf.read_float();
         let keyboard_key = buf.read_string();
         let inverse_condition = buf.read_bool();
@@ -699,8 +699,8 @@ impl UeBlackboard{
     pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<UeBlackboard, LubanError> {
         let id = buf.read_int();
         let node_name = buf.read_string();
-        let flow_abort_mode = buf.read_int().into();
-        let notify_observer = buf.read_int().into();
+        let flow_abort_mode = Into::<ai::EFlowAbortMode>::into(buf.read_int());
+        let notify_observer = Into::<ai::ENotifyObserverMode>::into(buf.read_int());
         let blackboard_key = buf.read_string();
         let key_query = ai::KeyQueryOperator::new(&mut buf)?;
         
@@ -726,7 +726,7 @@ impl UeCooldown{
     pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<UeCooldown, LubanError> {
         let id = buf.read_int();
         let node_name = buf.read_string();
-        let flow_abort_mode = buf.read_int().into();
+        let flow_abort_mode = Into::<ai::EFlowAbortMode>::into(buf.read_int());
         let cooldown_time = buf.read_float();
         
         Ok(UeCooldown { id, node_name, flow_abort_mode, cooldown_time, })
@@ -749,7 +749,7 @@ impl UeForceSuccess{
     pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<UeForceSuccess, LubanError> {
         let id = buf.read_int();
         let node_name = buf.read_string();
-        let flow_abort_mode = buf.read_int().into();
+        let flow_abort_mode = Into::<ai::EFlowAbortMode>::into(buf.read_int());
         
         Ok(UeForceSuccess { id, node_name, flow_abort_mode, })
     }    
@@ -774,7 +774,7 @@ impl UeLoop{
     pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<UeLoop, LubanError> {
         let id = buf.read_int();
         let node_name = buf.read_string();
-        let flow_abort_mode = buf.read_int().into();
+        let flow_abort_mode = Into::<ai::EFlowAbortMode>::into(buf.read_int());
         let num_loops = buf.read_int();
         let infinite_loop = buf.read_bool();
         let infinite_loop_timeout_time = buf.read_float();
@@ -800,7 +800,7 @@ impl UeTimeLimit{
     pub(crate) fn new(mut buf: &mut ByteBuf) -> Result<UeTimeLimit, LubanError> {
         let id = buf.read_int();
         let node_name = buf.read_string();
-        let flow_abort_mode = buf.read_int().into();
+        let flow_abort_mode = Into::<ai::EFlowAbortMode>::into(buf.read_int());
         let limit_time = buf.read_float();
         
         Ok(UeTimeLimit { id, node_name, flow_abort_mode, limit_time, })
@@ -1056,7 +1056,7 @@ impl SimpleParallel{
         let node_name = buf.read_string();
         let decorators = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(ai::Decorator::new(&mut buf)?); } _e0 };
         let services = {let n0 = std::cmp::min(buf.read_size(), buf.size());let mut _e0 = vec![]; for i0 in 0..n0 { _e0.push(ai::Service::new(&mut buf)?); } _e0 };
-        let finish_mode = buf.read_int().into();
+        let finish_mode = Into::<ai::EFinishMode>::into(buf.read_int());
         let main_task = ai::Task::new(&mut buf)?;
         let background_node = ai::FlowNode::new(&mut buf)?;
         
